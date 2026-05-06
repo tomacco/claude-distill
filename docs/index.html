@@ -164,12 +164,58 @@
             opacity: 0;
             transition: opacity 0.3s, transform 0.3s;
             pointer-events: none;
-            z-index: 10000;
+            z-index: 10001;
         }
 
         .toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
+        }
+
+        /* Particle burst canvas */
+        #burst-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        /* Screen flash */
+        .screen-flash {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9997;
+            opacity: 0;
+        }
+
+        .screen-flash.fire {
+            animation: flash-sequence 1.2s ease-out forwards;
+        }
+
+        @keyframes flash-sequence {
+            0% { opacity: 0; background: var(--synapse); }
+            5% { opacity: 0.15; background: var(--synapse); }
+            10% { opacity: 0; }
+            15% { opacity: 0.08; background: var(--cortex); }
+            25% { opacity: 0; }
+            35% { opacity: 0.05; background: var(--dendrite); }
+            50% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* Install cmd copied state */
+        .install-cmd.copied {
+            border-color: var(--synapse);
+            box-shadow: 0 0 20px rgba(0, 245, 212, 0.3), inset 0 0 20px rgba(0, 245, 212, 0.05);
+            animation: cmd-pulse 0.6s ease-out;
+        }
+
+        @keyframes cmd-pulse {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.02); }
+            40% { transform: scale(0.98); }
+            100% { transform: scale(1); }
         }
 
         /* ═══ MANIFESTO ═══ */
@@ -560,7 +606,9 @@
         <h1 class="title">claude-<span>distill</span></h1>
         <p class="tagline">memory consolidation for AI agents</p>
     </div>
-    <div class="install-cmd" id="install-cmd" onclick="copyInstall()">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <canvas id="burst-canvas"></canvas>
+    <div class="screen-flash" id="screen-flash"></div>
     <div class="toast" id="toast">copied to clipboard</div>
 </div>
 
@@ -707,25 +755,178 @@
 </footer>
 
 <script>
-// Copy to clipboard
-function copyInstall() {
+// ═══ SYNAPTIC BURST PARTICLE SYSTEM ═══
+const burstCanvas = document.getElementById('burst-canvas');
+const bCtx = burstCanvas.getContext('2d');
+let particles = [];
+let burstAnimating = false;
+
+function resizeBurstCanvas() {
+    burstCanvas.width = window.innerWidth;
+    burstCanvas.height = window.innerHeight;
+}
+resizeBurstCanvas();
+window.addEventListener('resize', resizeBurstCanvas);
+
+const COLORS = ['#00f5d4', '#7b2ff7', '#f72585', '#3a86ff', '#00f5d4', '#00f5d4'];
+
+class Particle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 8;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.life = 1.0;
+        this.decay = 0.008 + Math.random() * 0.015;
+        this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.size = 1 + Math.random() * 3;
+        this.type = Math.random(); // determines shape
+        this.trail = [];
+        this.gravity = 0.04 + Math.random() * 0.03;
+        this.drag = 0.98;
+    }
+
+    update() {
+        this.trail.push({ x: this.x, y: this.y, life: this.life });
+        if (this.trail.length > 8) this.trail.shift();
+
+        this.vx *= this.drag;
+        this.vy *= this.drag;
+        this.vy += this.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life -= this.decay;
+    }
+
+    draw(ctx) {
+        // Draw trail
+        for (let i = 0; i < this.trail.length; i++) {
+            const t = this.trail[i];
+            const alpha = (i / this.trail.length) * this.life * 0.3;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, this.size * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = this.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+            ctx.fill();
+        }
+
+        // Draw particle
+        const alpha = this.life;
+        ctx.globalAlpha = alpha;
+
+        if (this.type > 0.7) {
+            // Diamond shape
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - this.size);
+            ctx.lineTo(this.x + this.size, this.y);
+            ctx.lineTo(this.x, this.y + this.size);
+            ctx.lineTo(this.x - this.size, this.y);
+            ctx.closePath();
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        } else if (this.type > 0.4) {
+            // Glowing dot
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            // Glow
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+            ctx.fillStyle = this.color + '15';
+            ctx.fill();
+        } else {
+            // Line spark
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x - this.vx * 3, this.y - this.vy * 3);
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = this.size * 0.7;
+            ctx.stroke();
+        }
+
+        ctx.globalAlpha = 1;
+    }
+}
+
+function emitBurst(x, y, count) {
+    for (let i = 0; i < count; i++) {
+        particles.push(new Particle(x, y));
+    }
+    if (!burstAnimating) {
+        burstAnimating = true;
+        animateBurst();
+    }
+}
+
+function animateBurst() {
+    bCtx.clearRect(0, 0, burstCanvas.width, burstCanvas.height);
+
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => {
+        p.update();
+        p.draw(bCtx);
+    });
+
+    if (particles.length > 0) {
+        requestAnimationFrame(animateBurst);
+    } else {
+        burstAnimating = false;
+        bCtx.clearRect(0, 0, burstCanvas.width, burstCanvas.height);
+    }
+}
+
+// ═══ COPY WITH EFFECTS ═══
+function copyInstall(e) {
     const cmd = 'curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash';
     navigator.clipboard.writeText(cmd);
+
+    // Get click position for burst origin
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX || rect.left + rect.width / 2;
+    const y = e.clientY || rect.top + rect.height / 2;
+
+    // Fire particles in 3 waves for a cascade effect
+    emitBurst(x, y, 60);
+    setTimeout(() => emitBurst(x, y, 30), 100);
+    setTimeout(() => emitBurst(x, y, 15), 250);
+
+    // Screen flash
+    const flash = document.getElementById('screen-flash');
+    flash.classList.remove('fire');
+    void flash.offsetWidth; // force reflow
+    flash.classList.add('fire');
+
+    // Cmd element pulse
+    const cmdEl = document.getElementById('install-cmd');
+    cmdEl.classList.add('copied');
+    setTimeout(() => cmdEl.classList.remove('copied'), 1500);
+
+    // Boost ASCII animation temporarily
+    asciiBoost = 40;
+
+    // Toast
     const toast = document.getElementById('toast');
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
+    setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
 // Neural pattern ASCII animation
 // Art style: synaptic firing patterns — nodes pulse and connections flicker
 const canvas = document.getElementById('neural-canvas');
 const W = 72, H = 20;
-const nodes = '.+:*';
+const nodes = '.+:*#@';
 const connections = '-=~|/\\';
+const sparks = '*+.';
 const space = ' ';
+let asciiBoost = 0; // intensity boost from copy event
 
-function neuralFrame(t) {
+function neuralFrame(t, boost) {
     let out = '';
+    const intensity = boost > 0 ? 0.9 : 0;
+    const threshold = boost > 0 ? -0.2 + (boost / 40) * 0.8 : 0;
+
     for (let y = 0; y < H; y++) {
         for (let x = 0; x < W; x++) {
             const cx = (x - W/2) / (W/2);
@@ -733,23 +934,27 @@ function neuralFrame(t) {
             const r = Math.sqrt(cx*cx + cy*cy);
 
             // Radial wave from center (consolidation pulse)
-            const wave = Math.sin(r * 8 - t * 0.06) * Math.cos(t * 0.02 + Math.atan2(cy, cx) * 3);
+            const speed = boost > 0 ? 0.15 : 0.06;
+            const wave = Math.sin(r * 8 - t * speed) * Math.cos(t * 0.02 + Math.atan2(cy, cx) * 3);
 
             // Synaptic flicker
             const flicker = Math.sin(x * 0.7 + t * 0.04) * Math.cos(y * 1.2 - t * 0.03);
 
-            // Combine
-            const v = wave * 0.6 + flicker * 0.4;
+            // Boost adds chaotic energy
+            const chaos = boost > 0 ? Math.sin(x * t * 0.01) * Math.cos(y * t * 0.008) * intensity : 0;
 
-            // Threshold to create sparse neural look
-            if (r > 0.95) {
+            // Combine
+            const v = wave * 0.6 + flicker * 0.4 + chaos;
+
+            // Threshold to create sparse neural look (denser when boosted)
+            if (r > 0.95 && boost <= 5) {
                 out += space;
-            } else if (v > 0.6) {
+            } else if (v > 0.6 - threshold) {
                 out += nodes[Math.floor(Math.random() * nodes.length)];
-            } else if (v > 0.3) {
+            } else if (v > 0.3 - threshold) {
                 out += connections[Math.floor((v * 10 + t * 0.1) % connections.length)];
-            } else if (v > 0.05 && Math.random() > 0.7) {
-                out += '.';
+            } else if (v > 0.05 - threshold && (Math.random() > 0.7 - intensity * 0.5)) {
+                out += boost > 20 ? sparks[Math.floor(Math.random() * sparks.length)] : '.';
             } else {
                 out += space;
             }
@@ -761,10 +966,18 @@ function neuralFrame(t) {
 
 let t = 0;
 function animateNeural() {
-    canvas.textContent = neuralFrame(t);
-    // Color cycling via CSS
-    const hue = 170 + Math.sin(t * 0.01) * 30;
-    canvas.style.color = `hsl(${hue}, 80%, 60%)`;
+    canvas.textContent = neuralFrame(t, asciiBoost);
+
+    // Color cycling — goes wild when boosted
+    const baseHue = 170 + Math.sin(t * 0.01) * 30;
+    const hue = asciiBoost > 0 ? (baseHue + asciiBoost * 8) % 360 : baseHue;
+    const sat = asciiBoost > 0 ? 95 : 80;
+    const light = asciiBoost > 0 ? 65 + asciiBoost * 0.5 : 60;
+    canvas.style.color = `hsl(${hue}, ${sat}%, ${Math.min(light, 80)}%)`;
+
+    // Decay boost
+    if (asciiBoost > 0) asciiBoost -= 0.5;
+
     t += 1.5;
     requestAnimationFrame(animateNeural);
 }
