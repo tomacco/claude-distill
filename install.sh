@@ -100,7 +100,15 @@ if [ -f "$CLAUDE_MD" ]; then
         printf "  Add this line to CLAUDE.md? [Y/n] "
         read -r response < /dev/tty
         if [[ "$response" =~ ^[Nn] ]]; then
-            echo "  · Skipped. You can add it manually later."
+            echo ""
+            echo "  · Skipped. /distill will still work when you type it manually,"
+            echo "    but without this line:"
+            echo "      • Prior knowledge won't load at session start"
+            echo "      • No automatic suggestions to consolidate"
+            echo "      • Sessions won't benefit from each other passively"
+            echo ""
+            echo "    To add it later:"
+            echo "      echo '$DISTILL_LINE' >> ~/.claude/CLAUDE.md"
         else
             echo "" >> "$CLAUDE_MD"
             echo "$DISTILL_LINE" >> "$CLAUDE_MD"
