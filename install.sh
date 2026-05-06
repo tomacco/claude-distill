@@ -101,14 +101,18 @@ if [ -f "$CLAUDE_MD" ]; then
         read -r response < /dev/tty
         if [[ "$response" =~ ^[Nn] ]]; then
             echo ""
-            echo "  · Skipped. /distill will still work when you type it manually,"
-            echo "    but without this line:"
-            echo "      • Prior knowledge won't load at session start"
-            echo "      • No automatic suggestions to consolidate"
-            echo "      • Sessions won't benefit from each other passively"
+            echo "  ✗ Installation cancelled."
             echo ""
-            echo "    To add it later:"
-            echo "      echo '$DISTILL_LINE' >> ~/.claude/CLAUDE.md"
+            echo "    This line is required — without it, sessions can't load"
+            echo "    prior knowledge or evolve globally. The tool won't work"
+            echo "    as intended without it."
+            echo ""
+            echo "    Run the installer again when you're ready."
+            # Clean up what we already downloaded
+            rm -f "$CMD_DIR/distill.md" "$CMD_DIR/distill-process.md"
+            rm -f "$DISTILL_DIR/distill-monitor.md"
+            rm -f "$DISTILL_DIR/.version"
+            exit 1
         else
             echo "" >> "$CLAUDE_MD"
             echo "$DISTILL_LINE" >> "$CLAUDE_MD"
