@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>claude-distill</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=IBM+Plex+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void: #05050a;
+            --deep: #0a0a14;
+            --surface: #0f0f1a;
+            --border: #1a1a2e;
+            --dim: #4a4a6a;
+            --text: #c8c8e0;
+            --bright: #e8e8f8;
+            --synapse: #00f5d4;
+            --cortex: #7b2ff7;
+            --dendrite: #f72585;
+            --axon: #3a86ff;
+            --glow: rgba(0, 245, 212, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--void);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .neural-canvas {
+            font-size: clamp(0.32rem, 1vw, 0.6rem);
+            line-height: 1.1;
+            white-space: pre;
+            text-align: center;
+            margin-bottom: 3rem;
+            user-select: none;
+            opacity: 0.85;
+        }
+
+        .title-group {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            color: var(--bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .title span {
+            background: linear-gradient(135deg, var(--synapse), var(--axon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: clamp(0.75rem, 1.5vw, 1rem);
+            font-weight: 300;
+            color: var(--dim);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .install-cmd {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.85rem;
+            color: var(--synapse);
+            position: relative;
+            display: inline-block;
+        }
+
+        .install-cmd::before {
+            content: '\276f';
+            color: var(--dim);
+            margin-right: 0.75rem;
+        }
+
+        /* ═══ MANIFESTO ═══ */
+        .manifesto {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .manifesto::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--border), transparent);
+            transform: translateX(-50%);
+            z-index: -1;
+        }
+
+        .manifesto p {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 300;
+            color: var(--dim);
+            margin-bottom: 2rem;
+            text-align: center;
+            transition: color 0.3s;
+        }
+
+        .manifesto p strong {
+            color: var(--text);
+            font-weight: 400;
+        }
+
+        .manifesto .break-line {
+            color: var(--synapse);
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        /* ═══ PRESSURE SECTION ═══ */
+        .pressure-section {
+            padding: 4rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--cortex);
+            margin-bottom: 1rem;
+        }
+
+        .section-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--bright);
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            font-size: 0.85rem;
+            color: var(--dim);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+
+        .pressure-visual {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pressure-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--synapse), var(--cortex), var(--dendrite));
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .pressure-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .pressure-label {
+            font-size: 0.7rem;
+            color: var(--dim);
+            min-width: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .pressure-bar {
+            flex: 1;
+            height: 3px;
+            background: var(--border);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .pressure-fill {
+            height: 100%;
+            border-radius: 1px;
+            animation: fill-pulse 4s ease-in-out infinite;
+        }
+
+        .pressure-fill.s1 {
+            background: var(--synapse);
+            animation-delay: 0s;
+        }
+        .pressure-fill.s2 {
+            background: var(--cortex);
+            animation-delay: 0.5s;
+        }
+        .pressure-fill.s3 {
+            background: var(--dendrite);
+            animation-delay: 1s;
+        }
+
+        @keyframes fill-pulse {
+            0% { width: 15%; }
+            50% { width: 85%; }
+            55% { width: 20%; }
+            100% { width: 15%; }
+        }
+
+        .pressure-score-display {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--synapse);
+            animation: score-color 4s ease-in-out infinite;
+        }
+
+        @keyframes score-color {
+            0% { color: var(--synapse); }
+            50% { color: var(--dendrite); }
+            55% { color: var(--synapse); }
+            100% { color: var(--synapse); }
+        }
+
+        .pressure-caption {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--dim);
+            letter-spacing: 0.1em;
+        }
+
+        /* ═══ TIERS ═══ */
+        .tiers-section {
+            padding: 4rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .tier-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: 2rem 0;
+        }
+
+        .tier {
+            padding: 1.5rem 2rem;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tier::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+        }
+
+        .tier-1 {
+            background: linear-gradient(135deg, rgba(0, 245, 212, 0.05), transparent);
+        }
+        .tier-1::after { background: var(--synapse); }
+
+        .tier-2 {
+            background: linear-gradient(135deg, rgba(123, 47, 247, 0.04), transparent);
+        }
+        .tier-2::after { background: var(--cortex); }
+
+        .tier-3 {
+            background: linear-gradient(135deg, rgba(58, 134, 255, 0.03), transparent);
+        }
+        .tier-3::after { background: var(--axon); }
+
+        .tier-name {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .tier-1 .tier-name { color: var(--synapse); }
+        .tier-2 .tier-name { color: var(--cortex); }
+        .tier-3 .tier-name { color: var(--axon); }
+
+        .tier-desc {
+            font-size: 0.8rem;
+            color: var(--dim);
+        }
+
+        .tier-limit {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            color: var(--border);
+            font-weight: 500;
+        }
+
+        /* ═══ FEATURES ═══ */
+        .features-section {
+            padding: 4rem 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+
+        .feature {
+            background: var(--deep);
+            padding: 2rem;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .feature:hover {
+            background: var(--surface);
+        }
+
+        .feature-icon {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--bright);
+            margin-bottom: 0.75rem;
+        }
+
+        .feature p {
+            font-size: 0.75rem;
+            color: var(--dim);
+            line-height: 1.7;
+        }
+
+        /* ═══ INTEGRITY ═══ */
+        .integrity-section {
+            padding: 6rem 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .integrity-list {
+            list-style: none;
+            text-align: left;
+            margin: 2rem 0;
+        }
+
+        .integrity-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text);
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .integrity-list li:last-child { border-bottom: none; }
+
+        .integrity-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--cortex);
+            min-width: 1.5rem;
+        }
+
+        .integrity-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 300;
+        }
+
+        /* ═══ CTA ═══ */
+        .cta {
+            text-align: center;
+            padding: 6rem 2rem;
+        }
+
+        .cta-link {
+            display: inline-block;
+            padding: 0.75rem 2.5rem;
+            border: 1px solid var(--synapse);
+            color: var(--synapse);
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .cta-link:hover {
+            background: var(--synapse);
+            color: var(--void);
+        }
+
+        /* ═══ FOOTER ═══ */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.65rem;
+            color: var(--dim);
+            border-top: 1px solid var(--border);
+            letter-spacing: 0.1em;
+        }
+
+        /* ═══ ANIMATIONS ═══ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .neural-canvas { font-size: 0.28rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .tier-limit { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <pre class="neural-canvas" id="neural-canvas" aria-hidden="true"></pre>
+    <div class="title-group">
+        <h1 class="title">claude-<span>distill</span></h1>
+        <p class="tagline">memory consolidation for AI agents</p>
+    </div>
+    <div class="install-cmd">cp distill.md ~/.claude/commands/</div>
+</div>
+
+<div class="manifesto">
+    <p class="reveal">Every conversation starts from zero. Your AI doesn't know what you know. It doesn't remember what failed last time.</p>
+    <p class="reveal">It can't distinguish between a senior architect thinking out loud and a student asking for help.</p>
+    <p class="reveal"><strong>Session ends. Knowledge evaporates. Repeat.</strong></p>
+    <p class="reveal break-line">claude-distill breaks the loop.</p>
+    <p class="reveal">After each session, it extracts what was hard, traces friction to first principles, and encodes learnings where future sessions will find them. Your AI evolves. Not through retraining &mdash; through <strong>remembering what working with you taught it</strong>.</p>
+</div>
+
+<div class="pressure-section">
+    <div class="section-label reveal">Inspired by neuroscience</div>
+    <h2 class="section-heading reveal">Memory Pressure</h2>
+    <p class="section-desc reveal">
+        Your brain accumulates adenosine during wakefulness &mdash; a chemical "sleep pressure" that degrades cognition until sleep consolidates memories. LLM sessions work identically: unconsolidated learnings pile up, signal degrades, hallucination risk climbs.
+    </p>
+
+    <div class="pressure-visual reveal">
+        <div class="pressure-row">
+            <span class="pressure-label">signals</span>
+            <div class="pressure-bar"><div class="pressure-fill s1"></div></div>
+        </div>
+        <div class="pressure-row">
+            <span class="pressure-label">corrections</span>
+            <div class="pressure-bar"><div class="pressure-fill s2"></div></div>
+        </div>
+        <div class="pressure-row">
+            <span class="pressure-label">complexity</span>
+            <div class="pressure-bar"><div class="pressure-fill s3"></div></div>
+        </div>
+        <div class="pressure-score-display" id="pressure-num">3</div>
+        <div class="pressure-caption">CONSOLIDATION PRESSURE / 10</div>
+    </div>
+
+    <p class="section-desc reveal" style="margin-top: 2rem;">
+        When pressure reaches 7, the system recommends mid-session consolidation &mdash; a power nap for your AI. Not a suggestion to stop. A suggestion to <em>crystallize</em>, so the remaining work benefits from clearer context.
+    </p>
+</div>
+
+<div class="tiers-section">
+    <div class="section-label reveal">Architecture</div>
+    <h2 class="section-heading reveal">Three-Tier Knowledge</h2>
+    <p class="section-desc reveal">Only the spine loads into context. Everything else is navigated on demand. Knowledge compresses across tiers &mdash; it is never deleted.</p>
+
+    <div class="tier-stack reveal">
+        <div class="tier tier-1">
+            <div class="tier-name">Tier 1 &mdash; The Spine</div>
+            <div class="tier-desc">Always in context. Index pointers with relevance hooks. The map, not the territory.</div>
+            <div class="tier-limit">max 80 lines</div>
+        </div>
+        <div class="tier tier-2">
+            <div class="tier-name">Tier 2 &mdash; Active Knowledge</div>
+            <div class="tier-desc">Read on demand. One topic per file. Current, actionable, validated on every access.</div>
+            <div class="tier-limit">max 60 lines/file</div>
+        </div>
+        <div class="tier tier-3">
+            <div class="tier-name">Tier 3 &mdash; Archive</div>
+            <div class="tier-desc">Compressed history. Promoted back when recalled frequently. The full record at lower resolution.</div>
+            <div class="tier-limit">no limit</div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="section-label reveal">Capabilities</div>
+    <h2 class="section-heading reveal">What it does</h2>
+
+    <div class="features-grid reveal">
+        <div class="feature">
+            <span class="feature-icon" style="color: var(--synapse);">&#x25C8;</span>
+            <h3>Self-discovering structure</h3>
+            <p>No prescribed layout. Reads YOUR workspace at runtime to discover where knowledge lives &mdash; whatever you call your files, whatever your craft.</p>
+        </div>
+        <div class="feature">
+            <span class="feature-icon" style="color: var(--cortex);">&#x25C8;</span>
+            <h3>Evolving user model</h3>
+            <p>Maps your expertise, communication style, thinking patterns, and growth edges. Every session sharpens the picture. Encodes observations, never judgments.</p>
+        </div>
+        <div class="feature">
+            <span class="feature-icon" style="color: var(--dendrite);">&#x25C8;</span>
+            <h3>Memory pressure scoring</h3>
+            <p>Tracks unconsolidated learnings like sleep debt. Recommends consolidation before context degrades &mdash; a power nap for cognitive load.</p>
+        </div>
+        <div class="feature">
+            <span class="feature-icon" style="color: var(--axon);">&#x25C8;</span>
+            <h3>Validate-on-recall</h3>
+            <p>Every memory access is a verification pass. Stale knowledge self-heals. Frequently recalled archives get promoted. The system maintains itself.</p>
+        </div>
+        <div class="feature">
+            <span class="feature-icon" style="color: var(--synapse);">&#x25C8;</span>
+            <h3>Compress, never discard</h3>
+            <p>Zero information loss across tiers. Old knowledge gets denser, not deleted. The full history remains navigable at different resolutions.</p>
+        </div>
+        <div class="feature">
+            <span class="feature-icon" style="color: var(--cortex);">&#x25C8;</span>
+            <h3>Profession-agnostic</h3>
+            <p>Engineer, designer, researcher, PM &mdash; the distillation process works on any craft. Principles are universal. Only the routing is personal.</p>
+        </div>
+    </div>
+</div>
+
+<div class="integrity-section">
+    <div class="section-label reveal">Non-negotiable</div>
+    <h2 class="section-heading reveal">The Integrity Contract</h2>
+    <p class="section-desc reveal" style="max-width: 500px; margin: 0 auto 2rem;">
+        These are baked into the process. They cannot be overridden by mood, pushback, or preference.
+    </p>
+
+    <ol class="integrity-list reveal">
+        <li>
+            <span class="integrity-num">1</span>
+            <span class="integrity-text">Never encode comfort as truth.</span>
+        </li>
+        <li>
+            <span class="integrity-num">2</span>
+            <span class="integrity-text">Never flatten standards to reduce friction.</span>
+        </li>
+        <li>
+            <span class="integrity-num">3</span>
+            <span class="integrity-text">Never confuse preference with principle.</span>
+        </li>
+        <li>
+            <span class="integrity-num">4</span>
+            <span class="integrity-text">Frustration is diagnostic, not directive.</span>
+        </li>
+        <li>
+            <span class="integrity-num">5</span>
+            <span class="integrity-text">The user's growth is the goal.</span>
+        </li>
+    </ol>
+
+    <p class="section-desc reveal" style="max-width: 500px; margin: 2rem auto 0; text-align: center;">
+        The goal is an <strong style="color: var(--bright);">honest ally</strong>. One that respects you enough to tell you what's true.
+    </p>
+</div>
+
+<div class="cta">
+    <a href="https://github.com/tomacco/claude-distill" class="cta-link">View source on GitHub</a>
+</div>
+
+<footer>
+    MIT &middot; Built for Claude Code
+</footer>
+
+<script>
+// Neural pattern ASCII animation
+// Art style: synaptic firing patterns — nodes pulse and connections flicker
+const canvas = document.getElementById('neural-canvas');
+const W = 72, H = 20;
+const nodes = '.+:*';
+const connections = '-=~|/\\';
+const space = ' ';
+
+function neuralFrame(t) {
+    let out = '';
+    for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+            const cx = (x - W/2) / (W/2);
+            const cy = (y - H/2) / (H/2);
+            const r = Math.sqrt(cx*cx + cy*cy);
+
+            // Radial wave from center (consolidation pulse)
+            const wave = Math.sin(r * 8 - t * 0.06) * Math.cos(t * 0.02 + Math.atan2(cy, cx) * 3);
+
+            // Synaptic flicker
+            const flicker = Math.sin(x * 0.7 + t * 0.04) * Math.cos(y * 1.2 - t * 0.03);
+
+            // Combine
+            const v = wave * 0.6 + flicker * 0.4;
+
+            // Threshold to create sparse neural look
+            if (r > 0.95) {
+                out += space;
+            } else if (v > 0.6) {
+                out += nodes[Math.floor(Math.random() * nodes.length)];
+            } else if (v > 0.3) {
+                out += connections[Math.floor((v * 10 + t * 0.1) % connections.length)];
+            } else if (v > 0.05 && Math.random() > 0.7) {
+                out += '.';
+            } else {
+                out += space;
+            }
+        }
+        out += '\n';
+    }
+    return out;
+}
+
+let t = 0;
+function animateNeural() {
+    canvas.textContent = neuralFrame(t);
+    // Color cycling via CSS
+    const hue = 170 + Math.sin(t * 0.01) * 30;
+    canvas.style.color = `hsl(${hue}, 80%, 60%)`;
+    t += 1.5;
+    requestAnimationFrame(animateNeural);
+}
+animateNeural();
+
+// Pressure score animation
+const pressureEl = document.getElementById('pressure-num');
+let pt = 0;
+setInterval(() => {
+    pt += 0.04;
+    const cycle = 0.5 + 0.5 * Math.sin(pt);
+    const val = Math.floor(1 + 8 * cycle);
+    pressureEl.textContent = val;
+}, 150);
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
