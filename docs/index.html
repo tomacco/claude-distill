@@ -259,47 +259,129 @@
             50% { transform: translateY(6px); }
         }
 
-        /* ═══ MANIFESTO ═══ */
-        .manifesto {
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 6rem 2rem;
-            position: relative;
-        }
-
-        .manifesto::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: linear-gradient(to bottom, transparent, var(--border), transparent);
-            transform: translateX(-50%);
-            z-index: -1;
-        }
-
-        .manifesto p {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 300;
-            color: var(--dim);
-            margin-bottom: 2rem;
-            text-align: center;
-            transition: color 0.3s;
-        }
-
-        .manifesto p strong {
-            color: var(--text);
-            font-weight: 400;
-        }
-
+        /* (manifesto replaced by pain-section + value-section) */
         .manifesto .break-line {
             color: var(--synapse);
             font-size: 1.4rem;
             font-weight: 700;
             font-family: 'Playfair Display', serif;
             font-style: italic;
+        }
+
+        /* ═══ PAIN SECTION ═══ */
+        .pain-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .pain-card {
+            padding: 1.5rem;
+            border-left: 2px solid var(--dendrite);
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.03), transparent);
+        }
+
+        .pain-quote {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.05rem;
+            color: var(--bright);
+            margin-bottom: 0.75rem;
+        }
+
+        .pain-desc {
+            font-size: 0.78rem;
+            color: var(--dim);
+            line-height: 1.7;
+        }
+
+        .pain-pivot {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .pain-pivot .break-line {
+            color: var(--synapse);
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            margin-bottom: 0.75rem;
+        }
+
+        .pivot-sub {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            color: var(--dim);
+            font-weight: 300;
+        }
+
+        .pivot-sub strong {
+            color: var(--text);
+        }
+
+        /* ═══ VALUE STRIP ═══ */
+        .value-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 2rem 4rem;
+        }
+
+        .value-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            flex-wrap: wrap;
+        }
+
+        .value-item {
+            text-align: center;
+        }
+
+        .value-verb {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 0.3rem;
+        }
+
+        .value-what {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            color: var(--bright);
+            font-weight: 400;
+        }
+
+        .value-what code {
+            color: var(--synapse);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+        }
+
+        .value-arrow {
+            color: var(--dim);
+            font-size: 1.2rem;
+        }
+
+        .value-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--dim);
+            margin-top: 1rem;
+            letter-spacing: 0.05em;
         }
 
         /* ═══ PRESSURE SECTION ═══ */
@@ -645,7 +727,7 @@
     <pre class="neural-canvas" id="neural-canvas" aria-hidden="true"></pre>
     <div class="title-group">
         <h1 class="title">claude-<span>distill</span></h1>
-        <p class="tagline">memory consolidation for AI agents</p>
+        <p class="tagline">your AI should get better at being yours</p>
     </div>
     <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
     <div class="scroll-hint" id="scroll-hint">
@@ -661,12 +743,51 @@
     <div class="toast" id="toast">copied to clipboard</div>
 </div>
 
-<div class="manifesto">
-    <p class="reveal">Every conversation starts from zero. Your AI doesn't know what you know. It doesn't remember what failed last time.</p>
-    <p class="reveal">It can't distinguish between a senior architect thinking out loud and a student asking for help.</p>
-    <p class="reveal"><strong>Session ends. Knowledge evaporates. Repeat.</strong></p>
-    <p class="reveal break-line">claude-distill breaks the loop.</p>
-    <p class="reveal">After each session, it extracts what was hard, traces friction to first principles, and encodes learnings where future sessions will find them. Your AI evolves. Not through retraining &mdash; through <strong>remembering what working with you taught it</strong>.</p>
+<div class="pain-section">
+    <div class="pain-grid reveal">
+        <div class="pain-card">
+            <div class="pain-quote">"I already told you this yesterday."</div>
+            <div class="pain-desc">Every session starts from scratch. You explain the same constraints, preferences, and context again and again.</div>
+        </div>
+        <div class="pain-card">
+            <div class="pain-quote">"Why did you make the same mistake?"</div>
+            <div class="pain-desc">Claude fails the same way it did last week. The fix was never captured. The lesson was lost when the session closed.</div>
+        </div>
+        <div class="pain-card">
+            <div class="pain-quote">"You don't know how I work."</div>
+            <div class="pain-desc">It doesn't know you're an expert. It over-explains. It asks basic questions. It treats you like a stranger every time.</div>
+        </div>
+    </div>
+
+    <div class="pain-pivot reveal">
+        <p class="break-line">What if it learned?</p>
+        <p class="pivot-sub">Not retrained. Not fine-tuned. Just&hellip; <strong>remembered</strong> what working with you taught it.</p>
+    </div>
+</div>
+
+<div class="value-section">
+    <div class="value-strip reveal">
+        <div class="value-item">
+            <div class="value-verb">type</div>
+            <div class="value-what"><code>/distill</code></div>
+        </div>
+        <div class="value-arrow">&rarr;</div>
+        <div class="value-item">
+            <div class="value-verb">it extracts</div>
+            <div class="value-what">what was hard &amp; why</div>
+        </div>
+        <div class="value-arrow">&rarr;</div>
+        <div class="value-item">
+            <div class="value-verb">it encodes</div>
+            <div class="value-what">knowledge that persists</div>
+        </div>
+        <div class="value-arrow">&rarr;</div>
+        <div class="value-item">
+            <div class="value-verb">next session</div>
+            <div class="value-what">Claude is sharper</div>
+        </div>
+    </div>
+    <p class="value-note reveal">Runs in an isolated sub-agent. Your main context stays untouched.</p>
 </div>
 
 <div class="pressure-section">
