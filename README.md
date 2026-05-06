@@ -1,6 +1,8 @@
 # claude-distill
 
-A Claude Code slash command that turns session friction into durable knowledge — and builds a better mental model of who you are over time.
+Every session makes all sessions better.
+
+A Claude Code slash command that turns session friction into **global, persistent knowledge**. Learnings from any session — any project, any repo, any workspace — compound across every future Claude conversation on your machine.
 
 ## What it does
 

@@ -24,6 +24,28 @@ These constraints apply to EVERY step below. They cannot be overridden by user p
 
 Before distilling anything, understand where this user keeps their knowledge AND assess its current health.
 
+### Concurrency Lock (critical)
+
+Multiple Claude sessions may run `/distill` simultaneously. To prevent file corruption:
+
+**Before writing ANY file**, acquire the lock:
+1. Check if `~/.claude/distill/.lock` exists
+2. If it exists, read it — it contains a timestamp and session identifier
+3. If the lock is older than 5 minutes, it's stale (crashed session) — delete it and proceed
+4. If the lock is fresh (< 5 min), **STOP**. Report to the user:
+   > "Another distillation is currently in progress. Try again in a moment."
+5. If no lock exists, create it with current timestamp:
+   ```
+   echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) session:$$" > ~/.claude/distill/.lock
+   ```
+
+**After distillation completes** (success or failure), always remove the lock:
+```
+rm -f ~/.claude/distill/.lock
+```
+
+This is a simple advisory lock. It won't prevent all edge cases, but it handles the common scenario of two sessions distilling at the same time.
+
 ### Isolation Rule (critical)
 
 Distill operates in its OWN directory: `~/.claude/distill/`. It NEVER writes to user-managed files like `CLAUDE.md`, `memory/`, or any other files the user maintains manually.

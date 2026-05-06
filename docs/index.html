@@ -808,7 +808,7 @@
     <pre class="neural-canvas" id="neural-canvas" aria-hidden="true"></pre>
     <div class="title-group">
         <h1 class="title">claude-<span>distill</span></h1>
-        <p class="tagline">your AI should get better at being yours</p>
+        <p class="tagline">every session makes all sessions better</p>
     </div>
     <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
     <div class="scroll-hint" id="scroll-hint">
@@ -841,8 +841,8 @@
     </div>
 
     <div class="pain-pivot reveal">
-        <p class="break-line">What if it learned?</p>
-        <p class="pivot-sub">Not retrained. Not fine-tuned. Just&hellip; <strong>remembered</strong> what working with you taught it.</p>
+        <p class="break-line">What if every session made Claude smarter?</p>
+        <p class="pivot-sub">Not one session. Not one project. <strong>Every Claude session on your machine, forever.</strong><br>Learnings from Monday's debugging help Wednesday's architecture review. Globally.</p>
     </div>
 </div>
 
@@ -860,15 +860,15 @@
         <div class="value-arrow">&rarr;</div>
         <div class="value-item">
             <div class="value-verb">it encodes</div>
-            <div class="value-what">knowledge that persists</div>
+            <div class="value-what">knowledge globally</div>
         </div>
         <div class="value-arrow">&rarr;</div>
         <div class="value-item">
-            <div class="value-verb">next session</div>
-            <div class="value-what">Claude is sharper</div>
+            <div class="value-verb">every session</div>
+            <div class="value-what">inherits the learnings</div>
         </div>
     </div>
-    <p class="value-note reveal">Runs in an isolated sub-agent. Your main context stays untouched.</p>
+    <p class="value-note reveal">Global knowledge. Any project, any session, any Claude Code workspace on your machine. Runs in an isolated sub-agent &mdash; your main context stays untouched.</p>
 </div>
 
 <div class="pressure-section">
@@ -1032,6 +1032,16 @@
         <details class="faq-item reveal">
             <summary>What if I already have a knowledge management system?</summary>
             <p>Distill won't interfere. It maintains its own parallel structure. If you want to consolidate &mdash; merge distill's findings into your existing system &mdash; you do that manually. Distill will flag when its knowledge overlaps or conflicts with your files, giving you the information to decide. You're always the authority.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>Is the learning global across all my sessions?</summary>
+            <p><strong>Yes. This is the core idea.</strong> Knowledge lives in <code>~/.claude/distill/</code> which is shared across every Claude Code session on your machine. A lesson learned during a morning debugging session improves the afternoon architecture review. Different projects, different repos, different contexts &mdash; all benefit from the same accumulated knowledge.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>What if two sessions run /distill at the same time?</summary>
+            <p>Handled. Distill uses a lockfile (<code>.lock</code>) to prevent concurrent writes. If another distillation is in progress, it'll tell you to try again in a moment. Stale locks (from crashed sessions) auto-expire after 5 minutes.</p>
         </details>
 
         <details class="faq-item reveal">
