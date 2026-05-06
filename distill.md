@@ -53,7 +53,7 @@ You CANNOT see the original conversation. Everything you know comes from the sig
 ## Your Process
 
 Read the full distillation process instructions from:
-~/.claude/commands/distill-process.md
+~/.claude/distill/distill-process.md
 
 Execute every step:
 0. Discover knowledge structure

@@ -35,8 +35,8 @@ mkdir -p "$DISTILL_DIR"/{craft,ops,profile,projects,feedback,archive}
 curl -sL "$REPO/distill.md" -o "$CMD_DIR/distill.md"
 echo "  ✓ distill.md (dispatcher)"
 
-# Download the full process (used by sub-agent)
-curl -sL "$REPO/distill-process.md" -o "$CMD_DIR/distill-process.md"
+# Download the full process (read by sub-agent from disk, NOT a command)
+curl -sL "$REPO/distill-process.md" -o "$DISTILL_DIR/distill-process.md"
 echo "  ✓ distill-process.md (process)"
 
 # Download the session monitor (loaded every session via CLAUDE.md)
@@ -109,7 +109,8 @@ if [ -f "$CLAUDE_MD" ]; then
             echo ""
             echo "    Run the installer again when you're ready."
             # Clean up what we already downloaded
-            rm -f "$CMD_DIR/distill.md" "$CMD_DIR/distill-process.md"
+            rm -f "$CMD_DIR/distill.md"
+            rm -f "$DISTILL_DIR/distill-process.md"
             rm -f "$DISTILL_DIR/distill-monitor.md"
             rm -f "$DISTILL_DIR/.version"
             exit 1
@@ -141,7 +142,7 @@ else
 fi
 echo ""
 echo "  Uninstall:"
-echo "    rm $CMD_DIR/distill.md $CMD_DIR/distill-process.md"
+echo "    rm $CMD_DIR/distill.md"
 echo "    rm -rf $DISTILL_DIR"
 echo "    # Remove the 'Distill' line from ~/.claude/CLAUDE.md"
 echo ""

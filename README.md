@@ -42,9 +42,10 @@ The goal is an **honest ally** — one that respects you enough to tell you what
 curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
 ```
 
-This installs two files:
-- `distill.md` — the dispatcher (harvests signals, spawns sub-agent)
-- `distill-process.md` — the full process (executed by the sub-agent in isolation)
+This installs:
+- `~/.claude/commands/distill.md` — the `/distill` command (lightweight dispatcher)
+- `~/.claude/distill/distill-process.md` — full process (read by sub-agent, not a command)
+- `~/.claude/distill/distill-monitor.md` — session monitor (loaded via CLAUDE.md)
 
 Then invoke it in any Claude Code session:
 
@@ -135,7 +136,7 @@ You can:
 ## Uninstall
 
 ```bash
-rm ~/.claude/commands/distill.md ~/.claude/commands/distill-process.md
+rm ~/.claude/commands/distill.md
 rm -rf ~/.claude/distill/
 ```
 
