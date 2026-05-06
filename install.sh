@@ -72,7 +72,7 @@ if [ -f "$CLAUDE_MD" ]; then
         echo "    pressure and suggests /distill automatically."
         echo ""
         printf "  Replace old line with new one? [Y/n] "
-        read -r response
+        read -r response < /dev/tty
         if [[ "$response" =~ ^[Nn] ]]; then
             echo "  · Kept old reference. You can update manually later."
         else
@@ -98,7 +98,7 @@ if [ -f "$CLAUDE_MD" ]; then
         echo "  └─────────────────────────────────────────────────────────────────────┘"
         echo ""
         printf "  Add this line to CLAUDE.md? [Y/n] "
-        read -r response
+        read -r response < /dev/tty
         if [[ "$response" =~ ^[Nn] ]]; then
             echo "  · Skipped. You can add it manually later."
         else
