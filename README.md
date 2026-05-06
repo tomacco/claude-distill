@@ -36,19 +36,8 @@ The goal is an **honest ally** — one that respects you enough to tell you what
 
 ## Installation
 
-### One-liner (for the impatient)
-
 ```bash
 curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
-```
-
-### Manual (for the cautious)
-
-```bash
-# 1. Download the command file
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill.md -o ~/.claude/commands/distill.md
-
-# 2. That's it. Use it:
 ```
 
 Then invoke it in any Claude Code session:
