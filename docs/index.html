@@ -123,15 +123,40 @@
             text-transform: uppercase;
         }
 
+        .install-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .install-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .install-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--dim);
+            min-width: 50px;
+            text-align: right;
+        }
+
         .install-cmd {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 4px;
-            padding: 0.8rem 1.5rem;
-            font-size: 0.85rem;
+            padding: 0.7rem 1.2rem;
+            font-size: clamp(0.55rem, 1.3vw, 0.8rem);
             color: var(--synapse);
             position: relative;
-            display: inline-block;
+            flex: 1;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
         .install-cmd::before {
@@ -528,7 +553,16 @@
         <h1 class="title">claude-<span>distill</span></h1>
         <p class="tagline">memory consolidation for AI agents</p>
     </div>
-    <div class="install-cmd">cp distill.md ~/.claude/commands/</div>
+    <div class="install-group">
+        <div class="install-option">
+            <span class="install-label">lazy</span>
+            <div class="install-cmd">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+        </div>
+        <div class="install-option">
+            <span class="install-label">manual</span>
+            <div class="install-cmd">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill.md -o ~/.claude/commands/distill.md</div>
+        </div>
+    </div>
 </div>
 
 <div class="manifesto">
