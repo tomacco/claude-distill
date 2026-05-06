@@ -1,40 +1,67 @@
-# claude-distill
+<p align="center">
+  <img src="docs/header.svg" alt="claude-distill" width="800"/>
+</p>
 
-Every session makes all sessions better.
+<p align="center">
+  <strong>Every session makes all sessions better.</strong><br>
+  <em>Global, persistent memory consolidation for Claude Code.</em>
+</p>
 
-A Claude Code slash command that turns session friction into **global, persistent knowledge**. Learnings from any session — any project, any repo, any workspace — compound across every future Claude conversation on your machine.
+<p align="center">
+  <a href="https://tomacco.github.io/claude-distill/">Website</a> ·
+  <a href="#installation">Install</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#uninstall">Uninstall</a>
+</p>
 
-## What it does
+---
 
-After a work session — coding, writing, designing, researching, managing — run `/distill` to:
+## The problem
 
-1. **Extract learnings** from friction, failures, and surprises
-2. **Evolve the user model** — understand your expertise, communication style, thinking patterns, and growth edges
-3. **Route knowledge** to the right layer in YOUR file structure (discovered at runtime, not prescribed)
-4. **Maintain honesty** — never encodes comfort as truth or softens findings to avoid discomfort
+Every Claude session starts from zero. It doesn't know what you know. It doesn't remember what failed last week. It can't tell a senior architect from a first-time coder.
 
-## Why this exists
+**You repeat yourself. It repeats its mistakes. Session ends. Knowledge gone.**
 
-LLMs start every conversation blind. They don't know if you're a senior architect or a first-year student. They don't know if "make it work" means "I trust you, just ship it" or "I'm stuck and need guidance."
+## The fix
 
-`claude-distill` solves this by building a persistent, evolving understanding of:
-- **What you know** (so future sessions calibrate explanations correctly)
-- **How you communicate** (so interactions match your style, not a generic one)
-- **Where you're growing** (so support lands where it's actually useful)
-- **What went wrong** (so mistakes aren't repeated)
+```bash
+curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
+```
 
-## Anti-sycophancy by design
+Type `/distill` after any session. Learnings persist **globally** — any project, any repo, any Claude Code workspace on your machine benefits from every past session.
 
-Most AI memory systems have a failure mode: they optimize for making the user feel good rather than making them more capable. This produces distorted feedback loops where bad habits get reinforced because they were never challenged.
+---
 
-`claude-distill` has **integrity principles baked into the process** that cannot be overridden:
+## How it works
 
-- Frustration is treated as diagnostic data, not as a signal to soften findings
-- Preferences are encoded alongside their consequences (good and bad)
-- Every learning is checked against: "Does this make the user more capable, or just more comfortable?"
-- Tensions between honesty and comfort are flagged explicitly in the output
+```
+you type /distill
+    → dispatcher harvests signals from the conversation
+    → spawns an isolated sub-agent (your context stays clean)
+    → sub-agent traces friction to first principles
+    → encodes knowledge in ~/.claude/distill/
+    → every future session inherits the learnings
+```
 
-The goal is an **honest ally** — one that respects you enough to tell you what you need to hear.
+### What it captures
+
+| Layer | What it learns |
+|---|---|
+| **Craft** | How to practice your discipline better |
+| **Operations** | Workflows, processes, tool-specific knowledge |
+| **User profile** | Your expertise, communication style, thinking patterns |
+| **Projects** | Domain context that's hard to re-derive |
+| **Preferences** | How you like to collaborate with AI |
+
+### Memory pressure
+
+The system tracks unconsolidated learnings like sleep debt. When pressure is high, it suggests consolidation — you don't need to remember to type `/distill`.
+
+### Anti-sycophancy
+
+Five integrity principles are baked in. The system **never** encodes comfort as truth, flattens standards to reduce friction, or softens findings because you're frustrated. The goal is an honest ally, not a yes-machine.
+
+---
 
 ## Installation
 
@@ -43,117 +70,78 @@ curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.s
 ```
 
 This installs:
-- `~/.claude/commands/distill.md` — the `/distill` command (lightweight dispatcher)
-- `~/.claude/distill/distill-process.md` — full process (read by sub-agent, not a command)
-- `~/.claude/distill/distill-monitor.md` — session monitor (loaded via CLAUDE.md)
 
-Then invoke it in any Claude Code session:
+| File | Location | Purpose |
+|------|----------|---------|
+| `distill.md` | `~/.claude/commands/` | The `/distill` command |
+| `distill-process.md` | `~/.claude/distill/` | Full process (read by sub-agent) |
+| `distill-monitor.md` | `~/.claude/distill/` | Session monitor (pressure tracking) |
+| `SPINE.md` | `~/.claude/distill/` | Knowledge index |
 
-```
-/distill
-```
+The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this is required for cross-session knowledge loading and automatic suggestions.
 
-## How it works
+---
 
-### Self-discovering structure
-
-Unlike rigid templates that assume a specific profession or file layout, `claude-distill` **discovers your knowledge structure at runtime**. It reads your workspace to find:
-
-- Standards/conventions files (whatever your craft calls them)
-- Procedures/workflow files
-- Memory directories with indexes
-- User profile files
-
-This means it works whether you're a software engineer with `coding-standards.md`, a designer with `design-principles.md`, a PM with `decision-frameworks.md`, or a researcher with `methodology-notes.md`.
-
-### The five layers
-
-| Layer | What it captures |
-|---|---|
-| Craft standards | How to practice your discipline well |
-| Operational procedures | How to get things done (workflows, processes) |
-| Project context | Domain-specific knowledge |
-| User profile | Who you are, how you think, what you know |
-| Preferences | How you like to collaborate with AI |
-
-### The distillation loop
-
-```
-harvest signals (main context) → spawn agent → trace to principles → encode → verify → report back
-```
-
-Distillation runs in a **spawned sub-agent** so your main conversation context stays intact. The dispatcher harvests all signals from the conversation (it can see the full history), packs them into a self-contained prompt, then hands off to an isolated agent that does the heavy lifting — reading files, writing knowledge, running compaction.
-
-### Memory pressure (the sleep debt analogy)
-
-The human brain accumulates adenosine during wakefulness — a chemical "sleep pressure" that degrades cognition until sleep consolidates memories and resets the system. LLM sessions work the same way:
-
-- Unconsolidated learnings pile up in context
-- Signal-to-noise ratio degrades
-- Hallucination risk increases (the LLM equivalent of a sleep-deprived person confabulating)
-- Eventually the session ends and everything not consolidated is lost forever
-
-`claude-distill` tracks a **memory pressure score (0-10)** throughout the session. When pressure reaches 7+, it recommends a mid-session consolidation — like a power nap that resets cognitive load without stopping work.
-
-This isn't about stopping. It's about consolidating so the REMAINING work is sharper.
-
-## Isolation guarantee
-
-Distill operates in its own directory (`~/.claude/distill/`) and **never touches your manually maintained files**. Not your `CLAUDE.md`, not your `memory/` directory, not your project configs.
-
-If distill's knowledge conflicts with your existing files, it flags the conflict in the report and asks you to reconcile. It never overwrites.
+## Architecture
 
 ```
 ~/.claude/
-├── CLAUDE.md              ← yours. never touched.
+├── CLAUDE.md                        ← yours (one distill reference line added)
 ├── commands/
-│   ├── distill.md         ← installed by us (dispatcher)
-│   └── distill-process.md ← installed by us (process)
-└── distill/               ← all distill output lives here
-    ├── SPINE.md           ← tier 1 index
-    ├── craft/             ← tier 2
-    ├── ops/               ← tier 2
-    ├── profile/           ← tier 2
-    ├── projects/          ← tier 2
-    ├── feedback/          ← tier 2
-    └── archive/           ← tier 3
+│   └── distill.md                   ← the /distill command
+└── distill/                         ← all distill-managed knowledge
+    ├── SPINE.md                     ← tier 1: index (max 80 lines, auto-loaded)
+    ├── distill-process.md           ← the full process
+    ├── distill-monitor.md           ← session monitor
+    ├── .version                     ← installed version
+    ├── craft/                       ← tier 2: discipline knowledge
+    ├── ops/                         ← tier 2: operational knowledge
+    ├── profile/                     ← tier 2: user model
+    ├── projects/                    ← tier 2: project context
+    ├── feedback/                    ← tier 2: preferences
+    └── archive/                     ← tier 3: compressed history
 ```
+
+**Three tiers** keep context lean:
+- **Tier 1 (Spine):** Always loaded. Max 80 lines. Just pointers.
+- **Tier 2 (Active):** Read on demand. Max 60 lines per file.
+- **Tier 3 (Archive):** Compressed, rarely read. Never deleted.
+
+---
 
 ## Updates
 
-`claude-distill` checks for new versions once per session. When an update is available:
+Checks for new versions once per session:
 
 ```
 claude-distill update available: v0.1.0 → v0.2.0
 Run the install command to update, or say 'auto-update' and I'll do it now.
 ```
 
-You can:
-- **Manual update:** re-run the install one-liner
-- **In-session update:** say "auto-update" when prompted
-- **Always auto-update:** say "always auto-update distill" and it'll remember your preference
+Or just re-run the install one-liner.
 
 ## Uninstall
 
 ```bash
 rm ~/.claude/commands/distill.md
 rm -rf ~/.claude/distill/
+# Remove the 'Distill' line from ~/.claude/CLAUDE.md
 ```
 
-No traces. No config to revert. No side effects.
+Clean. Total. No traces.
 
-## Requirements
-
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+---
 
 ## Philosophy
 
-**Struggling is a signal, not a virtue.** When something was unexpectedly hard, that's information worth capturing before it fades.
+**Struggling is a signal, not a virtue.** When something was hard, that's information worth capturing.
 
-**Your AI should know you better over time.** Not to manipulate or flatter — to collaborate more effectively. A good colleague remembers how you think and what you care about.
+**Your AI should know you better over time.** Not to flatter — to collaborate. A good colleague remembers how you think.
 
-**Honesty compounds.** A system that tells you what you want to hear feels good today and costs you tomorrow. A system that tells you what's true feels uncomfortable sometimes and makes you excellent over time.
+**Honesty compounds.** What's true today makes you excellent tomorrow. What's comfortable today costs you tomorrow.
 
-## License
+---
 
-MIT
+<p align="center">
+  <sub>v0.2.0 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
+</p>
