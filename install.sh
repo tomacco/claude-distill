@@ -9,7 +9,7 @@ REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
-DISTILL_LINE="# Distill Knowledge — read ~/.claude/distill/SPINE.md at session start for persistent learnings from /distill"
+DISTILL_LINE="# Distill — read ~/.claude/distill/distill-monitor.md and follow its instructions"
 
 echo ""
 echo "  ╭──────────────────────────────╮"
@@ -29,6 +29,10 @@ echo "  ✓ distill.md (dispatcher)"
 # Download the full process (used by sub-agent)
 curl -sL "$REPO/distill-process.md" -o "$CMD_DIR/distill-process.md"
 echo "  ✓ distill-process.md (process)"
+
+# Download the session monitor (loaded every session via CLAUDE.md)
+curl -sL "$REPO/distill-monitor.md" -o "$DISTILL_DIR/distill-monitor.md"
+echo "  ✓ distill-monitor.md (session monitor)"
 
 # Save version file for update checking
 echo "$VERSION" > "$DISTILL_DIR/.version"
@@ -51,14 +55,16 @@ if [ -f "$CLAUDE_MD" ]; then
     if grep -q "distill/SPINE.md" "$CLAUDE_MD" 2>/dev/null; then
         echo "  · CLAUDE.md already references distill (skipped)"
     else
-        echo "  ┌─────────────────────────────────────────────────────────────────┐"
-        echo "  │ To load learnings in future sessions, distill needs one line    │"
-        echo "  │ added to your ~/.claude/CLAUDE.md:                              │"
-        echo "  │                                                                 │"
+        echo "  ┌─────────────────────────────────────────────────────────────────────┐"
+        echo "  │ For distill to work across sessions, it needs one line in your      │"
+        echo "  │ ~/.claude/CLAUDE.md that tells Claude to read the session monitor:  │"
+        echo "  │                                                                     │"
         echo "  │   $DISTILL_LINE"
-        echo "  │                                                                 │"
-        echo "  │ This tells Claude to read your distilled knowledge at startup.  │"
-        echo "  └─────────────────────────────────────────────────────────────────┘"
+        echo "  │                                                                     │"
+        echo "  │ This enables:                                                       │"
+        echo "  │   • Loading your distilled knowledge at session start               │"
+        echo "  │   • Tracking memory pressure and suggesting /distill when needed    │"
+        echo "  └─────────────────────────────────────────────────────────────────────┘"
         echo ""
         printf "  Add this line to CLAUDE.md? [Y/n] "
         read -r response
@@ -88,5 +94,5 @@ echo ""
 echo "  Uninstall:"
 echo "    rm $CMD_DIR/distill.md $CMD_DIR/distill-process.md"
 echo "    rm -rf $DISTILL_DIR"
-echo "    # Remove the distill line from ~/.claude/CLAUDE.md"
+echo "    # Remove the 'Distill' line from ~/.claude/CLAUDE.md"
 echo ""
