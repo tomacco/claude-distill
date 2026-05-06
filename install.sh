@@ -18,6 +18,15 @@ echo "  │  v${VERSION}                       │"
 echo "  ╰──────────────────────────────╯"
 echo ""
 
+# Detect existing installation
+EXISTING_VERSION=""
+if [ -f "$DISTILL_DIR/.version" ]; then
+    EXISTING_VERSION=$(cat "$DISTILL_DIR/.version")
+    echo "  ℹ Existing installation detected: v${EXISTING_VERSION}"
+    echo "  ℹ Upgrading to: v${VERSION}"
+    echo ""
+fi
+
 # Ensure directories exist
 mkdir -p "$CMD_DIR"
 mkdir -p "$DISTILL_DIR"/{craft,ops,profile,projects,feedback,archive}
@@ -46,14 +55,36 @@ if [ ! -f "$DISTILL_DIR/SPINE.md" ]; then
     echo "<!-- Each entry: - [Title](path.md) — when to read this -->" >> "$DISTILL_DIR/SPINE.md"
     echo "  ✓ SPINE.md (created)"
 else
-    echo "  · SPINE.md (already exists, skipped)"
+    echo "  · SPINE.md (already exists, preserved)"
 fi
 
 # CLAUDE.md integration (transparent — asks user)
 echo ""
 if [ -f "$CLAUDE_MD" ]; then
-    if grep -q "distill/SPINE.md" "$CLAUDE_MD" 2>/dev/null; then
-        echo "  · CLAUDE.md already references distill (skipped)"
+    # Check for current reference (distill-monitor.md)
+    if grep -q "distill-monitor.md" "$CLAUDE_MD" 2>/dev/null; then
+        echo "  · CLAUDE.md already references distill-monitor (up to date)"
+
+    # Check for old-style reference (SPINE.md only) — offer upgrade
+    elif grep -q "distill/SPINE.md" "$CLAUDE_MD" 2>/dev/null; then
+        echo "  ℹ CLAUDE.md has an older distill reference (SPINE.md only)."
+        echo "    The new version uses a session monitor that also tracks memory"
+        echo "    pressure and suggests /distill automatically."
+        echo ""
+        printf "  Replace old line with new one? [Y/n] "
+        read -r response
+        if [[ "$response" =~ ^[Nn] ]]; then
+            echo "  · Kept old reference. You can update manually later."
+        else
+            # Remove old line, add new one
+            sed -i.bak '/distill\/SPINE.md/d' "$CLAUDE_MD"
+            rm -f "$CLAUDE_MD.bak"
+            echo "" >> "$CLAUDE_MD"
+            echo "$DISTILL_LINE" >> "$CLAUDE_MD"
+            echo "  ✓ Upgraded CLAUDE.md reference"
+        fi
+
+    # No distill reference at all — offer to add
     else
         echo "  ┌─────────────────────────────────────────────────────────────────────┐"
         echo "  │ For distill to work across sessions, it needs one line in your      │"
@@ -90,6 +121,12 @@ echo "    Knowledge: $DISTILL_DIR/"
 echo "    Version:   $VERSION"
 echo ""
 echo "  Usage: type /distill in any Claude Code session"
+echo ""
+if [ -n "$EXISTING_VERSION" ]; then
+    echo "  Upgraded from v${EXISTING_VERSION} → v${VERSION}"
+else
+    echo "  Fresh install complete."
+fi
 echo ""
 echo "  Uninstall:"
 echo "    rm $CMD_DIR/distill.md $CMD_DIR/distill-process.md"
