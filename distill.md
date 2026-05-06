@@ -81,13 +81,40 @@ Return a distillation report:
 })
 ```
 
-### Step 3: Report back
+### Step 3: Load results into current context
 
-When the sub-agent completes, relay its report to the user concisely. Only surface:
-- What was learned (the principles, not the raw signals)
-- Where it was saved
-- Any open questions that need user input
-- Any flagged tensions
+When the sub-agent completes:
+
+1. **Read the spine** — `Read ~/.claude/distill/SPINE.md` to bring the updated knowledge index into the current session context. This is how the current session benefits immediately from what was just distilled.
+
+2. **Relay the report** to the user concisely. Only surface:
+   - What was learned (the principles, not the raw signals)
+   - Where it was saved
+   - Any open questions that need user input
+   - Any flagged tensions
+
+The spine is now in your context — you can reference distilled knowledge for the remainder of this session without re-reading files.
+
+---
+
+## Version Checking
+
+On the FIRST invocation of `/distill` in a session, check for updates:
+
+1. Read `~/.claude/distill/.version` to get the installed version
+2. Fetch `https://raw.githubusercontent.com/tomacco/claude-distill/main/VERSION` to get the latest
+3. If they differ, inform the user:
+
+> "claude-distill update available: vX.Y.Z → vA.B.C. Run the install command to update, or say 'auto-update' and I'll do it now."
+
+If the user says "auto-update" (or has previously set auto-update preference):
+- Fetch and overwrite `~/.claude/commands/distill.md` and `distill-process.md` from the repo
+- Update `~/.claude/distill/.version`
+- Report what changed
+
+**Auto-update preference:** If the user says "always auto-update distill" or similar, encode this in `~/.claude/distill/feedback/preferences.md` so future sessions do it silently.
+
+Only check once per session, not on every invocation.
 
 ---
 

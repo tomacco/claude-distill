@@ -116,6 +116,20 @@ If distill's knowledge conflicts with your existing files, it flags the conflict
     └── archive/           ← tier 3
 ```
 
+## Updates
+
+`claude-distill` checks for new versions once per session. When an update is available:
+
+```
+claude-distill update available: v0.1.0 → v0.2.0
+Run the install command to update, or say 'auto-update' and I'll do it now.
+```
+
+You can:
+- **Manual update:** re-run the install one-liner
+- **In-session update:** say "auto-update" when prompted
+- **Always auto-update:** say "always auto-update distill" and it'll remember your preference
+
 ## Uninstall
 
 ```bash
