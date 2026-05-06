@@ -1004,7 +1004,7 @@
     <div class="faq-list">
         <details class="faq-item reveal">
             <summary>Will it mess with my existing CLAUDE.md or memory files?</summary>
-            <p>No. Distill operates in complete isolation inside <code>~/.claude/distill/</code>. It never touches your manually maintained files &mdash; not your CLAUDE.md, not your memory directory, not your project configs. Your files are yours. If distill discovers a conflict between its knowledge and your files, it flags it in the report and asks YOU to decide. It never overwrites.</p>
+            <p>During install, it asks your permission to add <strong>one line</strong> to CLAUDE.md (the session monitor reference). That's the only touch point. After that, all distill knowledge lives in its own isolated directory (<code>~/.claude/distill/</code>). It never modifies your memory files, project configs, or any other content you maintain. If its knowledge conflicts with yours, it flags it and asks YOU to decide.</p>
         </details>
 
         <details class="faq-item reveal">
