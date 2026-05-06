@@ -669,6 +669,87 @@
             font-weight: 300;
         }
 
+        /* ═══ FAQ ═══ */
+        .faq-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .faq-list {
+            margin-top: 2rem;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+        }
+
+        .faq-item summary {
+            padding: 1.2rem 0;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: color 0.2s;
+        }
+
+        .faq-item summary:hover {
+            color: var(--synapse);
+        }
+
+        .faq-item summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--dim);
+            transition: transform 0.3s;
+        }
+
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+            color: var(--synapse);
+        }
+
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-item p {
+            font-size: 0.8rem;
+            color: var(--dim);
+            line-height: 1.8;
+            padding: 0 0 1.2rem;
+        }
+
+        .faq-item p strong {
+            color: var(--text);
+        }
+
+        .faq-item code {
+            font-size: 0.75rem;
+            color: var(--synapse);
+            background: var(--surface);
+            padding: 0.15rem 0.4rem;
+            border-radius: 2px;
+        }
+
+        .faq-code {
+            display: block;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0.8rem 1rem;
+            margin: 0.75rem 0;
+            font-size: 0.72rem;
+            color: var(--synapse);
+            border-radius: 2px;
+            line-height: 1.8;
+        }
+
         /* ═══ CTA ═══ */
         .cta {
             text-align: center;
@@ -914,6 +995,50 @@
     <p class="section-desc reveal" style="max-width: 500px; margin: 2rem auto 0; text-align: center;">
         The goal is an <strong style="color: var(--bright);">honest ally</strong>. One that respects you enough to tell you what's true.
     </p>
+</div>
+
+<div class="faq-section">
+    <div class="section-label reveal">Common questions</div>
+    <h2 class="section-heading reveal">FAQ</h2>
+
+    <div class="faq-list">
+        <details class="faq-item reveal">
+            <summary>Will it mess with my existing CLAUDE.md or memory files?</summary>
+            <p>No. Distill operates in complete isolation inside <code>~/.claude/distill/</code>. It never touches your manually maintained files &mdash; not your CLAUDE.md, not your memory directory, not your project configs. Your files are yours. If distill discovers a conflict between its knowledge and your files, it flags it in the report and asks YOU to decide. It never overwrites.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>How do I uninstall completely?</summary>
+            <p>Two commands, total cleanup:</p>
+            <code class="faq-code">rm ~/.claude/commands/distill.md ~/.claude/commands/distill-process.md<br>rm -rf ~/.claude/distill/</code>
+            <p>That's it. No traces left. No config to revert. No side effects.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>Does it consume my context window?</summary>
+            <p>The distillation itself runs in a <strong>spawned sub-agent</strong> &mdash; a separate, isolated context. Your main session stays untouched. The only cost in your main context is the signal harvest (a brief scan of the conversation), which is much smaller than the full distillation process.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>How many tokens does it use?</summary>
+            <p>The dispatcher (signal harvest) uses ~500-1000 tokens in your main context. The sub-agent runs separately with its own context &mdash; typically 3000-8000 tokens depending on how much was learned. This is a one-time cost per distillation, not per message.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>Does the knowledge it creates auto-load into every session?</summary>
+            <p>Only the spine (SPINE.md, max 80 lines) is meant to be referenced. And even that is not auto-injected into your CLAUDE.md &mdash; it lives in its own directory. The sub-agent reads it when distilling. For the knowledge to benefit future sessions, you can optionally reference <code>~/.claude/distill/SPINE.md</code> from your CLAUDE.md, but this is your choice.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>What if I already have a knowledge management system?</summary>
+            <p>Distill won't interfere. It maintains its own parallel structure. If you want to consolidate &mdash; merge distill's findings into your existing system &mdash; you do that manually. Distill will flag when its knowledge overlaps or conflicts with your files, giving you the information to decide. You're always the authority.</p>
+        </details>
+
+        <details class="faq-item reveal">
+            <summary>Does it work for non-programmers?</summary>
+            <p>Yes. The distillation process is profession-agnostic. It discovers whatever knowledge structure you have (or helps bootstrap one). Whether you write code, design interfaces, manage teams, or do research &mdash; if you have sessions with friction and learning, distill captures it.</p>
+        </details>
+    </div>
 </div>
 
 <div class="cta">

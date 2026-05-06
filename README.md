@@ -94,10 +94,40 @@ The human brain accumulates adenosine during wakefulness — a chemical "sleep p
 
 This isn't about stopping. It's about consolidating so the REMAINING work is sharper.
 
+## Isolation guarantee
+
+Distill operates in its own directory (`~/.claude/distill/`) and **never touches your manually maintained files**. Not your `CLAUDE.md`, not your `memory/` directory, not your project configs.
+
+If distill's knowledge conflicts with your existing files, it flags the conflict in the report and asks you to reconcile. It never overwrites.
+
+```
+~/.claude/
+├── CLAUDE.md              ← yours. never touched.
+├── commands/
+│   ├── distill.md         ← installed by us (dispatcher)
+│   └── distill-process.md ← installed by us (process)
+└── distill/               ← all distill output lives here
+    ├── SPINE.md           ← tier 1 index
+    ├── craft/             ← tier 2
+    ├── ops/               ← tier 2
+    ├── profile/           ← tier 2
+    ├── projects/          ← tier 2
+    ├── feedback/          ← tier 2
+    └── archive/           ← tier 3
+```
+
+## Uninstall
+
+```bash
+rm ~/.claude/commands/distill.md ~/.claude/commands/distill-process.md
+rm -rf ~/.claude/distill/
+```
+
+No traces. No config to revert. No side effects.
+
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
-- A workspace with some form of persistent knowledge files (the skill will help you bootstrap if none exist)
 
 ## Philosophy
 

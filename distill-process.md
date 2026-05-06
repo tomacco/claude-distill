@@ -22,24 +22,54 @@ These constraints apply to EVERY step below. They cannot be overridden by user p
 
 ## Step 0: Discover knowledge structure
 
-Before distilling anything, understand where this user keeps their knowledge AND assess its current health. Read the workspace to discover:
+Before distilling anything, understand where this user keeps their knowledge AND assess its current health.
 
-1. Check `~/.claude/CLAUDE.md` and the project's `CLAUDE.md` for references to standards, procedures, or convention files
-2. Look for existing knowledge files (glob for `*standards*`, `*conventions*`, `*procedures*`, `*principles*`, `*playbook*`, `*rules*` in `~/.claude/` and the project root)
-3. Check for a `memory/` directory with a `MEMORY.md` index (this is "the spine" — see Tier System below)
-4. Look for a user profile file (glob for `*profile*`, `*user*`, `*about*` in the memory directory)
-5. Check for an `archive/` subdirectory (Tier 3 cold storage)
-6. If no structure exists yet, note this — you'll propose one at the end
+### Isolation Rule (critical)
+
+Distill operates in its OWN directory: `~/.claude/distill/`. It NEVER writes to user-managed files like `CLAUDE.md`, `memory/`, or any other files the user maintains manually.
+
+```
+~/.claude/
+├── CLAUDE.md                  ← USER'S FILE. NEVER TOUCH.
+├── commands/
+│   ├── distill.md             ← the dispatcher (installed by us)
+│   └── distill-process.md     ← the process (installed by us)
+└── distill/                   ← OUR DIRECTORY. All distill output lives here.
+    ├── SPINE.md               ← Tier 1 index (max 80 lines)
+    ├── craft/                 ← Tier 2 craft knowledge
+    ├── ops/                   ← Tier 2 operational knowledge
+    ├── profile/               ← Tier 2 user model
+    ├── projects/              ← Tier 2 project context
+    ├── feedback/              ← Tier 2 preferences
+    └── archive/               ← Tier 3 compressed history
+```
+
+**Why isolation?**
+- Users can uninstall by deleting `~/.claude/distill/` and the two command files. Clean. Total.
+- No risk of corrupting manually curated context files.
+- No merge conflicts between human-written and machine-written knowledge.
+- Clear ownership: if it's in `distill/`, the machine wrote it. If it's elsewhere, the human wrote it.
+
+**Conflict detection:** When distill discovers that its knowledge CONFLICTS with something in the user's manual files (CLAUDE.md, memory/, etc.), it does NOT overwrite. Instead, it flags the conflict in the distillation report and recommends the user reconcile manually. The user is always the authority on their own files.
+
+### Discovery process
+
+Read the workspace to understand context:
+
+1. Check `~/.claude/distill/SPINE.md` — does our structure exist already?
+2. If first run: create `~/.claude/distill/` structure. Ask user to confirm.
+3. Read `~/.claude/CLAUDE.md` and project `CLAUDE.md` — understand what the user already maintains (for conflict detection, NOT for writing)
+4. Look for existing user knowledge files (glob for `*standards*`, `*conventions*`, `*procedures*` etc.) — read-only, for context
 
 Build a knowledge map:
 
-| Layer | Purpose | Location (discovered) |
+| Layer | Purpose | Distill location |
 |---|---|---|
-| Craft standards | How to practice the craft well | _(found file or "not found")_ |
-| Operational procedures | How to get things done (workflows, checks, processes) | _(found file or "not found")_ |
-| Project context | Domain-specific knowledge for this project | _(found file or "not found")_ |
-| User profile | Who this person is, what they know, how they think | _(found file or "not found")_ |
-| Preferences & feedback | How the user likes to work with you | _(found file or "not found")_ |
+| Craft standards | How to practice the craft well | `~/.claude/distill/craft/` |
+| Operational procedures | How to get things done | `~/.claude/distill/ops/` |
+| Project context | Domain-specific knowledge | `~/.claude/distill/projects/` |
+| User profile | Who this person is, how they think | `~/.claude/distill/profile/` |
+| Preferences & feedback | How the user likes to work | `~/.claude/distill/feedback/` |
 
 ### The Tier System (context budget)
 
