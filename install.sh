@@ -16,10 +16,16 @@ echo ""
 # Ensure commands directory exists
 mkdir -p "$CMD_DIR"
 
-# Download the command
+# Download the command (dispatcher)
 curl -sL "$REPO/distill.md" -o "$CMD_DIR/distill.md"
+echo "  ✓ distill.md"
 
-echo "  ✓ Installed to $CMD_DIR/distill.md"
+# Download the full process (used by sub-agent)
+curl -sL "$REPO/distill-process.md" -o "$CMD_DIR/distill-process.md"
+echo "  ✓ distill-process.md"
+
+echo ""
+echo "  Installed to $CMD_DIR/"
 echo ""
 echo "  Usage: type /distill in any Claude Code session"
 echo ""

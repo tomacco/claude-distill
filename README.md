@@ -40,6 +40,10 @@ The goal is an **honest ally** — one that respects you enough to tell you what
 curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
 ```
 
+This installs two files:
+- `distill.md` — the dispatcher (harvests signals, spawns sub-agent)
+- `distill-process.md` — the full process (executed by the sub-agent in isolation)
+
 Then invoke it in any Claude Code session:
 
 ```
@@ -72,8 +76,10 @@ This means it works whether you're a software engineer with `coding-standards.md
 ### The distillation loop
 
 ```
-signal detected → trace to first principle → route to right layer → verify quality → anti-sycophancy check
+harvest signals (main context) → spawn agent → trace to principles → encode → verify → report back
 ```
+
+Distillation runs in a **spawned sub-agent** so your main conversation context stays intact. The dispatcher harvests all signals from the conversation (it can see the full history), packs them into a self-contained prompt, then hands off to an isolated agent that does the heavy lifting — reading files, writing knowledge, running compaction.
 
 ### Memory pressure (the sleep debt analogy)
 
