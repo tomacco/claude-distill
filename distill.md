@@ -97,24 +97,60 @@ The spine is now in your context — you can reference distilled knowledge for t
 
 ---
 
-## Version Checking
+## Version Checking & Updates
 
 On the FIRST invocation of `/distill` in a session, check for updates:
 
 1. Read `~/.claude/distill/.version` to get the installed version
-2. Fetch `https://raw.githubusercontent.com/tomacco/claude-distill/main/VERSION` to get the latest
-3. If they differ, inform the user:
+2. Check if `~/.claude/distill/feedback/preferences.md` contains an auto-update preference
+3. Fetch `https://raw.githubusercontent.com/tomacco/claude-distill/main/VERSION` to get the latest
+4. If versions match → continue silently
+5. If they differ → proceed based on user preference:
 
-> "claude-distill update available: vX.Y.Z → vA.B.C. Run the install command to update, or say 'auto-update' and I'll do it now."
+### If auto-update is OFF (default):
 
-If the user says "auto-update" (or has previously set auto-update preference):
-- Fetch and overwrite `~/.claude/commands/distill.md` and `distill-process.md` from the repo
-- Update `~/.claude/distill/.version`
-- Report what changed
+Inform the user:
 
-**Auto-update preference:** If the user says "always auto-update distill" or similar, encode this in `~/.claude/distill/feedback/preferences.md` so future sessions do it silently.
+> "claude-distill update available: vX.Y.Z → vA.B.C. Want me to update now? (You can also say 'always keep it updated' and I won't ask again.)"
 
-Only check once per session, not on every invocation.
+- If user says **yes/update** → run the update (see below)
+- If user says **no/later** → continue with current version, don't ask again this session
+- If user says **"always keep it updated"** or similar → save preference, then update
+
+### If auto-update is ON (user previously opted in):
+
+Update silently, then briefly confirm:
+
+> "claude-distill updated: vX.Y.Z → vA.B.C"
+
+### Update procedure (when accepted):
+
+```bash
+curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill.md -o ~/.claude/commands/distill.md
+curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-process.md -o ~/.claude/distill/distill-process.md
+curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-monitor.md -o ~/.claude/distill/distill-monitor.md
+echo "NEW_VERSION" > ~/.claude/distill/.version
+```
+
+After updating, inform the user what changed (fetch the commit log or just state the new version).
+
+### Auto-update preference storage:
+
+Save in `~/.claude/distill/feedback/preferences.md`:
+
+```markdown
+---
+domain: feedback
+scope: distill system preferences
+last_updated: [date]
+---
+
+## Auto-update
+- enabled: true
+- set_on: [date user said yes]
+```
+
+Only check version once per session, not on every invocation.
 
 ---
 

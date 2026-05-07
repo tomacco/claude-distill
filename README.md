@@ -111,14 +111,17 @@ The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this 
 
 ## Updates
 
-Checks for new versions once per session:
+Updates happen **inside `/distill`**, not by re-running the installer. On first invocation each session, it checks for new versions:
 
 ```
-claude-distill update available: v0.1.0 → v0.3.1
-Run the install command to update, or say 'auto-update' and I'll do it now.
+claude-distill update available: v0.3.0 → v0.3.1
+Want me to update now? (You can also say 'always keep it updated' and I won't ask again.)
 ```
 
-Or just re-run the install one-liner.
+You're always in control:
+- **"yes"** — updates now, this once
+- **"no"** — skips, won't ask again this session
+- **"always keep it updated"** — remembers your preference, updates silently from now on
 
 ## Uninstall
 
