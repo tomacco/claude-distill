@@ -225,6 +225,38 @@ The user profile is a living document that evolves. It should contain:
 
 **Validate-on-recall:** When reading any existing knowledge file during distillation (to check for duplicates or to update), validate its content against current reality. If something changed, update it now — this is the cheapest moment to correct drift. Every read is also a maintenance pass.
 
+### Step 3b: Bridge detection (knowledge that needs to reach user files)
+
+After encoding, ask for EACH learning: **"Will this knowledge be found at the moment it's needed?"**
+
+The distill directory is only read:
+- At session start (via the monitor/spine)
+- During /distill itself
+
+But some knowledge needs to be active in contexts that DON'T read distill files:
+- Agent prompts that get spawned with specific instructions
+- Project-level CLAUDE.md files that guide behavior in that repo
+- Workflow-specific moments (e.g., "before writing code, read X")
+
+**When a learning is important but UNREACHABLE from its distill location**, flag it as a **bridge candidate**.
+
+A bridge candidate means: "This knowledge lives in distill (source of truth), but a pointer/reference line should exist in the user's active workflow files so it's found at execution time."
+
+**In the distillation report, include a "Bridge suggestions" section:**
+
+```
+**Bridge suggestions:** (knowledge that needs a pointer in user files)
+- [learning] needs to be referenced in [user file] because [when it's needed, distill files aren't loaded]
+  Suggested line: `# Read ~/.claude/distill/craft/[file].md before [action]`
+```
+
+**Rules for bridges:**
+- NEVER write content to user files. Only suggest single-line pointers.
+- Always explain WHY this can't live in distill alone (the execution context doesn't see it)
+- The user decides whether to add the bridge. Present it as a suggestion in the report.
+- If the user has previously approved similar bridges, note the pattern so future suggestions are faster.
+- If the same bridge is suggested repeatedly (user didn't act on it) and frustration recurs, ESCALATE: tell the user directly that this specific knowledge gap is causing repeated friction because the bridge wasn't added.
+
 ## Step 4: Verify encoding
 
 For each learning saved, confirm:
@@ -233,6 +265,7 @@ For each learning saved, confirm:
 - [ ] Is it findable? (It's in a file that gets loaded when the topic is relevant)
 - [ ] Does it explain WHY? (So edge cases can be judged, not just blindly followed)
 - [ ] Is it universal enough? (Won't become stale when the specific project changes)
+- [ ] Is it REACHABLE? (Will it be found at the moment of execution, not just during distillation?)
 
 ### Anti-sycophancy check (mandatory)
 
@@ -280,6 +313,10 @@ it, the system captured it. Here's proof.
 
 **Flagged tensions:** (learnings where honesty and comfort diverge)
 - [If any — describe the tension and what was encoded vs. what might feel better]
+
+**Bridge suggestions:** (knowledge that needs a pointer in user files to be reachable)
+- [If any — what learning, what file needs the pointer, why distill alone isn't enough]
+  Suggested line: `[the exact line to add]`
 
 **Open questions:** (anything ambiguous that needs user input)
 ```
