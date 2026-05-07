@@ -384,6 +384,42 @@
             letter-spacing: 0.05em;
         }
 
+        /* ═══ SIGNAL SECTION ═══ */
+        .signal-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .signal-card {
+            padding: 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+        }
+
+        .signal-do {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 400;
+            color: var(--synapse);
+            margin-bottom: 0.75rem;
+        }
+
+        .signal-example {
+            font-size: 0.82rem;
+            color: var(--dim);
+            line-height: 1.7;
+            font-style: italic;
+        }
+
         /* ═══ PRESSURE SECTION ═══ */
         .pressure-section {
             padding: 4rem 2rem;
@@ -809,6 +845,7 @@
     <div class="title-group">
         <h1 class="title">claude-<span>distill</span></h1>
         <p class="tagline">every session makes all sessions better</p>
+        <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">say what matters. it's listening.</p>
     </div>
     <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
     <div class="scroll-hint" id="scroll-hint">
@@ -869,6 +906,33 @@
         </div>
     </div>
     <p class="value-note reveal">Global knowledge. Any project, any session, any Claude Code workspace on your machine. Runs in an isolated sub-agent &mdash; your main context stays untouched.</p>
+</div>
+
+<div class="signal-section">
+    <div class="section-label reveal">How to use it well</div>
+    <h2 class="section-heading reveal">It captures what you express</h2>
+    <p class="section-desc reveal" style="max-width: 650px;">
+        Distill can only learn from what's in the conversation. The more intentional you are about expressing what matters, the sharper Claude becomes.
+    </p>
+
+    <div class="signal-grid reveal">
+        <div class="signal-card">
+            <div class="signal-do">Say what matters</div>
+            <div class="signal-example">"Use newspaper style — public methods first, private at the bottom. This is non-negotiable for me."</div>
+        </div>
+        <div class="signal-card">
+            <div class="signal-do">Express frustration</div>
+            <div class="signal-example">"I already told you this. It's important — don't use mocks in integration tests."</div>
+        </div>
+        <div class="signal-card">
+            <div class="signal-do">Correct with authority</div>
+            <div class="signal-example">"No. The deploy always goes through staging first. Always."</div>
+        </div>
+    </div>
+
+    <p class="section-desc reveal" style="max-width: 650px; margin-top: 2rem;">
+        <strong style="color: var(--bright);">When you repeat a frustration, the system treats it as a critical failure in itself</strong> &mdash; it elevates priority, strengthens the encoding, and ensures it's harder to miss next time. You shouldn't have to say things twice. When you do, distill notices.
+    </p>
 </div>
 
 <div class="pressure-section">

@@ -154,6 +154,20 @@ When frustration is detected, investigate its source honestly:
 - Was it caused by the USER's own gap? (missing knowledge, skipped step, premature optimization) → Encode as a growth opportunity — name it directly but respectfully
 - Was it caused by a MISMATCH between user and agent? (different mental models, communication style clash) → Encode as calibration data for both sides
 
+### Step 1c: Frustration escalation (high-priority reprocessing)
+
+When frustration is HIGH (user explicitly said something was important, repeated a correction, or expressed disappointment that a prior instruction wasn't followed), this triggers **priority elevation**:
+
+1. **Identify the violated expectation** — what did the user expect that didn't happen?
+2. **Check if it's already encoded** — is this in the knowledge files but being ignored? If so, the problem is FINDABILITY or PRIORITY, not capture.
+3. **Elevate priority** — move this learning HIGHER in its file (top of the relevant section), add a `[HIGH]` marker, and ensure the spine pointer mentions it explicitly.
+4. **Strengthen the encoding** — make the instruction more direct, more specific, harder to miss. If it was soft ("consider using newspaper style") make it hard ("ALWAYS use newspaper style for method ordering").
+5. **Cross-reference** — if the frustration relates to a craft standard, also add it to the user profile as "non-negotiable preference" so it's loaded from TWO angles.
+
+The principle: **repeated frustration about the same thing means the system failed to listen the first time.** The fix is never "encode it again the same way." The fix is "encode it louder, in more places, with stronger language."
+
+**Core human need:** People need to feel heard. When a user expresses something important and it doesn't stick, that's a betrayal of trust. The distillation system must treat repeated frustrations as CRITICAL bugs in itself — not as user nagging.
+
 ## Step 2: Trace to first principles
 
 For each signal, ask "why" until you reach a universal truth. Examples across domains:
@@ -245,6 +259,14 @@ Summarize what was distilled:
 | # | Learning (principle) | Destination | New/Updated |
 |---|---|---|---|
 | 1 | ... | ... | ... |
+
+**I heard you on:** (reassurance section — ALWAYS include)
+- [List the things the user expressed as important, frustrating, or non-negotiable]
+- [For each, explain what concrete action was taken to ensure it sticks]
+- [If something was elevated/strengthened, say so explicitly]
+
+This section exists because being understood is not optional. If you expressed
+it, the system captured it. Here's proof.
 
 **User model evolution:**
 - [What changed in the understanding of who this user is]

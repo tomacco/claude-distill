@@ -132,11 +132,25 @@ Clean. Total. No traces.
 
 ---
 
+## Say what matters. It's listening.
+
+Distill captures what you express. The more intentional you are, the sharper Claude becomes:
+
+- **Say what's important** — "Use newspaper style. Non-negotiable."
+- **Express frustration** — "I told you this already. Don't mock the database."
+- **Correct with authority** — "No. Always go through staging. Always."
+
+When you repeat a frustration, the system treats it as a critical failure in itself — it elevates priority, strengthens the encoding, and cross-references it so it's harder to miss next time.
+
+**You shouldn't have to say things twice.** When you do, distill notices.
+
+---
+
 ## Philosophy
 
-**Struggling is a signal, not a virtue.** When something was hard, that's information worth capturing.
+**Being understood is a core human need.** Distill exists because your AI should feel like a colleague who remembers — not a stranger you brief from scratch.
 
-**Your AI should know you better over time.** Not to flatter — to collaborate. A good colleague remembers how you think.
+**Struggling is a signal, not a virtue.** When something was hard, that's information worth capturing.
 
 **Honesty compounds.** What's true today makes you excellent tomorrow. What's comfortable today costs you tomorrow.
 
