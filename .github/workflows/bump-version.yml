@@ -1,0 +1,55 @@
+name: Auto-bump version
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'VERSION'
+      - 'install.sh'
+      - 'docs/header.svg'
+      - 'README.md'
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    # Don't run on version bump commits (prevent infinite loop)
+    if: "!contains(github.event.head_commit.message, '[version-bump]')"
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump patch version
+        run: |
+          current=$(cat VERSION | tr -d '[:space:]')
+          IFS='.' read -r major minor patch <<< "$current"
+          new_patch=$((patch + 1))
+          new_version="${major}.${minor}.${new_patch}"
+
+          echo "Bumping $current → $new_version"
+
+          # Update VERSION file
+          echo "$new_version" > VERSION
+
+          # Update install.sh
+          sed -i "s/VERSION=\"$current\"/VERSION=\"$new_version\"/" install.sh
+
+          # Update header.svg
+          sed -i "s/v$current/v$new_version/g" docs/header.svg
+
+          # Update README.md
+          sed -i "s/v$current/v$new_version/g" README.md
+
+          echo "new_version=$new_version" >> $GITHUB_ENV
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add VERSION install.sh docs/header.svg README.md
+          git commit -m "Bump version to v${new_version} [version-bump]" || echo "No changes to commit"
+          git push

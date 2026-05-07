@@ -114,7 +114,7 @@ The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this 
 Checks for new versions once per session:
 
 ```
-claude-distill update available: v0.1.0 → v0.2.0
+claude-distill update available: v0.1.0 → v0.3.0
 Run the install command to update, or say 'auto-update' and I'll do it now.
 ```
 
@@ -157,5 +157,5 @@ When you repeat a frustration, the system treats it as a critical failure in its
 ---
 
 <p align="center">
-  <sub>v0.2.0 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
+  <sub>v0.3.0 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
 </p>

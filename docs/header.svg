@@ -98,5 +98,5 @@
   <text x="400" y="158" font-family="monospace" font-size="11" fill="#6a6a9a" text-anchor="middle">say what matters. it's listening.</text>
 
   <!-- Version -->
-  <text x="400" y="180" font-family="monospace" font-size="10" fill="#4a4a6a" text-anchor="middle">v0.2.0</text>
+  <text x="400" y="180" font-family="monospace" font-size="10" fill="#4a4a6a" text-anchor="middle">v0.3.0</text>
 </svg>
