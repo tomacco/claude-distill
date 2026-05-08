@@ -13,14 +13,14 @@ CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 DISTILL_LINE="# Distill — read ~/.claude/distill/distill-monitor.md and follow its instructions"
 
 # ═══ COLORS & FORMATTING ═══
-CYAN=$'\033[0;36m'
-PURPLE=$'\033[0;35m'
-GREEN=$'\033[0;32m'
-DIM=$'\033[2m'
-BOLD=$'\033[1m'
-RESET=$'\033[0m'
-RED=$'\033[0;31m'
-YELLOW=$'\033[0;33m'
+CYAN=$(printf '\033[0;36m')
+PURPLE=$(printf '\033[0;35m')
+GREEN=$(printf '\033[0;32m')
+DIM=$(printf '\033[2m')
+BOLD=$(printf '\033[1m')
+RESET=$(printf '\033[0m')
+RED=$(printf '\033[0;31m')
+YELLOW=$(printf '\033[0;33m')
 
 # ═══ ANIMATION HELPERS ═══
 
@@ -97,22 +97,6 @@ show_section() {
   echo ""
 }
 
-# ═══ PROGRESS BAR ═══
-
-progress_bar() {
-  local current=$1
-  local total=$2
-  local width=30
-  local pct=$((current * 100 / total))
-  local filled=$((current * width / total))
-  local empty=$((width - filled))
-  local fill_str="" empty_str=""
-
-  for ((j=0; j<filled; j++)); do fill_str+="█"; done
-  for ((j=0; j<empty; j++)); do empty_str+="░"; done
-
-  printf "\r  ${DIM}[${RESET}${CYAN}%s${RESET}${DIM}%s] %d%%${RESET}" "$fill_str" "$empty_str" "$pct"
-}
 
 # ═══ MAIN INSTALLATION ═══
 
@@ -126,8 +110,6 @@ if [ -f "$DISTILL_DIR/.version" ]; then
     echo ""
 fi
 
-TOTAL_STEPS=7
-STEP=0
 
 show_section "Core files"
 
@@ -136,15 +118,15 @@ mkdir -p "$CMD_DIR"
 mkdir -p "$DISTILL_DIR"/{craft,ops,profile,projects,feedback,archive}
 
 # Download core files
-STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+
 curl -sL "$REPO/distill.md" -o "$CMD_DIR/distill.md"
 done_msg "distill.md ${DIM}(command)${RESET}"
 
-STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+
 curl -sL "$REPO/distill-process.md" -o "$DISTILL_DIR/distill-process.md"
 done_msg "distill-process.md ${DIM}(process engine)${RESET}"
 
-STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+
 curl -sL "$REPO/distill-monitor.md" -o "$DISTILL_DIR/distill-monitor.md"
 done_msg "distill-monitor.md ${DIM}(session monitor)${RESET}"
 
@@ -179,7 +161,7 @@ else
     else
         # Download server
         mkdir -p "$SERVER_DIR/src"
-        STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+        
         curl -sL "$REPO/server/package.json" -o "$SERVER_DIR/package.json"
         curl -sL "$REPO/server/tsconfig.json" -o "$SERVER_DIR/tsconfig.json"
         curl -sL "$REPO/server/src/index.ts" -o "$SERVER_DIR/src/index.ts"
@@ -188,13 +170,13 @@ else
         done_msg "Server source downloaded"
 
         # Install deps (with spinner)
-        STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+        
         (cd "$SERVER_DIR" && npm install --registry https://registry.npmjs.org --silent 2>/dev/null) &
         spinner $! "Installing dependencies..."
         done_msg "Dependencies installed"
 
         # Build (with spinner)
-        STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+        
         (cd "$SERVER_DIR" && npx tsc 2>/dev/null) &
         spinner $! "Building server..."
         done_msg "Server built"
@@ -217,7 +199,7 @@ fi
 
 show_section "Session integration"
 
-STEP=$((STEP + 1)); progress_bar $STEP $TOTAL_STEPS
+
 
 if [ -f "$CLAUDE_MD" ]; then
     if grep -q "distill-monitor.md" "$CLAUDE_MD" 2>/dev/null; then
@@ -279,7 +261,6 @@ fi
 
 # ═══ COMPLETE ═══
 
-progress_bar $TOTAL_STEPS $TOTAL_STEPS
 echo ""
 echo ""
 printf "  ${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"
