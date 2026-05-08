@@ -13,14 +13,14 @@ CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 DISTILL_LINE="# Distill — read ~/.claude/distill/distill-monitor.md and follow its instructions"
 
 # ═══ COLORS & FORMATTING ═══
-CYAN='\033[0;36m'
-PURPLE='\033[0;35m'
-GREEN='\033[0;32m'
-DIM='\033[2m'
-BOLD='\033[1m'
-RESET='\033[0m'
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
+CYAN=$'\033[0;36m'
+PURPLE=$'\033[0;35m'
+GREEN=$'\033[0;32m'
+DIM=$'\033[2m'
+BOLD=$'\033[1m'
+RESET=$'\033[0m'
+RED=$'\033[0;31m'
+YELLOW=$'\033[0;33m'
 
 # ═══ ANIMATION HELPERS ═══
 
@@ -29,35 +29,37 @@ spinner() {
   local msg=$2
   local frames=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
   local i=0
+  tput civis 2>/dev/null  # hide cursor
   while kill -0 "$pid" 2>/dev/null; do
-    printf "\r  ${CYAN}${frames[$i]}${RESET} ${DIM}%s${RESET}" "$msg"
+    printf "\r  %s %s   " "${frames[$i]}" "$msg"
     i=$(( (i + 1) % ${#frames[@]} ))
     sleep 0.1
   done
   wait "$pid"
   local exit_code=$?
-  printf "\r"
+  printf "\r                                                              \r"
+  tput cnorm 2>/dev/null  # show cursor
   return $exit_code
 }
 
 done_msg() {
-  printf "  ${GREEN}✓${RESET} %s\n" "$1"
+  echo "  ${GREEN}✓${RESET} $1"
 }
 
 skip_msg() {
-  printf "  ${DIM}·${RESET} %s\n" "$1"
+  echo "  ${DIM}·${RESET} $1"
 }
 
 warn_msg() {
-  printf "  ${YELLOW}⚠${RESET} %s\n" "$1"
+  echo "  ${YELLOW}⚠${RESET} $1"
 }
 
 fail_msg() {
-  printf "  ${RED}✗${RESET} %s\n" "$1"
+  echo "  ${RED}✗${RESET} $1"
 }
 
 info_msg() {
-  printf "  ${CYAN}ℹ${RESET} %s\n" "$1"
+  echo "  ${CYAN}ℹ${RESET} $1"
 }
 
 # ═══ HEADER ANIMATION ═══
@@ -104,11 +106,12 @@ progress_bar() {
   local pct=$((current * 100 / total))
   local filled=$((current * width / total))
   local empty=$((width - filled))
+  local fill_str="" empty_str=""
 
-  printf "\r  ${DIM}[${RESET}"
-  printf "${CYAN}%0.s█${RESET}" $(seq 1 $filled 2>/dev/null) || true
-  printf "${DIM}%0.s░${RESET}" $(seq 1 $empty 2>/dev/null) || true
-  printf "${DIM}]${RESET} ${DIM}%d%%${RESET}" "$pct"
+  for ((j=0; j<filled; j++)); do fill_str+="█"; done
+  for ((j=0; j<empty; j++)); do empty_str+="░"; done
+
+  printf "\r  ${DIM}[${RESET}${CYAN}%s${RESET}${DIM}%s] %d%%${RESET}" "$fill_str" "$empty_str" "$pct"
 }
 
 # ═══ MAIN INSTALLATION ═══
