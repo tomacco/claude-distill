@@ -36,6 +36,8 @@ Living document of the mechanisms in claude-distill, their current state, and im
 | Mechanism | Status | How it works | Known gaps |
 |-----------|--------|--------------|------------|
 | User profile | v0.1.0 | Expertise/communication/thinking in profile/ | Only updated during distill, not real-time |
+| Trust topology | v0.3.4 | Maps what user delegates/retains/verifies and WHY | Requires multiple sessions to build accurate picture |
+| Dissonance detection | v0.3.4 | Compares delegation behavior to stated principles | Only flags — never assumes wrong, asks for clarification |
 | Frustration escalation | v0.3.0 | Repeated frustration → elevate + strengthen + cross-ref | No quantitative tracking of "times frustrated about X" |
 | Reassurance output | v0.3.0 | "I heard you on:" section in report | Only in report — no in-session reassurance |
 | Pressure monitoring | v0.2.0 | Monitor tracks score, suggests at 7+ | Heuristic, not measured — no persistence between sessions |
@@ -45,6 +47,9 @@ Living document of the mechanisms in claude-distill, their current state, and im
 - [ ] Frustration frequency tracking (count per topic, not just boolean)
 - [ ] In-session micro-reassurance ("noted, I'll remember this")
 - [ ] User model versioning (track how understanding evolves over time)
+- [ ] Trust topology trend tracking (how delegation boundaries shift over time)
+- [ ] Proactive trust calibration ("you've been delegating X more — should I treat it as trusted territory now?")
+- [ ] Dissonance resolution history (track what was flagged, what user said, how it resolved)
 
 ## Version & Distribution
 

@@ -159,6 +159,31 @@ In addition to craft/process learnings, scan for signals about who the user is:
 - How does the user make decisions? (data-driven, intuition, consensus, authority?)
 - What does the user optimize for? (speed, quality, learning, shipping?)
 
+**Delegation & trust signals:**
+Observe what the user delegates vs. retains, and why:
+
+- What tasks does the user hand off without checking? (high trust areas)
+- What tasks does the user check thoroughly or redo? (low trust / high stakes)
+- What does the user ask for verification on before approving? (trust but verify)
+- What does the user gatekeep entirely? (non-delegatable for them)
+
+For each pattern, try to understand the UNDERLYING REASON:
+- "I trust Claude with X" — is it because Claude is demonstrably good at it? Because the stakes are low? Because the user lacks interest?
+- "I always check Y" — is it because they MUST understand it (signing off code)? Because Claude fails at it? Because they enjoy it? Because compliance requires it?
+- "I never delegate Z" — is it reputation risk (public comms)? Legal accountability? Personal growth they don't want to outsource? Company policy?
+
+**Do NOT assume the reason.** If unclear, flag it as an open question in the report. The same behavior (e.g., not reviewing code) could mean "my company has decided AI-first is fine" OR "I'm being lazy and this will bite me." Only the user's stated principles resolve this.
+
+**Dissonance detection:**
+Once you understand BOTH the delegation pattern AND the user's core principles, watch for misalignment:
+- User says "I must deeply understand all code I ship" but delegates without reading → flag gently
+- User says "quality is non-negotiable" but skips verification steps → flag gently
+- User delegates public communication but says "I gatekeep what's said publicly" → flag
+
+When flagging dissonance, NEVER assume it's wrong. Present it as: "I noticed [behavior] which seems to differ from [stated principle]. Is this intentional? If so, I'll update my understanding."
+
+The user might have evolved their principles, or there might be context you're missing (team policy, time pressure they've accepted, conscious risk-taking). Understand first, then encode.
+
 **Frustration analysis (apply Integrity Principle #4):**
 When frustration is detected, investigate its source honestly:
 - Was it caused by YOUR failure? (wrong assumption, slow response, missed context) → Encode as process improvement
@@ -216,6 +241,12 @@ The user profile is a living document that evolves. It should contain:
 
 ## Thinking Patterns
 - [how they reason, what they optimize for, how they handle uncertainty]
+
+## Trust Topology
+- Delegates freely: [tasks they hand off without checking — and why]
+- Verifies before approving: [tasks they check — and why]
+- Retains completely: [tasks they never delegate — and why]
+- Core principles governing delegation: [stated reasons for their boundaries]
 
 ## Growth Edges
 - [areas where they're actively developing — NOT weaknesses to exploit]
@@ -316,6 +347,11 @@ it, the system captured it. Here's proof.
 **User model evolution:**
 - [What changed in the understanding of who this user is]
 - [Any new expertise, communication patterns, or growth edges observed]
+- [Any trust topology changes — new delegations, new retentions, boundary shifts]
+
+**Dissonance check:** (behavior vs. stated principles)
+- [If any — describe the observed pattern, the principle it may conflict with, and ask for clarification]
+- [If none observed — "No dissonance detected"]
 
 **Knowledge structure used:**
 - Craft: [path or "none — consider creating one"]
