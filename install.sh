@@ -5,6 +5,7 @@
 set -e
 
 VERSION="0.4.0"
+BUILD="20260508-6"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/feat/mcp-server"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
@@ -84,7 +85,7 @@ show_header() {
   printf "  ${DIM}every session makes all sessions better${RESET}\n"
   printf "  ${DIM}say what matters. it's listening.${RESET}\n"
   echo ""
-  printf "  ${DIM}v${VERSION}${RESET}\n"
+  printf "  ${DIM}v${VERSION} (build ${BUILD})${RESET}\n"
   echo ""
 }
 
