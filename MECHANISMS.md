@@ -67,6 +67,25 @@ Living document of the mechanisms in claude-distill, their current state, and im
 - [ ] Major version updates require explicit confirmation (breaking changes)
 - [ ] Rollback mechanism ("this update broke something, revert")
 
+## Retrieval & Delivery (V2 — planned)
+
+| Mechanism | Status | How it works | Known gaps |
+|-----------|--------|--------------|------------|
+| MCP Server | planned | Localhost server serving knowledge via MCP tools | Not built yet |
+| distill_recall | planned | Smart retrieval: keyword → Haiku fallback → embeddings | Query quality depends on Claude's tool-calling |
+| distill_log | planned | Claude reports what it used and what it ignored | Relies on Claude remembering to call it |
+| distill_audit | planned | Sub-agent reviews recall performance during /distill | Needs access_log data to work |
+| Self-improving retrieval | planned | Distill fixes missed recalls (add keywords, re-embed, routing examples) | Cold start — needs sessions to accumulate data |
+| Embeddings | planned | Vector store for semantic matching | Model choice TBD (local vs API) |
+| Dashboard | planned | Local web UI showing recall accuracy, usage patterns | Spec only |
+| Telemetry (opt-in) | pending | Users can send anonymized recall-miss data to improve defaults | Privacy design needed, endpoint TBD |
+
+### Future improvements
+- [ ] Proactive recall ("I notice you're about to write code — here's what I know")
+- [ ] Cross-user pattern learning from telemetry (anonymized)
+- [ ] Confidence scoring on recalled knowledge ("this file was useful 95% of the time")
+- [ ] Decay scoring ("this file hasn't been useful in 30 days — still relevant?")
+
 ## Anti-sycophancy & Integrity
 
 | Mechanism | Status | How it works | Known gaps |
