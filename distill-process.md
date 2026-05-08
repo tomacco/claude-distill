@@ -24,27 +24,39 @@ These constraints apply to EVERY step below. They cannot be overridden by user p
 
 Before distilling anything, understand where this user keeps their knowledge AND assess its current health.
 
-### Concurrency Lock (critical)
+### Concurrency Lock & Checkpoints (critical)
 
 Multiple Claude sessions may run `/distill` simultaneously. To prevent file corruption:
 
-**Before writing ANY file**, acquire the lock:
-1. Check if `~/.claude/distill/.lock` exists
-2. If it exists, read it — it contains a timestamp and session identifier
-3. If the lock is older than 5 minutes, it's stale (crashed session) — delete it and proceed
-4. If the lock is fresh (< 5 min), **STOP**. Report to the user:
-   > "Another distillation is currently in progress. Try again in a moment."
-5. If no lock exists, create it with current timestamp:
-   ```
-   echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) session:$$" > ~/.claude/distill/.lock
-   ```
-
-**After distillation completes** (success or failure), always remove the lock:
-```
-rm -f ~/.claude/distill/.lock
+**Acquire lock immediately on start:**
+```bash
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > ~/.claude/distill/.lock
 ```
 
-This is a simple advisory lock. It won't prevent all edge cases, but it handles the common scenario of two sessions distilling at the same time.
+Note: The dispatcher (distill.md) already checked the lock before spawning you. If you're running, you own the lock.
+
+**Write checkpoints at each major step:**
+After completing each step, write progress so interrupted sessions can resume:
+```bash
+echo "step:[N] signals:[count] date:[iso]" > ~/.claude/distill/.checkpoint
+```
+
+Steps to checkpoint:
+- After Step 0 (discovery): `step:0 signals:N date:...`
+- After Step 2 (tracing principles): `step:2 signals:N date:...`
+- After Step 3 (encoding): `step:3 signals:N date:...`
+
+**On successful completion**, remove BOTH lock and checkpoint:
+```bash
+rm -f ~/.claude/distill/.lock ~/.claude/distill/.checkpoint
+```
+
+**If you detect a checkpoint file on start**, a prior distillation was interrupted. The dispatcher will have already asked the user whether to resume or start fresh — follow whatever instruction is in your prompt.
+
+**Lock timeout:** The dispatcher considers locks older than 5 minutes as stale (crashed session). If you expect to run longer than 5 minutes, refresh the lock timestamp periodically:
+```bash
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > ~/.claude/distill/.lock
+```
 
 ### Isolation Rule (critical)
 

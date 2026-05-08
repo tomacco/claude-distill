@@ -4,6 +4,30 @@
 
 ## What you MUST do (exactly in this order)
 
+### Step 0: Pre-flight checks
+
+Before doing ANYTHING else, run these checks:
+
+**Lock check:**
+1. Check if `~/.claude/distill/.lock` exists (use Bash: `cat ~/.claude/distill/.lock 2>/dev/null`)
+2. If it exists and is **less than 5 minutes old** → another distillation is in progress. Tell the user:
+   > "Another distillation is currently running (started at [timestamp]). I can harvest signals now and wait for it to finish, or you can try again later. What do you prefer?"
+   - If user says wait/queue: proceed with signal harvest (Step 1), then poll the lock file every 30 seconds before spawning. Once it's gone, spawn the sub-agent.
+   - If user says later: stop, don't distill.
+3. If it exists and is **older than 5 minutes** → stale lock from a crashed session. Check for a checkpoint file (see below). Delete the stale lock and proceed.
+4. If it doesn't exist → proceed normally.
+
+**Checkpoint recovery:**
+If `~/.claude/distill/.checkpoint` exists, a prior distillation was interrupted. Read it — it contains which step was reached and what signals were already harvested. Tell the user:
+> "A previous distillation was interrupted at [step]. It had harvested N signals. Want me to resume from where it left off, or start fresh?"
+- Resume: skip harvest, use the checkpoint data, spawn sub-agent with it.
+- Fresh: delete checkpoint, proceed with new harvest.
+
+**Version check (once per session):**
+If this is the first `/distill` invocation this session, run the version check (see Version Checking section below).
+
+---
+
 ### Step 1: Harvest signals from THIS conversation
 
 You are in the main context right now. You CAN see the full conversation history. The sub-agent CANNOT. Therefore you must extract everything relevant NOW, before spawning.
