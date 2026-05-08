@@ -241,7 +241,21 @@ fi
 
 show_section "Session integration"
 
-
+# Disable auto-memory (distill owns knowledge management)
+SETTINGS_JSON="$HOME/.claude/settings.json"
+if [ -f "$SETTINGS_JSON" ]; then
+    if grep -q '"autoMemoryEnabled"' "$SETTINGS_JSON" 2>/dev/null; then
+        skip_msg "Auto-memory already configured in settings.json"
+    else
+        # Add autoMemoryEnabled: false after the opening brace
+        sed -i.bak 's/^{$/{\n  "autoMemoryEnabled": false,/' "$SETTINGS_JSON"
+        rm -f "$SETTINGS_JSON.bak"
+        done_msg "Disabled auto-memory ${DIM}(distill owns knowledge)${RESET}"
+    fi
+else
+    echo '{ "autoMemoryEnabled": false }' > "$SETTINGS_JSON"
+    done_msg "Created settings.json with auto-memory disabled"
+fi
 
 if [ -f "$CLAUDE_MD" ]; then
     if grep -q "distill-monitor.md" "$CLAUDE_MD" 2>/dev/null; then
