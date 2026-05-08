@@ -5,7 +5,7 @@
 set -e
 
 VERSION="0.4.0"
-REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
+REPO="https://raw.githubusercontent.com/tomacco/claude-distill/feat/mcp-server"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
 SERVER_DIR="$DISTILL_DIR/server"
@@ -67,28 +67,25 @@ info_msg() {
 show_header() {
   clear
   echo ""
-  printf "${PURPLE}"
-  cat << 'BANNER'
-        ╭─────────────────────────────────────────╮
-        │                                         │
-        │      ░█▀▀░█░░░█▀█░█░█░█▀▄░█▀▀          │
-        │      ░█░░░█░░░█▀█░█░█░█░█░█▀▀          │
-        │      ░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀░░▀▀▀          │
-        │                                         │
-        │      ░█▀▄░▀█▀░█▀▀░▀█▀░▀█▀░█░░░█░░      │
-        │      ░█░█░░█░░▀▀█░░█░░░█░░█░░░█░░      │
-        │      ░▀▀░░▀▀▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀      │
-        │                                         │
-        ╰─────────────────────────────────────────╯
-BANNER
+  echo ""
+  printf "  ${PURPLE}${BOLD}"
+  echo "         ___  _     _   _  _  ___  ___"
+  echo "        / __|| |   /_\ | || ||   \| __|"
+  echo "       | (__ | |_ / _ \| || || |) | _| "
+  echo "        \___||___/_/ \_\\\__/ |___/|___|"
+  echo ""
+  echo "        ___  ___  ___  _____  ___  _     _    "
+  echo "       |   \|_ _|/ __||_   _||_ _|| |   | |   "
+  echo "       | |) || | \__ \  | |   | | | |__ | |__ "
+  echo "       |___/|___||___/  |_|  |___||____||____|"
   printf "${RESET}"
   echo ""
-  printf "       ${DIM}every session makes all sessions better${RESET}\n"
-  printf "       ${DIM}say what matters. it's listening.${RESET}\n"
   echo ""
-  printf "       ${DIM}v${VERSION}${RESET}\n"
+  printf "  ${DIM}every session makes all sessions better${RESET}\n"
+  printf "  ${DIM}say what matters. it's listening.${RESET}\n"
   echo ""
-  sleep 0.5
+  printf "  ${DIM}v${VERSION}${RESET}\n"
+  echo ""
 }
 
 show_section() {
@@ -170,27 +167,41 @@ else
         done_msg "Server source downloaded"
 
         # Install deps (with spinner)
-        
-        (cd "$SERVER_DIR" && npm install --registry https://registry.npmjs.org --silent 2>/dev/null) &
+        (cd "$SERVER_DIR" && npm install --registry https://registry.npmjs.org --silent 2>&1 > /dev/null) &
         spinner $! "Installing dependencies..."
-        done_msg "Dependencies installed"
+        if [ $? -eq 0 ]; then
+            done_msg "Dependencies installed"
+        else
+            fail_msg "npm install failed"
+            warn_msg "MCP server won't be available (fallback mode active)"
+            MCP_INSTALLED=false
+        fi
 
         # Build (with spinner)
-        
-        (cd "$SERVER_DIR" && npx tsc 2>/dev/null) &
-        spinner $! "Building server..."
-        done_msg "Server built"
+        if [ "$MCP_INSTALLED" != "false" ]; then
+            (cd "$SERVER_DIR" && npx tsc 2>&1 > /dev/null) &
+            spinner $! "Building server..."
+            if [ $? -eq 0 ]; then
+                done_msg "Server built"
+            else
+                fail_msg "Build failed"
+                warn_msg "MCP server won't be available (fallback mode active)"
+                MCP_INSTALLED=false
+            fi
+        fi
 
-        # Register MCP
-        if command -v claude &> /dev/null; then
-            claude mcp remove distill 2>/dev/null || true
-            claude mcp add --scope user --transport stdio distill -- node "$SERVER_DIR/dist/index.js" 2>/dev/null
-            done_msg "Registered globally ${DIM}(user scope)${RESET}"
-            MCP_INSTALLED=true
-        else
-            warn_msg "'claude' CLI not in PATH — server built but not registered"
-            info_msg "Run: claude mcp add --scope user --transport stdio distill -- node $SERVER_DIR/dist/index.js"
-            MCP_INSTALLED=true
+        # Register MCP (only if build succeeded)
+        if [ "$MCP_INSTALLED" != "false" ]; then
+            if command -v claude &> /dev/null; then
+                claude mcp remove distill 2>/dev/null || true
+                claude mcp add --scope user --transport stdio distill -- node "$SERVER_DIR/dist/index.js" 2>/dev/null
+                done_msg "Registered globally ${DIM}(user scope)${RESET}"
+                MCP_INSTALLED=true
+            else
+                warn_msg "'claude' CLI not in PATH — server built but not registered"
+                info_msg "Run: claude mcp add --scope user --transport stdio distill -- node $SERVER_DIR/dist/index.js"
+                MCP_INSTALLED=true
+            fi
         fi
     fi
 fi
