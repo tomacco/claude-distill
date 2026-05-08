@@ -2,6 +2,20 @@
 
 This file is loaded at the start of every Claude Code session. It is intentionally small to minimize context cost.
 
+## Knowledge ownership (critical)
+
+**Distill owns ALL persistent knowledge management.** Do NOT use Claude Code's built-in auto-memory system (`memory/` files, `MEMORY.md`) for learnings, corrections, preferences, or user model observations.
+
+When you detect something worth remembering (a correction, a preference, a frustration, a learning):
+- Do NOT write it to `memory/` files
+- Do NOT create feedback/user/project memory files via the built-in system
+- Instead: **note it mentally as a signal for the next `/distill` run** (this increases memory pressure)
+- If it's urgent and the user explicitly says "remember this": tell them `/distill` will capture it properly, or offer to run it now
+
+**Why:** Distill has anti-sycophancy checks, frustration escalation, tiered storage, compaction, and observability. The built-in memory system has none of these. Bypassing distill means bypassing quality control.
+
+**Exception:** If distill is NOT installed (no `distill_recall` tool available AND no `~/.claude/distill/` directory exists), fall back to the built-in memory system normally.
+
 ## What to do at session start
 
 1. **Check if `distill_recall` tool is available** (MCP server running).
