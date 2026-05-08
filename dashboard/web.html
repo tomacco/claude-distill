@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>distill dashboard</title>
+    <style>
+        :root {
+            --bg: #05050a;
+            --surface: #0f0f1a;
+            --border: #1a1a2e;
+            --dim: #8080b0;
+            --text: #d0d0e8;
+            --bright: #f0f0ff;
+            --synapse: #00f5d4;
+            --cortex: #9b5ff7;
+            --dendrite: #f72585;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1rem;
+            color: var(--synapse);
+            font-weight: 500;
+        }
+
+        .header .status {
+            font-size: 0.7rem;
+            color: var(--dim);
+        }
+
+        .header .live-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--synapse);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.2rem;
+        }
+
+        .panel-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--dim);
+            margin-bottom: 1rem;
+        }
+
+        .panel.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Live feed */
+        .feed {
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+        }
+
+        .feed-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+            align-items: baseline;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feed-time {
+            color: var(--dim);
+            font-size: 0.65rem;
+            min-width: 45px;
+        }
+
+        .feed-type {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .feed-type.code { background: rgba(0, 245, 212, 0.1); color: var(--synapse); }
+        .feed-type.architecture { background: rgba(155, 95, 247, 0.1); color: var(--cortex); }
+        .feed-type.review { background: rgba(247, 37, 133, 0.1); color: var(--dendrite); }
+        .feed-type.general { background: rgba(128, 128, 176, 0.1); color: var(--dim); }
+        .feed-type.process { background: rgba(58, 134, 255, 0.1); color: #3a86ff; }
+
+        .feed-query { color: var(--text); flex: 1; }
+        .feed-confidence { color: var(--dim); font-size: 0.65rem; }
+
+        /* Stats */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+        }
+
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--dim); }
+        .stat-value { color: var(--bright); font-weight: 500; }
+        .stat-value.good { color: var(--synapse); }
+        .stat-value.warn { color: #f7b731; }
+
+        /* Knowledge bars */
+        .knowledge-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .knowledge-label {
+            font-size: 0.7rem;
+            color: var(--dim);
+            margin-bottom: 0.3rem;
+        }
+
+        .knowledge-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .knowledge-fill {
+            height: 100%;
+            background: var(--synapse);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        /* Decisions */
+        .decision-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+        }
+
+        .decision-item:last-child { border-bottom: none; }
+
+        .decision-text { color: var(--text); }
+        .decision-file { color: var(--cortex); font-size: 0.65rem; margin-top: 0.2rem; }
+
+        /* Empty state */
+        .empty {
+            color: var(--dim);
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>distill dashboard</h1>
+    <span class="status"><span class="live-dot"></span>polling every 3s</span>
+</div>
+
+<div class="grid">
+    <div class="panel">
+        <div class="panel-title">session stats</div>
+        <div id="stats">
+            <div class="empty">waiting for data...</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">knowledge usage</div>
+        <div id="knowledge">
+            <div class="empty">no recalls yet</div>
+        </div>
+    </div>
+
+    <div class="panel full-width">
+        <div class="panel-title">live recall feed</div>
+        <div id="feed" class="feed">
+            <div class="empty">recalls will appear here in real-time</div>
+        </div>
+    </div>
+
+    <div class="panel full-width">
+        <div class="panel-title">decisions (what claude did with the knowledge)</div>
+        <div id="decisions">
+            <div class="empty">no decisions logged yet</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// This dashboard reads from the MCP server's status endpoint
+// For now, it polls a local JSON file that the server writes
+// In production, this would be SSE or WebSocket from the server
+
+const DB_POLL_URL = 'http://localhost:3456/api/dashboard';
+let lastRecallCount = 0;
+
+async function fetchData() {
+    try {
+        const res = await fetch(DB_POLL_URL);
+        if (!res.ok) throw new Error('Server not running');
+        return await res.json();
+    } catch (e) {
+        // Fallback: try reading from a static JSON file
+        return null;
+    }
+}
+
+function renderStats(data) {
+    if (!data || !data.session) return;
+    const s = data.session;
+    const accuracy = s.recalls_fired > 0
+        ? Math.round(s.recalls_useful * 100 / s.recalls_fired) + '%'
+        : '-';
+
+    document.getElementById('stats').innerHTML = `
+        <div class="stat-row">
+            <span class="stat-label">recalls fired</span>
+            <span class="stat-value">${s.recalls_fired}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">recalls useful</span>
+            <span class="stat-value good">${s.recalls_useful}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">accuracy</span>
+            <span class="stat-value ${parseInt(accuracy) >= 70 ? 'good' : 'warn'}">${accuracy}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">session started</span>
+            <span class="stat-value">${s.started_at || '-'}</span>
+        </div>
+    `;
+}
+
+function renderKnowledge(data) {
+    if (!data || !data.knowledge_usage || data.knowledge_usage.length === 0) return;
+    const max = Math.max(...data.knowledge_usage.map(k => k.count));
+
+    document.getElementById('knowledge').innerHTML = data.knowledge_usage.map(k => `
+        <div class="knowledge-item">
+            <div class="knowledge-label">${k.file} (${k.count})</div>
+            <div class="knowledge-bar">
+                <div class="knowledge-fill" style="width: ${(k.count / max) * 100}%"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderFeed(data) {
+    if (!data || !data.recalls || data.recalls.length === 0) return;
+    if (data.recalls.length === lastRecallCount) return; // no new data
+    lastRecallCount = data.recalls.length;
+
+    const feed = document.getElementById('feed');
+    feed.innerHTML = data.recalls.slice(0, 20).map(r => `
+        <div class="feed-item">
+            <span class="feed-time">${r.time}</span>
+            <span class="feed-type ${r.action_type}">${r.action_type}</span>
+            <span class="feed-query">${r.query}</span>
+            <span class="feed-confidence">${r.confidence ? Math.round(r.confidence * 100) + '%' : ''}</span>
+        </div>
+    `).join('');
+}
+
+function renderDecisions(data) {
+    if (!data || !data.decisions || data.decisions.length === 0) return;
+
+    document.getElementById('decisions').innerHTML = data.decisions.slice(0, 8).map(d => `
+        <div class="decision-item">
+            <div class="decision-text">${d.decision}</div>
+            <div class="decision-file">${d.files_used || ''}</div>
+        </div>
+    `).join('');
+}
+
+async function poll() {
+    const data = await fetchData();
+    if (data) {
+        renderStats(data);
+        renderKnowledge(data);
+        renderFeed(data);
+        renderDecisions(data);
+    }
+}
+
+// Poll every 3 seconds
+setInterval(poll, 3000);
+poll();
+</script>
+
+</body>
+</html>
