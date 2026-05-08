@@ -9,6 +9,20 @@ V1: capture → store → hope it's read
 V2: capture → store → serve on demand → observe → self-improve
 ```
 
+## Terminology
+
+| Term | Meaning | Examples |
+|------|---------|----------|
+| **Classic compute** | Deterministic execution. No reasoning. Predictable I/O. | File read/write, SQLite queries, keyword matching, regex, logging |
+| **Cognitive execution** | Requires an LLM to reason, judge, or generate. | "Which files are relevant?", "Trace this to a principle" |
+| **Ambient cognition** | Cognitive execution that piggybacks on the already-running Claude session (no extra cost/key). | Main Claude picking from MCP-returned candidates |
+| **Dedicated cognition** | Cognitive execution requiring a separate LLM (API key, sub-agent, extra cost). | Haiku API call, spawned sub-agent during /distill |
+| **Cognitive routing** | Pattern where classic compute can't decide and delegates UP to the active LLM. | MCP returns candidates → Claude picks |
+
+### Design principle
+
+> **Prefer ambient cognition over dedicated cognition.** If the user already has a running LLM, use IT for reasoning. Only use dedicated cognition when the ambient session can't help (e.g., the /distill sub-agent needs its own judgment). The MCP server is a pure classic-compute layer that escalates cognitive decisions to the caller.
+
 ## System Diagram
 
 ```
@@ -75,7 +89,7 @@ Primary retrieval tool. Claude calls this when it's about to do something where 
 }
 ```
 
-**Server-side logic:**
+**Server-side logic (pure classic compute):**
 
 ```
 1. Fast pass: keyword match query against SPINE entries
@@ -88,30 +102,50 @@ Primary retrieval tool. Claude calls this when it's about to do something where 
      review → craft/, feedback/, projects/
      general → all
 
-2. If fast pass returns results → serve them
-3. If ambiguous/no match → Haiku routing:
-   - Send SPINE.md + query to Haiku
-   - "Which files are relevant to this query?"
-   - Serve whatever Haiku recommends
+2. Score each match (classic compute — keyword overlap, action_type match)
+
+3. Return results with confidence:
+   - High confidence (>80%): return file contents directly
+   - Low confidence (<80%): return CANDIDATES with scores (cognitive routing)
+     Claude (ambient cognition) picks from candidates and calls distill_get
 
 4. Log the access:
-   INSERT INTO access_log (timestamp, session_id, query, action_type, files_returned, retrieval_method)
+   INSERT INTO access_log (timestamp, session_id, query, action_type, files_returned, retrieval_method, confidence)
 ```
 
-**Returns:**
+**Returns (high confidence):**
 
 ```json
 {
+  "status": "resolved",
   "relevant_knowledge": [
     {
       "source": "craft/coding-standards.md",
       "content": "...",
-      "relevance": "matches action_type=code, keyword 'Kotlin' in triggers"
+      "confidence": 0.92,
+      "match_reason": "action_type=code + keyword 'Kotlin' in triggers"
     }
   ],
   "recall_id": "uuid-for-logging"
 }
 ```
+
+**Returns (low confidence — cognitive routing):**
+
+```json
+{
+  "status": "needs_routing",
+  "candidates": [
+    { "source": "craft/coding-standards.md", "scope": "...", "confidence": 0.55 },
+    { "source": "ops/deployment-kafka.md", "scope": "...", "confidence": 0.40 },
+    { "source": "projects/magneton.md", "scope": "...", "confidence": 0.35 }
+  ],
+  "hint": "I matched keywords but I'm not sure which are relevant. Pick the ones that apply and call distill_get for each.",
+  "recall_id": "uuid-for-logging"
+}
+```
+
+In the low-confidence case, the ambient Claude session (already running, already paid for) uses its own reasoning to pick from candidates. No API key needed. No extra model. The cognitive execution lives in the session.
 
 ### distill_log
 
@@ -414,8 +448,8 @@ Users on V1 can upgrade gradually:
 ### Phase 2: Intelligence
 - [ ] distill_audit tool
 - [ ] Retrieval fix logic in distill-process.md
-- [ ] Haiku fallback routing
-- [ ] Embedding support (configurable model)
+- [ ] Cognitive routing (ambient cognition — Claude picks from candidates)
+- [ ] Embedding support (configurable model) for better candidate scoring
 - [ ] Re-embedding on retrieval fix
 
 ### Phase 3: Observability
@@ -436,6 +470,7 @@ Users on V1 can upgrade gradually:
 
 1. **Server runtime:** Node.js (Claude Code ecosystem) or Python (ML/embedding ecosystem)?
 2. **Auto-start:** Should the server auto-start on Claude Code launch? Or require manual start?
-3. **Embedding model:** Local (Ollama) vs. API? Configurable or opinionated default?
+3. **Embedding model:** Local (Ollama) vs. API? Configurable or opinionated default? (Phase 2)
 4. **Telemetry endpoint:** GitHub Issues? Dedicated API? Shared repo with PRs?
 5. **MCP config:** How to add the server to user's Claude Code MCP config automatically during install?
+6. **Dedicated cognition:** When is it justified? Only during /distill sub-agent? Or also for complex routing that ambient cognition can't handle cheaply?
