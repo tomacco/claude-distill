@@ -4,10 +4,11 @@
 
 set -e
 
-VERSION="0.3.6"
+VERSION="0.4.0"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
+SERVER_DIR="$DISTILL_DIR/server"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 DISTILL_LINE="# Distill — read ~/.claude/distill/distill-monitor.md and follow its instructions"
 
@@ -26,6 +27,8 @@ if [ -f "$DISTILL_DIR/.version" ]; then
     echo "  ℹ Upgrading to: v${VERSION}"
     echo ""
 fi
+
+# ═══ CORE FILES ═══
 
 # Ensure directories exist
 mkdir -p "$CMD_DIR"
@@ -58,7 +61,59 @@ else
     echo "  · SPINE.md (already exists, preserved)"
 fi
 
-# CLAUDE.md integration (transparent — asks user)
+# ═══ MCP SERVER ═══
+
+echo ""
+echo "  ── MCP Server (smart retrieval) ──"
+echo ""
+
+# Check for Node.js
+if ! command -v node &> /dev/null; then
+    echo "  ⚠ Node.js not found. Skipping MCP server installation."
+    echo "    Distill will still work (fallback mode: reads SPINE directly)"
+    echo "    Install Node.js 18+ to enable smart retrieval."
+    MCP_INSTALLED=false
+else
+    NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
+    if [ "$NODE_VERSION" -lt 18 ]; then
+        echo "  ⚠ Node.js $NODE_VERSION found but 18+ required. Skipping MCP server."
+        MCP_INSTALLED=false
+    else
+        # Download server files
+        mkdir -p "$SERVER_DIR/src"
+        curl -sL "$REPO/server/package.json" -o "$SERVER_DIR/package.json"
+        curl -sL "$REPO/server/tsconfig.json" -o "$SERVER_DIR/tsconfig.json"
+        curl -sL "$REPO/server/src/index.ts" -o "$SERVER_DIR/src/index.ts"
+        curl -sL "$REPO/server/src/db.ts" -o "$SERVER_DIR/src/db.ts"
+        curl -sL "$REPO/server/src/retrieval.ts" -o "$SERVER_DIR/src/retrieval.ts"
+        echo "  ✓ Server source downloaded"
+
+        # Install dependencies and build
+        echo "  ⏳ Installing dependencies..."
+        (cd "$SERVER_DIR" && npm install --registry https://registry.npmjs.org --silent 2>/dev/null)
+        echo "  ✓ Dependencies installed"
+
+        echo "  ⏳ Building..."
+        (cd "$SERVER_DIR" && npx tsc --silent 2>/dev/null)
+        echo "  ✓ Server built"
+
+        # Register MCP server globally
+        if command -v claude &> /dev/null; then
+            # Remove existing registration if present (idempotent)
+            claude mcp remove distill 2>/dev/null || true
+            claude mcp add --scope user --transport stdio distill -- node "$SERVER_DIR/dist/index.js"
+            echo "  ✓ MCP server registered globally (user scope)"
+            MCP_INSTALLED=true
+        else
+            echo "  ⚠ 'claude' CLI not found in PATH. Server built but not registered."
+            echo "    Register manually: claude mcp add --scope user --transport stdio distill -- node $SERVER_DIR/dist/index.js"
+            MCP_INSTALLED=true  # built, just not registered
+        fi
+    fi
+fi
+
+# ═══ CLAUDE.md INTEGRATION ═══
+
 echo ""
 if [ -f "$CLAUDE_MD" ]; then
     # Check for current reference (distill-monitor.md)
@@ -68,15 +123,14 @@ if [ -f "$CLAUDE_MD" ]; then
     # Check for old-style reference (SPINE.md only) — offer upgrade
     elif grep -q "distill/SPINE.md" "$CLAUDE_MD" 2>/dev/null; then
         echo "  ℹ CLAUDE.md has an older distill reference (SPINE.md only)."
-        echo "    The new version uses a session monitor that also tracks memory"
-        echo "    pressure and suggests /distill automatically."
+        echo "    The new version uses a session monitor with smart retrieval"
+        echo "    and automatic pressure tracking."
         echo ""
         printf "  Replace old line with new one? [Y/n] "
         read -r response < /dev/tty
         if [[ "$response" =~ ^[Nn] ]]; then
             echo "  · Kept old reference. You can update manually later."
         else
-            # Remove old line, add new one
             sed -i.bak '/distill\/SPINE.md/d' "$CLAUDE_MD"
             rm -f "$CLAUDE_MD.bak"
             echo "" >> "$CLAUDE_MD"
@@ -93,8 +147,9 @@ if [ -f "$CLAUDE_MD" ]; then
         echo "  │   $DISTILL_LINE"
         echo "  │                                                                     │"
         echo "  │ This enables:                                                       │"
-        echo "  │   • Loading your distilled knowledge at session start               │"
+        echo "  │   • Smart knowledge retrieval before major actions                  │"
         echo "  │   • Tracking memory pressure and suggesting /distill when needed    │"
+        echo "  │   • Observable: see what memories Claude uses and why               │"
         echo "  └─────────────────────────────────────────────────────────────────────┘"
         echo ""
         printf "  Add this line to CLAUDE.md? [Y/n] "
@@ -108,7 +163,6 @@ if [ -f "$CLAUDE_MD" ]; then
             echo "    as intended without it."
             echo ""
             echo "    Run the installer again when you're ready."
-            # Clean up what we already downloaded
             rm -f "$CMD_DIR/distill.md"
             rm -f "$DISTILL_DIR/distill-process.md"
             rm -f "$DISTILL_DIR/distill-monitor.md"
@@ -126,12 +180,22 @@ else
     echo "  ✓ Created CLAUDE.md with distill reference"
 fi
 
+# ═══ SUMMARY ═══
+
 echo ""
-echo "  ──────────────────────────────────────"
+echo "  ══════════════════════════════════════"
 echo "  Installed to:"
 echo "    Commands:  $CMD_DIR/"
 echo "    Knowledge: $DISTILL_DIR/"
+echo "    Server:    $SERVER_DIR/"
 echo "    Version:   $VERSION"
+echo ""
+if [ "$MCP_INSTALLED" = true ]; then
+    echo "  Mode: MCP server (smart retrieval + observability)"
+else
+    echo "  Mode: Fallback (reads SPINE directly, no observability)"
+    echo "    → Install Node.js 18+ to enable the MCP server"
+fi
 echo ""
 echo "  Usage: type /distill in any Claude Code session"
 echo ""
@@ -142,6 +206,7 @@ else
 fi
 echo ""
 echo "  Uninstall:"
+echo "    claude mcp remove distill 2>/dev/null"
 echo "    rm $CMD_DIR/distill.md"
 echo "    rm -rf $DISTILL_DIR"
 echo "    # Remove the 'Distill' line from ~/.claude/CLAUDE.md"

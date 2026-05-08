@@ -1,12 +1,32 @@
 # Distill: Session Monitor
 
-This file is loaded at the start of every Claude Code session. It is intentionally small (~40 lines) to minimize context cost.
+This file is loaded at the start of every Claude Code session. It is intentionally small to minimize context cost.
 
-## What to do
+## What to do at session start
 
-1. **At session start:** Read `~/.claude/distill/SPINE.md` to load your knowledge index.
+1. **Check if `distill_recall` tool is available** (MCP server running).
+   - If YES → use the MCP tools for knowledge retrieval (preferred path).
+   - If NO → fallback: read `~/.claude/distill/SPINE.md` directly for the knowledge index.
 2. **Throughout the session:** Track memory pressure (see below).
 3. **When pressure is high:** Suggest `/distill` to the user.
+
+## Knowledge Retrieval (MCP server available)
+
+When the `distill_recall` tool is available, use it **before major actions**:
+
+- **Before writing code** → `distill_recall({ query: "[what you're about to write]", action_type: "code" })`
+- **Before architecture decisions** → `distill_recall({ query: "[the decision]", action_type: "architecture" })`
+- **Before reviewing PRs** → `distill_recall({ query: "[what the PR does]", action_type: "review" })`
+- **Before spawning agents** → `distill_recall({ query: "[agent's task]", action_type: "process" })`
+- **When user references a preference** → `distill_recall({ query: "[what they mentioned]", action_type: "general" })`
+
+After using recalled knowledge, log what you used: `distill_log({ recall_id, files_used, decision })`.
+
+This is what makes the system observable — every recall and usage is tracked, so /distill can improve retrieval over time.
+
+## Knowledge Retrieval (fallback — no MCP server)
+
+If `distill_recall` is not available, read `~/.claude/distill/SPINE.md` at session start. Use its contents as a reference for the session. This is less targeted but still provides global knowledge.
 
 ## Memory Pressure Tracking
 
