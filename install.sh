@@ -5,7 +5,7 @@
 set -e
 
 VERSION="0.4.0"
-BUILD="20260508-6"
+BUILD="20260508-7"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/feat/mcp-server"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
@@ -68,19 +68,19 @@ info_msg() {
 show_header() {
   clear
   echo ""
-  echo ""
-  printf "  ${PURPLE}${BOLD}"
-  echo "         ___  _     _   _  _  ___  ___"
-  echo "        / __|| |   /_\ | || ||   \| __|"
-  echo "       | (__ | |_ / _ \| || || |) | _| "
-  echo "        \___||___/_/ \_\\\__/ |___/|___|"
-  echo ""
-  echo "        ___  ___  ___  _____  ___  _     _    "
-  echo "       |   \|_ _|/ __||_   _||_ _|| |   | |   "
-  echo "       | |) || | \__ \  | |   | | | |__ | |__ "
-  echo "       |___/|___||___/  |_|  |___||____||____|"
+  printf "${PURPLE}"
+  echo "        ╭─────────────────────────────────────────────╮"
+  echo "        │                                             │"
+  echo "        │    ░█▀▀░█░░░█▀█░█░█░█▀▄░█▀▀               │"
+  echo "        │    ░█░░░█░░░█▀█░█░█░█░█░█▀▀               │"
+  echo "        │    ░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀░░▀▀▀               │"
+  echo "        │                                             │"
+  echo "        │    ░█▀▄░▀█▀░█▀▀░▀█▀░▀█▀░█░░░█░░           │"
+  echo "        │    ░█░█░░█░░▀▀█░░█░░░█░░█░░░█░░           │"
+  echo "        │    ░▀▀░░▀▀▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀           │"
+  echo "        │                                             │"
+  echo "        ╰─────────────────────────────────────────────╯"
   printf "${RESET}"
-  echo ""
   echo ""
   printf "  ${DIM}every session makes all sessions better${RESET}\n"
   printf "  ${DIM}say what matters. it's listening.${RESET}\n"
@@ -149,9 +149,37 @@ show_section "MCP Server"
 MCP_INSTALLED=false
 
 if ! command -v node &> /dev/null; then
-    warn_msg "Node.js not found — skipping MCP server"
-    skip_msg "Smart retrieval disabled (fallback: reads SPINE directly)"
-    info_msg "Install Node.js 18+ later to enable"
+    warn_msg "Node.js not found"
+    echo ""
+    printf "  ${BOLD}The MCP server requires Node.js 18+.${RESET}\n"
+    printf "  ${DIM}Without it, distill works but without smart retrieval or observability.${RESET}\n"
+    echo ""
+    printf "  ${DIM}Install Node.js now? Options:${RESET}\n"
+    printf "    ${CYAN}1${RESET}) brew install node ${DIM}(recommended on macOS)${RESET}\n"
+    printf "    ${CYAN}2${RESET}) I'll install it myself later\n"
+    echo ""
+    printf "  ${BOLD}Choice [1/2]:${RESET} "
+    read -r node_choice < /dev/tty
+    if [[ "$node_choice" == "1" ]]; then
+        if command -v brew &> /dev/null; then
+            echo ""
+            (brew install node 2>&1 | tail -3) &
+            spinner $! "Installing Node.js via Homebrew..."
+            if command -v node &> /dev/null; then
+                done_msg "Node.js installed ($(node -v))"
+            else
+                fail_msg "Homebrew install didn't add node to PATH"
+                warn_msg "Continuing without MCP server (fallback mode)"
+            fi
+        else
+            fail_msg "Homebrew not found"
+            info_msg "Install from: https://nodejs.org/en/download"
+            warn_msg "Continuing without MCP server (fallback mode)"
+        fi
+    else
+        skip_msg "Skipping Node.js — MCP server disabled"
+        info_msg "Install Node 18+ and re-run to enable smart retrieval"
+    fi
 else
     NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
     if [ "$NODE_VERSION" -lt 18 ]; then
