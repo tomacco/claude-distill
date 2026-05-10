@@ -17,6 +17,32 @@ if [ ! -f "$DB" ]; then
     exit 1
 fi
 
+# Relative time function using SQLite
+relative_time_sql() {
+    cat << 'EOF'
+    CASE
+        WHEN (strftime('%s','now') - strftime('%s', timestamp)) < 10 THEN 'just now'
+        WHEN (strftime('%s','now') - strftime('%s', timestamp)) < 60 THEN (strftime('%s','now') - strftime('%s', timestamp)) || 's ago'
+        WHEN (strftime('%s','now') - strftime('%s', timestamp)) < 3600 THEN ((strftime('%s','now') - strftime('%s', timestamp)) / 60) || 'm ago'
+        WHEN (strftime('%s','now') - strftime('%s', timestamp)) < 86400 THEN ((strftime('%s','now') - strftime('%s', timestamp)) / 3600) || 'h ago'
+        WHEN (strftime('%s','now') - strftime('%s', timestamp)) < 172800 THEN 'yesterday'
+        ELSE strftime('%m/%d', timestamp)
+    END
+EOF
+}
+
+relative_time_started() {
+    cat << 'EOF'
+    CASE
+        WHEN (strftime('%s','now') - strftime('%s', started_at)) < 60 THEN 'just now'
+        WHEN (strftime('%s','now') - strftime('%s', started_at)) < 3600 THEN ((strftime('%s','now') - strftime('%s', started_at)) / 60) || 'm ago'
+        WHEN (strftime('%s','now') - strftime('%s', started_at)) < 86400 THEN ((strftime('%s','now') - strftime('%s', started_at)) / 3600) || 'h ago'
+        WHEN (strftime('%s','now') - strftime('%s', started_at)) < 172800 THEN 'yesterday'
+        ELSE strftime('%m/%d', started_at)
+    END
+EOF
+}
+
 while true; do
     clear
 
@@ -27,55 +53,54 @@ while true; do
 
     # Active sessions
     printf "  ${BOLD}Sessions${RESET}\n"
-    sqlite3 -header -column "$DB" "
+    sqlite3 "$DB" "
         SELECT
-            substr(id, 1, 8) as session,
-            started_at as started,
-            recalls_fired as recalls,
-            recalls_useful as useful,
+            substr(id, 1, 8),
+            $(relative_time_started),
+            recalls_fired,
+            recalls_useful,
             CASE WHEN recalls_fired > 0
                 THEN round(recalls_useful * 100.0 / recalls_fired) || '%'
                 ELSE '-'
-            END as accuracy
+            END
         FROM sessions
         ORDER BY started_at DESC
         LIMIT 5;
-    " 2>/dev/null | while IFS= read -r line; do
-        printf "  ${DIM}%s${RESET}\n" "$line"
+    " 2>/dev/null | while IFS='|' read -r session started recalls useful accuracy; do
+        printf "  ${DIM}%s${RESET}  %-10s  recalls: %s  useful: %s  accuracy: %s\n" "$session" "$started" "$recalls" "$useful" "$accuracy"
     done
     echo ""
 
     # Recent recalls
-    printf "  ${BOLD}Recent Recalls${RESET}  ${DIM}(last 10)${RESET}\n"
+    printf "  ${BOLD}Recent Recalls${RESET}\n"
     sqlite3 "$DB" "
         SELECT
-            substr(timestamp, 12, 5) as time,
-            action_type as type,
-            substr(query, 1, 40) as query,
-            CASE WHEN confidence >= 0.6 THEN '✓' ELSE '?' END as conf,
-            files_returned
+            $(relative_time_sql),
+            action_type,
+            substr(query, 1, 45),
+            CASE WHEN confidence >= 0.6 THEN '✓' ELSE '?' END
         FROM access_log
         ORDER BY timestamp DESC
         LIMIT 10;
-    " 2>/dev/null | while IFS='|' read -r time type query conf files; do
+    " 2>/dev/null | while IFS='|' read -r ago type query conf; do
         if [ "$conf" = "✓" ]; then
             icon="${GREEN}✓${RESET}"
         else
             icon="${YELLOW}?${RESET}"
         fi
-        printf "  %s %s ${DIM}%-10s${RESET} %s\n" "$icon" "$time" "$type" "$query"
+        printf "  %s ${DIM}%-10s${RESET} %-12s %s\n" "$icon" "$ago" "$type" "$query"
     done
     echo ""
 
     # Most used knowledge
-    printf "  ${BOLD}Knowledge Usage${RESET}  ${DIM}(top files)${RESET}\n"
+    printf "  ${BOLD}Knowledge Usage${RESET}\n"
     sqlite3 "$DB" "
         SELECT
-            json_each.value as file,
-            COUNT(*) as times
+            json_each.value,
+            COUNT(*)
         FROM usage_log, json_each(usage_log.files_used)
         GROUP BY json_each.value
-        ORDER BY times DESC
+        ORDER BY COUNT(*) DESC
         LIMIT 5;
     " 2>/dev/null | while IFS='|' read -r file count; do
         bar=""
@@ -85,17 +110,17 @@ while true; do
     echo ""
 
     # Recent decisions
-    printf "  ${BOLD}Decisions${RESET}  ${DIM}(what Claude did with the knowledge)${RESET}\n"
+    printf "  ${BOLD}Decisions${RESET}\n"
     sqlite3 "$DB" "
         SELECT
-            substr(timestamp, 12, 5) as time,
-            substr(decision, 1, 60) as decision
+            $(relative_time_sql),
+            substr(decision, 1, 55)
         FROM usage_log
         WHERE decision IS NOT NULL
         ORDER BY timestamp DESC
         LIMIT 5;
-    " 2>/dev/null | while IFS='|' read -r time decision; do
-        printf "  ${DIM}%s${RESET}  %s\n" "$time" "$decision"
+    " 2>/dev/null | while IFS='|' read -r ago decision; do
+        printf "  ${DIM}%-10s${RESET}  %s\n" "$ago" "$decision"
     done
     echo ""
 
