@@ -315,6 +315,28 @@ else
     done_msg "Created CLAUDE.md with distill reference"
 fi
 
+# ═══ MEMORY MIGRATION CHECK ═══
+
+# Detect existing memory files that should be ingested
+MEMORY_FILES=$(find "$HOME/.claude" -path "*/memory/*.md" -not -path "*/distill/*" 2>/dev/null | wc -l | tr -d ' ')
+if [ "$MEMORY_FILES" -gt 0 ] && [ ! -f "$DISTILL_DIR/.migrated" ]; then
+    echo ""
+    printf "  ${CYAN}━━${RESET} ${BOLD}Existing memories detected${RESET}\n"
+    echo ""
+    printf "  Found ${BOLD}${MEMORY_FILES}${RESET} memory files from Claude's built-in system.\n"
+    printf "  Since distill now owns knowledge management, these won't be\n"
+    printf "  read by the auto-memory system anymore.\n"
+    echo ""
+    printf "  ${BOLD}On your next session, run ${CYAN}/distill${RESET}${BOLD} — it will:${RESET}\n"
+    printf "    • Read your existing memories\n"
+    printf "    • Ingest them into distill's tiered system\n"
+    printf "    • Apply quality checks and proper categorization\n"
+    printf "    • Your old files stay untouched (as backup)\n"
+    echo ""
+    # Flag so we only show this once
+    touch "$DISTILL_DIR/.needs-migration"
+fi
+
 # ═══ COMPLETE ═══
 
 echo ""

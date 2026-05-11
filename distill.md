@@ -26,6 +26,16 @@ If `~/.claude/distill/.checkpoint` exists, a prior distillation was interrupted.
 **Version check (once per session):**
 If this is the first `/distill` invocation this session, run the version check (see Version Checking section below).
 
+**Migration check:**
+If `~/.claude/distill/.needs-migration` exists, this is the first distill after installation. In addition to normal signal harvesting, the sub-agent must also:
+1. Find all memory files: `find ~/.claude -path "*/memory/*.md" -not -path "*/distill/*"`
+2. Read each one and ingest its content into the appropriate distill tier (craft, ops, profile, feedback, projects)
+3. After successful ingestion, delete the flag: `rm ~/.claude/distill/.needs-migration`
+4. Create a marker: `touch ~/.claude/distill/.migrated`
+5. Report what was migrated in the distillation output
+
+The old memory files are NOT deleted — they stay as backup. Distill just absorbs their knowledge into its own system.
+
 ---
 
 ### Step 1: Harvest signals from THIS conversation
