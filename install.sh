@@ -5,8 +5,8 @@
 set -e
 
 VERSION="0.4.0"
-BUILD="20260508-9"
-REPO="https://raw.githubusercontent.com/tomacco/claude-distill/feat/mcp-server"
+BUILD="20260508-10"
+REPO="https://raw.githubusercontent.com/tomacco/claude-distill/harden/retrieval-gate"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
 SERVER_DIR="$DISTILL_DIR/server"
