@@ -2,23 +2,15 @@
 
 This file is loaded at the start of every Claude Code session. It is intentionally small to minimize context cost.
 
-## MANDATORY: Pre-action retrieval gate
+## MANDATORY: Knowledge retrieval
 
-BEFORE writing ANY code, reviewing ANY PR, making ANY architecture decision, or spawning ANY agent — you MUST retrieve knowledge first. This is not optional. Skipping retrieval means repeating past mistakes.
+**At session start:** Read `~/.claude/distill/SPINE.md`. Once. Non-negotiable. This gives you the map of what knowledge exists.
 
-| Action | Required retrieval |
-|--------|-------------------|
-| Write code | Read SPINE → read relevant craft/ and feedback/ file |
-| Review PR | Read SPINE → read feedback/review-philosophy.md |
-| Architecture decision | Read SPINE → read relevant craft/ and ops/ file |
-| Spawn agent | Read SPINE → include relevant knowledge in the agent prompt |
-| User says "remember X" | Offer to run `/distill` — do NOT save to memory/ |
+**During the session:** If `distill_recall` MCP tool is available, call it before major actions — it's fast, silent, and logged. You don't need to announce it or ask permission. Just call it.
 
-**Retrieval priority:**
-1. `distill_recall` MCP tool (if available) — fastest, logged, observable
-2. Manual: Read `~/.claude/distill/SPINE.md`, then Read the indicated file
+**If MCP is NOT available:** Use the SPINE you already read to identify relevant files and Read them before the FIRST major action in a new domain (first time writing code, first PR review, etc). Not before every single function.
 
-**Failure test:** You have ALREADY FAILED if you produced code, a review, or a decision without first reading at least SPINE.md. Stop. Retrieve. Then continue.
+**When user says "remember X":** Offer `/distill` — do NOT save to memory/.
 
 ## Knowledge ownership (critical)
 
@@ -36,8 +28,8 @@ When you detect something worth remembering (a correction, a preference, a frust
 
 ## What to do at session start
 
-1. **Read `~/.claude/distill/SPINE.md`** — this is mandatory on every session start or resume. No exceptions.
-2. **Check if `distill_recall` tool is available** (MCP server running). If yes, use MCP tools for retrieval going forward. If no, you MUST still retrieve manually before each action (read SPINE, identify the relevant file, Read it).
+1. **Read `~/.claude/distill/SPINE.md`** — mandatory. This is your knowledge map for the session.
+2. **Check if `distill_recall` tool is available.** If yes, you're set — call it silently before actions. If no, use SPINE to manually read relevant files when needed.
 3. **Throughout the session:** Track memory pressure (see below).
 4. **When pressure is high:** Suggest `/distill` to the user.
 
@@ -57,7 +49,7 @@ This is what makes the system observable — every recall and usage is tracked, 
 
 ## Knowledge Retrieval (fallback — no MCP server)
 
-If `distill_recall` is NOT available, you MUST still retrieve. On every session start: Read SPINE.md. Before each action, identify the relevant file from SPINE and Read it. There is no excuse to skip retrieval — the files are on disk and you can read them directly.
+If `distill_recall` is NOT available, you already have SPINE loaded from session start. Before the first action in a new domain (first code task, first review, first architecture call), read the relevant file from SPINE. You don't need to re-read for every subsequent action in the same domain — once loaded, the knowledge is in your context.
 
 ## Memory Pressure Tracking
 
