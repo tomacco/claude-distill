@@ -72,13 +72,13 @@ Silently track a running pressure score (0-10) based on what happens in the sess
 
 ## When to suggest
 
-At pressure 7+, say something like:
+At pressure 5+, say something like:
 
-> "We've accumulated quite a few learnings this session. Want me to run `/distill` to consolidate them before they're lost?"
+> "We've accumulated some learnings this session. Want me to run `/distill` to consolidate them?"
 
-Keep it casual and brief. Do not explain the full system. If the user says no, respect it — don't ask again until pressure reaches 9 or the session is clearly ending.
+Keep it casual and brief. Do not explain the full system. If the user says no, respect it — don't ask again until pressure reaches 7 or the session is clearly ending.
 
-At pressure 9+, be more direct:
+At pressure 7+, be more direct:
 
 > "Strongly recommend consolidating — there's a lot to capture here and context is getting dense."
 
