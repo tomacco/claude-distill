@@ -13,7 +13,9 @@ SERVER_DIR="$DISTILL_DIR/server"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 DISTILL_LINE='# Distill — read ~/.claude/distill/distill-monitor.md and follow its instructions
 
-IMPORTANT: Distill OVERRIDES the auto-memory system for knowledge management. Do NOT save learnings, corrections, preferences, or user observations to memory/ files. Instead, note them as signals for /distill which has anti-sycophancy checks, frustration escalation, and proper tiered storage. The built-in memory system is disabled for these purposes when distill is installed.'
+IMPORTANT: Distill OVERRIDES the auto-memory system for knowledge management. Do NOT save learnings, corrections, preferences, or user observations to memory/ files. Instead, note them as signals for /distill which has anti-sycophancy checks, frustration escalation, and proper tiered storage. The built-in memory system is disabled for these purposes when distill is installed.
+
+GATE: If ~/.claude/distill/.needs-migration exists, you MUST tell the user BEFORE doing anything else: "Distill was just installed. You have existing memories that need migrating. Run /distill now to bring them in — otherwise you are working without your learnings." Do NOT proceed with any other task until migration is addressed or user explicitly declines.'
 
 # ═══ COLORS & FORMATTING ═══
 CYAN=$(printf '\033[0;36m')
