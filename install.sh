@@ -337,7 +337,9 @@ if [ -n "$EXISTING_VERSION" ]; then
     printf "  ${CYAN}Upgraded${RESET} v${EXISTING_VERSION} → v${VERSION}\n"
 fi
 echo ""
-printf "  ${DIM}Uninstall: claude mcp remove distill && rm ~/.claude/commands/distill.md && rm -rf ~/.claude/distill/${RESET}\n"
+printf "  ${DIM}Uninstall (removes command + server, keeps your learnings):${RESET}\n"
+printf "    ${DIM}claude mcp remove distill && rm ~/.claude/commands/distill.md${RESET}\n"
+printf "    ${DIM}Your knowledge stays in ~/.claude/distill/ — it's yours.${RESET}\n"
 echo ""
 printf "  ${PURPLE}say what matters. it's listening.${RESET}\n"
 echo ""
