@@ -18,9 +18,11 @@
 
 ## The problem
 
-Every Claude session starts from zero. It doesn't know what you know. It doesn't remember what failed last week. It can't tell a senior architect from a first-time coder.
+Claude Code has memory. But it remembers *facts*, not *principles*.
 
-**You repeat yourself. It repeats its mistakes. Session ends. Knowledge gone.**
+It saves "user prefers dark mode" — but not "when user corrects me twice on the same thing, it means I'm missing a fundamental pattern." It dumps observations into a flat file with no hierarchy, no consolidation, no retrieval strategy.
+
+**Distill fixes how Claude learns** — not what it remembers, but *how* it organizes, retrieves, and applies knowledge. Inspired by how biological memory actually works: tiered storage, pressure-driven consolidation, and retrieval by relevance.
 
 ## The fix
 
