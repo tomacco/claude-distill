@@ -1,0 +1,1 @@
+deploying the payment retry feature now. pushing to staging. after 10 min soak I will promote to prod. can you draft the deploy announcement for slack?
