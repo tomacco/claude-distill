@@ -152,6 +152,41 @@
             margin-right: 0.75rem;
         }
 
+        .hero-pitch {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: var(--text);
+            text-align: center;
+            max-width: 550px;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .install-note {
+            font-size: 0.7rem;
+            color: var(--dim);
+            margin-top: 0.6rem;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .install-mid {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .install-mid .install-cmd {
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .install-mid-note {
+            font-size: 0.72rem;
+            color: var(--dim);
+            margin-top: 0.5rem;
+        }
+
         .star-row {
             margin-top: 1.2rem;
         }
@@ -1498,9 +1533,11 @@
     <div class="title-group">
         <h1 class="title">claude-<span>distill</span></h1>
         <p class="tagline">not what it remembers &mdash; how it learns</p>
-        <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">first-principles memory for Claude Code</p>
+        <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">Claude Code remembers facts. This teaches it principles.</p>
     </div>
+    <p class="hero-pitch">You correct Claude once. It should never make that mistake again &mdash; in any project, any session, forever.<br>That&rsquo;s what this does. One slash command: <code style="color:var(--synapse)">/distill</code></p>
     <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <p class="install-note">yes it&rsquo;s a curl|bash. <a href="https://github.com/tomacco/claude-distill/blob/main/install.sh" target="_blank" style="color:var(--synapse)">read it first</a> if you&rsquo;re the responsible kind. it&rsquo;s 100 lines, no sudo, writes only to ~/.claude/.</p>
     <div class="star-row">
         <a class="github-button" href="https://github.com/tomacco/claude-distill" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star tomacco/claude-distill on GitHub">Star</a>
     </div>
@@ -1646,6 +1683,11 @@
     </div>
 </div>
 
+<div class="install-mid reveal">
+    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <p class="install-mid-note">convinced yet? no? keep scrolling, we have graphs.</p>
+</div>
+
 <!-- ═══ WHAT'S DIFFERENT — visual grid ═══ -->
 <div class="captures-section">
     <div class="section-label reveal">What's different from memory.md</div>
@@ -1719,6 +1761,11 @@
     </div>
 </div>
 
+<div class="install-mid reveal">
+    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <p class="install-mid-note">still reading? you&rsquo;re thorough. we respect that. the install script is too.</p>
+</div>
+
 <!-- ═══ INTEGRITY — compact ═══ -->
 <div class="integrity-section-compact">
     <div class="section-label reveal">Non-negotiable</div>
@@ -1768,11 +1815,13 @@
 
 
 <div class="cta">
+    <div class="install-cmd" onclick="copyInstall(event)" style="max-width:600px;margin:0 auto 1.5rem;">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
     <a href="https://github.com/tomacco/claude-distill" class="cta-link">View source on GitHub</a>
+    <p style="margin-top:1rem;font-size:0.72rem;color:var(--dim);">you made it to the bottom. that&rsquo;s commitment. reward yourself with an install.</p>
 </div>
 
 <footer>
-    MIT &middot; Built for Claude Code
+    MIT &middot; Built for Claude Code &middot; v0.7.0
 </footer>
 
 <script>
