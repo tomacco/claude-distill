@@ -3,15 +3,15 @@
 </p>
 
 <p align="center">
-  <strong>Every session makes all sessions better.</strong><br>
-  <em>Global, persistent memory consolidation for Claude Code.</em>
+  <strong>Not what it remembers — how it learns.</strong><br>
+  <em>First-principles memory for Claude Code. A/B tested.</em>
 </p>
 
 <p align="center">
   <a href="https://tomacco.github.io/claude-distill/"><strong>Live Demo (try the terminal)</strong></a> ·
   <a href="#installation">Install</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="#uninstall">Uninstall</a>
+  <a href="#results">Results</a> ·
+  <a href="docs/research.md">Full Research</a>
 </p>
 
 ---
@@ -20,48 +20,23 @@
 
 Claude Code has memory. But it remembers *facts*, not *principles*.
 
-It saves "user prefers dark mode" — but not "when user corrects me twice on the same thing, it means I'm missing a fundamental pattern." It dumps observations into a flat file with no hierarchy, no consolidation, no retrieval strategy.
+It saves "user prefers dark mode" — but not "when I retry a permanent failure, I'm wasting resources." It dumps observations into a flat file with no hierarchy, no consolidation, no retrieval strategy.
 
-**Distill fixes how Claude learns** — not what it remembers, but *how* it organizes, retrieves, and applies knowledge. Inspired by how biological memory actually works: tiered storage, pressure-driven consolidation, and retrieval by relevance.
-
-## The fix
-
-```bash
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
-```
-
-Type `/distill` after any session. Learnings persist **globally** — any project, any repo, any Claude Code workspace on your machine benefits from every past session.
+**Distill fixes how Claude learns** — not what it remembers, but *how* it structures, retrieves, and applies knowledge.
 
 ---
 
-## How it works
+## Results
 
-```
-you type /distill
-    → dispatcher harvests signals from the conversation
-    → spawns an isolated sub-agent (your context stays clean)
-    → sub-agent traces friction to first principles
-    → encodes knowledge in ~/.claude/distill/
-    → every future session inherits the learnings
-```
+We A/B tested the same prompts with and without distill knowledge. Same model, same session.
 
-### What it captures
+| Scenario | Without distill | With distill |
+|----------|----------------|--------------|
+| User asks to retry 404 errors | Complies silently | **Refuses**: "404 is permanent. Won't retry." Offers correct alternative. |
+| User follows outdated deploy procedure | Drafts announcement for wrong process | **Catches it**: "Procedure changed after May 8 incident." |
+| User queries another service's DB | Writes the SQL + soft footnote | **Refuses**: "Violates one-service-one-DB." Cites past mistake. |
 
-| Layer | What it learns |
-|---|---|
-| **Craft** | How to practice your discipline better |
-| **Operations** | Workflows, processes, tool-specific knowledge |
-| **User profile** | Your expertise, communication style, thinking patterns |
-| **Projects** | Domain context that's hard to re-derive |
-| **Preferences** | How you like to collaborate with AI |
-
-### Memory pressure
-
-The system tracks unconsolidated learnings like sleep debt. When pressure is high, it suggests consolidation — you don't need to remember to type `/distill`.
-
-### Anti-sycophancy
-
-Five integrity principles are baked in. The system **never** encodes comfort as truth, flattens standards to reduce friction, or softens findings because you're frustrated. The goal is an honest ally, not a yes-machine.
+**Average improvement: +6.0 on a 12-point scale.** [Full methodology and raw outputs →](docs/research.md)
 
 ---
 
@@ -71,16 +46,51 @@ Five integrity principles are baked in. The system **never** encodes comfort as 
 curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
 ```
 
+<sub>100 lines, no sudo, writes only to `~/.claude/`. [Read it first](install.sh) if you're the responsible kind.</sub>
+
 This installs:
 
 | File | Location | Purpose |
 |------|----------|---------|
-| `distill.md` | `~/.claude/commands/` | The `/distill` command |
+| `distill.md` | `~/.claude/commands/` | The `/distill` slash command |
+| `distill.md` | `~/.claude/rules/` | Knowledge retrieval (18 lines, auto-loads every session) |
 | `distill-process.md` | `~/.claude/distill/` | Full process (read by sub-agent) |
-| `distill-monitor.md` | `~/.claude/distill/` | Session monitor (pressure tracking) |
 | `SPINE.md` | `~/.claude/distill/` | Knowledge index |
 
-The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this is required for cross-session knowledge loading and automatic suggestions.
+Zero dependencies. No Node.js. No MCP server. No database. Just files.
+
+---
+
+## How it works
+
+```
+you type /distill
+    → harvests signals from the conversation (corrections, preferences, surprises)
+    → spawns an isolated sub-agent (your context stays clean)
+    → sub-agent traces each signal to a first principle
+    → encodes in ~/.claude/distill/ with markers: [UPDATED], [CONTEXT], [NON-NEGOTIABLE]
+    → every future session retrieves relevant knowledge before responding
+```
+
+### What makes it different from memory.md
+
+| memory.md | distill |
+|-----------|---------|
+| Saves "user said don't modify shared factory" | Encodes "blast radius awareness: never modify shared infra for one consumer" |
+| Flat file, linear reading | Tiered: SPINE index → domain files → archive |
+| No staleness detection | `[UPDATED]` tags + `staleness_threshold` metadata |
+| Grows until it hits 200-line cap | Compacts: archive old knowledge, never drops it |
+| Same response regardless of context | Retrieves by relevance (SPINE hooks match current task) |
+
+### Knowledge markers
+
+```markdown
+- [CONTEXT] "Always interfaces" = new services. "Concrete" = prototypes.
+- [UPDATED 2026-05-13] Deploy now requires canary first. Old way removed.
+- [NON-NEGOTIABLE] One service, one database. No shared DBs.
+- [PROVISIONAL] Using WebSockets — may switch to SSE after LB testing.
+- [IMPORTANT] Under pressure, user fixates on first hypothesis. Widen the search.
+```
 
 ---
 
@@ -88,14 +98,12 @@ The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this 
 
 ```
 ~/.claude/
-├── CLAUDE.md                        ← yours (one distill reference line added)
-├── commands/
-│   └── distill.md                   ← the /distill command
-└── distill/                         ← all distill-managed knowledge
-    ├── SPINE.md                     ← tier 1: index (max 80 lines, auto-loaded)
-    ├── distill-process.md           ← the full process
-    ├── distill-monitor.md           ← session monitor
-    ├── .version                     ← installed version
+├── CLAUDE.md                        ← one line added (gate for migration)
+├── rules/
+│   └── distill.md                   ← retrieval engine (18 lines, auto-loaded)
+└── distill/
+    ├── SPINE.md                     ← tier 1: index (max 80 lines)
+    ├── distill-process.md           ← the distillation process
     ├── craft/                       ← tier 2: discipline knowledge
     ├── ops/                         ← tier 2: operational knowledge
     ├── profile/                     ← tier 2: user model
@@ -104,64 +112,37 @@ The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this 
     └── archive/                     ← tier 3: compressed history
 ```
 
-**Three tiers** keep context lean:
-- **Tier 1 (Spine):** Always loaded. Max 80 lines. Just pointers.
-- **Tier 2 (Active):** Read on demand. Max 60 lines per file.
-- **Tier 3 (Archive):** Compressed, rarely read. Never deleted.
+**Three tiers** — inspired by biological memory:
+- **Tier 1 (Spine):** Always loaded. Max 80 lines. Pointers with relevance hooks.
+- **Tier 2 (Active):** Read on demand when task matches. Max 60 lines per file.
+- **Tier 3 (Archive):** Compressed history. Promoted back when recalled. Never deleted.
 
 ---
 
-## Updates
+## Anti-sycophancy
 
-Updates happen **inside `/distill`**, not by re-running the installer. On first invocation each session, it checks for new versions:
+Five integrity principles are non-negotiable:
 
-```
-claude-distill update available: v0.6.0 → v0.7.2
-Want me to update now? (You can also say 'always keep it updated' and I won't ask again.)
-```
+1. Never encode comfort as truth
+2. Never flatten standards to reduce friction
+3. Never confuse preference with principle
+4. Frustration is diagnostic, not directive
+5. The user's growth is the goal
 
-You're always in control:
-- **"yes"** — updates now, this once
-- **"no"** — skips, won't ask again this session
-- **"always keep it updated"** — remembers your preference, updates silently from now on
+Claude with distill **pushes back** when you're about to make a mistake it already learned about. That's the point.
+
+---
 
 ## Uninstall
 
 ```bash
-# Remove the command and server
-claude mcp remove distill
-rm ~/.claude/commands/distill.md
-# Remove the 'Distill' line from ~/.claude/CLAUDE.md
+rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md
 ```
 
-Your learnings stay in `~/.claude/distill/` — they're yours. Delete them only if you want to. They're just markdown files with everything Claude learned from working with you.
-
----
-
-## Say what matters. It's listening.
-
-Distill captures what you express. The more intentional you are, the sharper Claude becomes:
-
-- **Say what's important** — "Use newspaper style. Non-negotiable."
-- **Express frustration** — "I told you this already. Don't mock the database."
-- **Correct with authority** — "No. Always go through staging. Always."
-
-When you repeat a frustration, the system treats it as a critical failure in itself — it elevates priority, strengthens the encoding, and cross-references it so it's harder to miss next time.
-
-**You shouldn't have to say things twice.** When you do, distill notices.
-
----
-
-## Philosophy
-
-**Being understood is a core human need.** Distill exists because your AI should feel like a colleague who remembers — not a stranger you brief from scratch.
-
-**Struggling is a signal, not a virtue.** When something was hard, that's information worth capturing.
-
-**Honesty compounds.** What's true today makes you excellent tomorrow. What's comfortable today costs you tomorrow.
+Your knowledge files are yours. Back them up if you want to keep them.
 
 ---
 
 <p align="center">
-  <sub>v0.7.2 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
+  <sub>v0.7.0 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
 </p>
