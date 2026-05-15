@@ -116,7 +116,7 @@ The installer asks permission to add one line to `~/.claude/CLAUDE.md` — this 
 Updates happen **inside `/distill`**, not by re-running the installer. On first invocation each session, it checks for new versions:
 
 ```
-claude-distill update available: v0.6.0 → v0.7.1
+claude-distill update available: v0.6.0 → v0.7.2
 Want me to update now? (You can also say 'always keep it updated' and I won't ask again.)
 ```
 
@@ -163,5 +163,5 @@ When you repeat a frustration, the system treats it as a critical failure in its
 ---
 
 <p align="center">
-  <sub>v0.7.1 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
+  <sub>v0.7.2 · MIT · Built for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></sub>
 </p>
