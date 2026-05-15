@@ -1,0 +1,17 @@
+Based on the architecture knowledge I have:
+
+**Fastest: consume a Kafka event from the payment service.**
+
+The notification service should react to a `payment-completed` event rather than querying for it. This is the natural fit given:
+
+- **DB ownership rule** — one service, one DB. The notification service can't read the payments DB directly (and the `accounts` table shared-DB violation is already a known pain point, not something to repeat).
+- **Event-driven is already the pattern** — Magneton and related services already use Kafka heavily. The payment service should publish a completion event; the notification service subscribes and sends the receipt on consumption.
+
+If the event doesn't exist yet, the fallback is a **synchronous GraphQL call** to the payment service (per the [UPDATED] internal API pattern — GraphQL over gRPC for service-to-service, unless you need streaming).
+
+**Key Kafka gotchas to remember:**
+- Create a **dedicated consumer group** (e.g., `notification-receipt-sender`), never reuse the service's main `groupId`
+- Kafka compacted topics are **not deduplicated** — the last message for a key is truth, not the first. Design for idempotent receipt sending (don't send duplicates if you reprocess)
+- `max-poll-records: 1` is the Magneton default — fine for notifications, but be aware of throughput implications
+
+**TL;DR:** Subscribe to the payment completion Kafka topic. If that topic doesn't exist yet, ask the payments team to publish one — it's the right architectural boundary. Synchronous GraphQL query is the fallback if you need it immediately and can't wait for the event infrastructure.
