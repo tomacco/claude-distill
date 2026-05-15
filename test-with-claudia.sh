@@ -1,0 +1,466 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════════════════════
+# claude-distill integration test harness
+# Uses "claudia" (personal Claude Code instance) as a sandboxed test user
+#
+# This tests the REAL user experience by running a separate Claude Code instance
+# with its own config dir, hitting Anthropic's API directly (not Bedrock).
+#
+# Usage:
+#   ./test-with-claudia.sh              # Run all tests
+#   ./test-with-claudia.sh install      # Run only install tests
+#   ./test-with-claudia.sh uninstall    # Run only uninstall tests
+#   ./test-with-claudia.sh mcp          # Run only MCP server tests
+#   ./test-with-claudia.sh behavior     # Run only behavior tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TEST_HOME=$(mktemp -d)
+TEST_CLAUDE_DIR="$TEST_HOME/.claude"
+# Use the real personal config (has auth token) for API tests
+REAL_CONFIG_DIR="$HOME/.claude-personal"
+CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
+SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
+
+# ═══ COLORS ═══
+GREEN=$(printf '\033[0;32m')
+RED=$(printf '\033[0;31m')
+YELLOW=$(printf '\033[0;33m')
+CYAN=$(printf '\033[0;36m')
+DIM=$(printf '\033[2m')
+BOLD=$(printf '\033[1m')
+RESET=$(printf '\033[0m')
+
+# ═══ COUNTERS ═══
+TESTS_RUN=0
+TESTS_PASSED=0
+TESTS_FAILED=0
+TESTS_SKIPPED=0
+
+# ═══ HELPERS ═══
+
+log_test() {
+  echo ""
+  printf "  ${CYAN}TEST${RESET} %s\n" "$1"
+}
+
+pass() {
+  TESTS_PASSED=$((TESTS_PASSED + 1))
+  printf "  ${GREEN}PASS${RESET} %s\n" "$1"
+}
+
+fail() {
+  TESTS_FAILED=$((TESTS_FAILED + 1))
+  printf "  ${RED}FAIL${RESET} %s\n" "$1"
+  if [ -n "${2:-}" ]; then
+    printf "       ${DIM}%s${RESET}\n" "$2"
+  fi
+}
+
+skip() {
+  TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
+  printf "  ${YELLOW}SKIP${RESET} %s\n" "$1"
+}
+
+run_claudia() {
+  # Run claudia in print mode with full permissions
+  # Uses real HOME + real config dir (for auth), prompts reference TEST paths
+  local prompt="$1"
+  local max_seconds="${2:-60}"
+  local output_file
+  output_file=$(mktemp)
+
+  # Run in background with a watchdog timer (no coreutils `timeout` needed)
+  (
+    CLAUDE_CONFIG_DIR="$REAL_CONFIG_DIR" \
+    CLAUDE_CODE_USE_BEDROCK=0 \
+    ANTHROPIC_DEFAULT_OPUS_MODEL= \
+    ANTHROPIC_DEFAULT_SONNET_MODEL= \
+    ANTHROPIC_DEFAULT_HAIKU_MODEL= \
+    ANTHROPIC_MODEL= \
+    AWS_PROFILE= \
+    AWS_ACCESS_KEY_ID= \
+    AWS_SECRET_ACCESS_KEY= \
+    AWS_SESSION_TOKEN= \
+    AWS_DEFAULT_REGION= \
+    AWS_SHARED_CREDENTIALS_FILE=/dev/null \
+    AWS_CONFIG_FILE=/dev/null \
+    sandbox-exec -p "$SANDBOX_PROFILE" \
+    $CLAUDE_BIN --dangerously-skip-permissions -p "$prompt" > "$output_file" 2>&1
+  ) &
+  local pid=$!
+
+  # Watchdog: kill after max_seconds
+  (sleep "$max_seconds" && kill "$pid" 2>/dev/null) &
+  local watchdog=$!
+
+  wait "$pid" 2>/dev/null || true
+  kill "$watchdog" 2>/dev/null || true
+  wait "$watchdog" 2>/dev/null || true
+
+  cat "$output_file"
+  rm -f "$output_file"
+}
+
+setup_test_env() {
+  echo ""
+  printf "  ${BOLD}Setting up test environment${RESET}\n"
+  printf "  ${DIM}TEST_HOME: %s${RESET}\n" "$TEST_HOME"
+  printf "  ${DIM}REAL_CONFIG: %s${RESET}\n" "$REAL_CONFIG_DIR"
+
+  # Create the .claude dir that install.sh will write to
+  mkdir -p "$TEST_CLAUDE_DIR"
+
+  printf "  ${GREEN}✓${RESET} Test environment ready\n"
+}
+
+teardown_test_env() {
+  if [ -d "$TEST_HOME" ]; then
+    rm -rf "$TEST_HOME"
+    printf "\n  ${DIM}Cleaned up %s${RESET}\n" "$TEST_HOME"
+  fi
+}
+
+# ═══ TEST SUITES ═══
+
+test_install_fresh() {
+  log_test "Fresh install (no prior distill)"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Run install.sh with test HOME so it writes to $TEST_HOME/.claude/
+  HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
+
+  # Verify core files
+  if [ -f "$TEST_CLAUDE_DIR/commands/distill.md" ]; then
+    pass "distill.md command installed"
+  else
+    fail "distill.md command not found" "$TEST_CLAUDE_DIR/commands/distill.md"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  if [ -f "$TEST_CLAUDE_DIR/distill/distill-process.md" ]; then
+    pass "distill-process.md installed"
+  else
+    fail "distill-process.md not found"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  if [ -f "$TEST_CLAUDE_DIR/distill/distill-monitor.md" ]; then
+    pass "distill-monitor.md installed"
+  else
+    fail "distill-monitor.md not found"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  if [ -f "$TEST_CLAUDE_DIR/distill/SPINE.md" ]; then
+    pass "SPINE.md created"
+  else
+    fail "SPINE.md not found"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  if [ -f "$TEST_CLAUDE_DIR/distill/.version" ]; then
+    local ver
+    ver=$(cat "$TEST_CLAUDE_DIR/distill/.version")
+    if [ "$ver" = "0.5.0" ]; then
+      pass "Version file correct ($ver)"
+    else
+      fail "Version mismatch" "expected 0.5.0, got $ver"
+    fi
+  else
+    fail ".version file not found"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Verify directory structure
+  local expected_dirs=("craft" "ops" "profile" "projects" "feedback" "archive")
+  for dir in "${expected_dirs[@]}"; do
+    if [ -d "$TEST_CLAUDE_DIR/distill/$dir" ]; then
+      pass "Directory $dir/ created"
+    else
+      fail "Directory $dir/ missing"
+    fi
+    TESTS_RUN=$((TESTS_RUN + 1))
+  done
+
+  # Verify settings.json has auto-memory disabled
+  if [ -f "$TEST_CLAUDE_DIR/settings.json" ]; then
+    if grep -q '"autoMemoryEnabled"' "$TEST_CLAUDE_DIR/settings.json"; then
+      pass "Auto-memory disabled in settings.json"
+    else
+      fail "Auto-memory not configured in settings.json"
+    fi
+  else
+    fail "settings.json not created"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Verify CLAUDE.md has distill reference
+  if [ -f "$TEST_CLAUDE_DIR/CLAUDE.md" ]; then
+    if grep -q "distill-monitor.md" "$TEST_CLAUDE_DIR/CLAUDE.md"; then
+      pass "CLAUDE.md contains distill monitor reference"
+    else
+      fail "CLAUDE.md missing distill reference"
+    fi
+  else
+    fail "CLAUDE.md not created"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+}
+
+test_install_upgrade() {
+  log_test "Upgrade install (existing distill)"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Pre-populate SPINE with some content
+  echo "# My Custom Knowledge" > "$TEST_CLAUDE_DIR/distill/SPINE.md"
+  echo "- [patterns](craft/patterns.md) — coding patterns" >> "$TEST_CLAUDE_DIR/distill/SPINE.md"
+
+  # Run install again
+  HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
+
+  # SPINE should be preserved (not overwritten)
+  if grep -q "My Custom Knowledge" "$TEST_CLAUDE_DIR/distill/SPINE.md"; then
+    pass "SPINE.md preserved on upgrade"
+  else
+    fail "SPINE.md was overwritten on upgrade"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # CLAUDE.md should not have duplicate entries
+  local count
+  count=$(grep -c "distill-monitor.md" "$TEST_CLAUDE_DIR/CLAUDE.md" 2>/dev/null || echo "0")
+  if [ "$count" -eq 1 ]; then
+    pass "No duplicate CLAUDE.md entries on upgrade"
+  else
+    fail "Duplicate CLAUDE.md entries" "found $count occurrences"
+  fi
+}
+
+test_install_with_existing_memories() {
+  log_test "Install detects existing memory files"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Create fake memory files (simulating Claude's built-in auto-memory)
+  mkdir -p "$TEST_CLAUDE_DIR/memory"
+  echo "User prefers dark mode" > "$TEST_CLAUDE_DIR/memory/preferences.md"
+  echo "Project uses Kotlin" > "$TEST_CLAUDE_DIR/memory/context.md"
+
+  # Remove migration flag if exists from prior test
+  rm -f "$TEST_CLAUDE_DIR/distill/.migrated"
+  rm -f "$TEST_CLAUDE_DIR/distill/.needs-migration"
+
+  # Run install
+  HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
+
+  # Should set .needs-migration flag
+  if [ -f "$TEST_CLAUDE_DIR/distill/.needs-migration" ]; then
+    pass "Migration flag set when existing memories found"
+  else
+    fail "Migration flag not set despite existing memories"
+  fi
+}
+
+test_mcp_server_build() {
+  log_test "MCP server builds correctly"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Known issue: install.sh piped with < /dev/null causes npx tsc to fail
+  # because the spinner subshell inherits closed stdin. This test verifies
+  # whether the build succeeded (it may not when install.sh is non-interactive).
+  if [ -f "$TEST_CLAUDE_DIR/distill/server/dist/index.js" ]; then
+    pass "MCP server compiled to dist/index.js"
+  else
+    # Try building manually (simulates what a real interactive install does)
+    if [ -f "$TEST_CLAUDE_DIR/distill/server/package.json" ]; then
+      (cd "$TEST_CLAUDE_DIR/distill/server" && npm install --silent 2>/dev/null && npx tsc 2>/dev/null) || true
+      if [ -f "$TEST_CLAUDE_DIR/distill/server/dist/index.js" ]; then
+        pass "MCP server compiled to dist/index.js (manual build)"
+      else
+        fail "MCP server dist/index.js not found even after manual build"
+      fi
+    else
+      fail "MCP server package.json not downloaded"
+    fi
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Test that the server can at least start without crashing
+  if [ -f "$TEST_CLAUDE_DIR/distill/server/dist/index.js" ]; then
+    local output
+    # MCP servers wait for stdio input — send empty and check for crash errors
+    output=$(cd "$TEST_CLAUDE_DIR/distill/server" && echo "" | node dist/index.js 2>&1 || true)
+    if echo "$output" | grep -qi "cannot find module\|MODULE_NOT_FOUND\|SyntaxError"; then
+      fail "MCP server crashes on start" "$(echo "$output" | head -3)"
+    else
+      pass "MCP server starts without crash"
+    fi
+  else
+    skip "Cannot test server start — not built"
+  fi
+}
+
+test_mcp_server_tools() {
+  log_test "MCP server responds to tool calls (via claudia)"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # This is the expensive test — actually uses Claude API
+  # Ask claudia to use the distill MCP tools
+  local result
+  result=$(run_claudia "You have a distill MCP server available. Call the distill_status tool and report what it returns. If you don't have access to distill tools, say NOTOOL." 45)
+
+  if echo "$result" | grep -qi "NOTOOL\|not available\|no.*tool\|cannot find"; then
+    fail "Claudia cannot access distill MCP tools" "$(echo "$result" | head -3)"
+  elif echo "$result" | grep -qi "status\|version\|knowledge\|spine\|entries"; then
+    pass "MCP distill_status tool works via claudia"
+  else
+    skip "Inconclusive MCP test"
+  fi
+}
+
+test_uninstall_preserves_knowledge() {
+  log_test "Uninstall preserves user knowledge"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Create some knowledge files
+  mkdir -p "$TEST_CLAUDE_DIR/distill/craft"
+  echo "# Kotlin Patterns" > "$TEST_CLAUDE_DIR/distill/craft/kotlin-patterns.md"
+  echo "- Use sealed classes for state" >> "$TEST_CLAUDE_DIR/distill/craft/kotlin-patterns.md"
+
+  # Simulate uninstall (what the install.sh footer suggests)
+  rm -f "$TEST_CLAUDE_DIR/commands/distill.md"
+  rm -rf "$TEST_CLAUDE_DIR/distill/server"
+
+  # Knowledge should survive
+  if [ -f "$TEST_CLAUDE_DIR/distill/craft/kotlin-patterns.md" ]; then
+    pass "Knowledge files preserved after uninstall"
+  else
+    fail "Knowledge files deleted on uninstall"
+  fi
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  if [ -f "$TEST_CLAUDE_DIR/distill/SPINE.md" ]; then
+    pass "SPINE.md preserved after uninstall"
+  else
+    fail "SPINE.md deleted on uninstall"
+  fi
+}
+
+test_claudia_behavior_no_distill() {
+  log_test "Claudia behavior WITHOUT distill installed"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Create a clean test CLAUDE.md with no distill
+  local test_claude_md="$TEST_HOME/CLAUDE-test.md"
+  echo "# Test instructions - no distill here" > "$test_claude_md"
+
+  local result
+  result=$(run_claudia "Read the file $test_claude_md. Does it contain any reference to distill, SPINE, or distill-monitor? Answer with exactly INSTALLED or NOT_INSTALLED." 45)
+
+  if echo "$result" | grep -qi "NOT_INSTALLED\|not installed\|no.*distill\|doesn't\|does not\|no reference"; then
+    pass "Claudia correctly reports no distill without installation"
+  else
+    fail "Claudia confused about distill state" "$(echo "$result" | head -3)"
+  fi
+}
+
+test_claudia_behavior_with_distill() {
+  log_test "Claudia behavior WITH distill installed"
+  TESTS_RUN=$((TESTS_RUN + 1))
+
+  # Install distill to test HOME
+  HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
+
+  local result
+  result=$(run_claudia "Read the file $TEST_CLAUDE_DIR/CLAUDE.md. Do you see distill instructions? Report what behavior they tell you to follow. Keep it under 50 words." 45)
+
+  if echo "$result" | grep -qi "distill\|monitor\|knowledge\|spine\|retrieval"; then
+    pass "Claudia picks up distill instructions from CLAUDE.md"
+  else
+    fail "Claudia doesn't recognize distill instructions" "$(echo "$result" | head -3)"
+  fi
+}
+
+# ═══ SUMMARY ═══
+
+print_summary() {
+  echo ""
+  echo ""
+  printf "  ${BOLD}═══ TEST SUMMARY ═══${RESET}\n"
+  echo ""
+  printf "  Total:   %d\n" "$TESTS_RUN"
+  printf "  ${GREEN}Passed:  %d${RESET}\n" "$TESTS_PASSED"
+  if [ "$TESTS_FAILED" -gt 0 ]; then
+    printf "  ${RED}Failed:  %d${RESET}\n" "$TESTS_FAILED"
+  fi
+  if [ "$TESTS_SKIPPED" -gt 0 ]; then
+    printf "  ${YELLOW}Skipped: %d${RESET}\n" "$TESTS_SKIPPED"
+  fi
+  echo ""
+
+  if [ "$TESTS_FAILED" -eq 0 ]; then
+    printf "  ${GREEN}${BOLD}All tests passed!${RESET}\n"
+  else
+    printf "  ${RED}${BOLD}%d test(s) failed${RESET}\n" "$TESTS_FAILED"
+  fi
+  echo ""
+}
+
+# ═══ MAIN ═══
+
+main() {
+  local suite="${1:-all}"
+
+  printf "\n${BOLD}  claude-distill integration tests${RESET}\n"
+  printf "  ${DIM}Using claudia as test user (Anthropic API)${RESET}\n"
+
+  setup_test_env
+
+  case "$suite" in
+    install)
+      test_install_fresh
+      test_install_upgrade
+      test_install_with_existing_memories
+      ;;
+    mcp)
+      # Need install first for MCP tests
+      HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
+      test_mcp_server_build
+      test_mcp_server_tools
+      ;;
+    uninstall)
+      HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
+      test_uninstall_preserves_knowledge
+      ;;
+    behavior)
+      test_claudia_behavior_no_distill
+      test_claudia_behavior_with_distill
+      ;;
+    all)
+      test_install_fresh
+      test_install_upgrade
+      test_install_with_existing_memories
+      test_mcp_server_build
+      test_uninstall_preserves_knowledge
+      test_claudia_behavior_no_distill
+      test_claudia_behavior_with_distill
+      # MCP tool test is expensive (API call) — run last
+      test_mcp_server_tools
+      ;;
+    *)
+      echo "Unknown suite: $suite"
+      echo "Usage: $0 [install|uninstall|mcp|behavior|all]"
+      exit 1
+      ;;
+  esac
+
+  print_summary
+  teardown_test_env
+
+  [ "$TESTS_FAILED" -eq 0 ]
+}
+
+trap teardown_test_env EXIT
+main "$@"

@@ -4,18 +4,16 @@
 
 set -e
 
-VERSION="0.5.0"
-BUILD="20260508-11"
-REPO="https://raw.githubusercontent.com/tomacco/claude-distill/harden/retrieval-gate"
+VERSION="0.6.0"
+BUILD="20260515-01"
+REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
 CMD_DIR="$HOME/.claude/commands"
 DISTILL_DIR="$HOME/.claude/distill"
-SERVER_DIR="$DISTILL_DIR/server"
+RULES_DIR="$HOME/.claude/rules"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
-DISTILL_LINE='# Distill — read ~/.claude/distill/distill-monitor.md and follow its instructions
+DISTILL_LINE='# Distill — knowledge system (github.com/tomacco/claude-distill)
 
-IMPORTANT: Distill OVERRIDES the auto-memory system for knowledge management. Do NOT save learnings, corrections, preferences, or user observations to memory/ files. Instead, note them as signals for /distill which has anti-sycophancy checks, frustration escalation, and proper tiered storage. The built-in memory system is disabled for these purposes when distill is installed.
-
-GATE: If ~/.claude/distill/.needs-migration exists, you MUST tell the user BEFORE doing anything else: "Distill was just installed. You have existing memories that need migrating. Run /distill now to bring them in — otherwise you are working without your learnings." Do NOT proceed with any other task until migration is addressed or user explicitly declines.'
+GATE: If ~/.claude/distill/.needs-migration exists, tell the user: "Run /distill to migrate existing memories." Do NOT proceed until addressed or declined.'
 
 # ═══ COLORS & FORMATTING ═══
 CYAN=$(printf '\033[0;36m')
@@ -146,98 +144,13 @@ else
     skip_msg "SPINE.md ${DIM}(preserved)${RESET}"
 fi
 
-# ═══ MCP SERVER ═══
+# ═══ KNOWLEDGE RETRIEVAL (rules file) ═══
 
-show_section "MCP Server"
+show_section "Knowledge retrieval"
 
-MCP_INSTALLED=false
-
-if ! command -v node &> /dev/null; then
-    warn_msg "Node.js not found"
-    echo ""
-    printf "  ${BOLD}The MCP server requires Node.js 18+.${RESET}\n"
-    printf "  ${DIM}Without it, distill works but without smart retrieval or observability.${RESET}\n"
-    echo ""
-    printf "  ${DIM}Install Node.js now? Options:${RESET}\n"
-    printf "    ${CYAN}1${RESET}) brew install node ${DIM}(recommended on macOS)${RESET}\n"
-    printf "    ${CYAN}2${RESET}) I'll install it myself later\n"
-    echo ""
-    printf "  ${BOLD}Choice [1/2]:${RESET} "
-    read -r node_choice < /dev/tty
-    if [[ "$node_choice" == "1" ]]; then
-        if command -v brew &> /dev/null; then
-            echo ""
-            (brew install node 2>&1 | tail -3) &
-            spinner $! "Installing Node.js via Homebrew..."
-            if command -v node &> /dev/null; then
-                done_msg "Node.js installed ($(node -v))"
-            else
-                fail_msg "Homebrew install didn't add node to PATH"
-                warn_msg "Continuing without MCP server (fallback mode)"
-            fi
-        else
-            fail_msg "Homebrew not found"
-            info_msg "Install from: https://nodejs.org/en/download"
-            warn_msg "Continuing without MCP server (fallback mode)"
-        fi
-    else
-        skip_msg "Skipping Node.js — MCP server disabled"
-        info_msg "Install Node 18+ and re-run to enable smart retrieval"
-    fi
-else
-    NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
-    if [ "$NODE_VERSION" -lt 18 ]; then
-        warn_msg "Node.js v${NODE_VERSION} found, need 18+ — skipping MCP server"
-    else
-        # Download server
-        mkdir -p "$SERVER_DIR/src"
-        
-        curl -sL "$REPO/server/package.json" -o "$SERVER_DIR/package.json"
-        curl -sL "$REPO/server/tsconfig.json" -o "$SERVER_DIR/tsconfig.json"
-        curl -sL "$REPO/server/src/index.ts" -o "$SERVER_DIR/src/index.ts"
-        curl -sL "$REPO/server/src/db.ts" -o "$SERVER_DIR/src/db.ts"
-        curl -sL "$REPO/server/src/retrieval.ts" -o "$SERVER_DIR/src/retrieval.ts"
-        done_msg "Server source downloaded"
-
-        # Install deps (with spinner)
-        (cd "$SERVER_DIR" && npm install --registry https://registry.npmjs.org --silent 2>&1 > /dev/null) &
-        spinner $! "Installing dependencies..."
-        if [ $? -eq 0 ]; then
-            done_msg "Dependencies installed"
-        else
-            fail_msg "npm install failed"
-            warn_msg "MCP server won't be available (fallback mode active)"
-            MCP_INSTALLED=false
-        fi
-
-        # Build (with spinner)
-        if [ "$MCP_INSTALLED" != "false" ]; then
-            (cd "$SERVER_DIR" && npx tsc 2>&1 > /dev/null) &
-            spinner $! "Building server..."
-            if [ $? -eq 0 ]; then
-                done_msg "Server built"
-            else
-                fail_msg "Build failed"
-                warn_msg "MCP server won't be available (fallback mode active)"
-                MCP_INSTALLED=false
-            fi
-        fi
-
-        # Register MCP (only if build succeeded)
-        if [ "$MCP_INSTALLED" != "false" ]; then
-            if command -v claude &> /dev/null; then
-                claude mcp remove distill 2>/dev/null || true
-                claude mcp add --scope user --transport stdio distill -- node "$SERVER_DIR/dist/index.js" 2>/dev/null
-                done_msg "Registered globally ${DIM}(user scope)${RESET}"
-                MCP_INSTALLED=true
-            else
-                warn_msg "'claude' CLI not in PATH — server built but not registered"
-                info_msg "Run: claude mcp add --scope user --transport stdio distill -- node $SERVER_DIR/dist/index.js"
-                MCP_INSTALLED=true
-            fi
-        fi
-    fi
-fi
+mkdir -p "$RULES_DIR"
+curl -sL "$REPO/rules/distill.md" -o "$RULES_DIR/distill.md"
+done_msg "rules/distill.md ${DIM}(auto-loads every session)${RESET}"
 
 # ═══ CLAUDE.md INTEGRATION ═══
 
@@ -260,61 +173,23 @@ else
 fi
 
 if [ -f "$CLAUDE_MD" ]; then
-    if grep -q "distill-monitor.md" "$CLAUDE_MD" 2>/dev/null; then
+    if grep -q "claude-distill" "$CLAUDE_MD" 2>/dev/null; then
         done_msg "CLAUDE.md ${DIM}(already configured)${RESET}"
-
-    elif grep -q "distill/SPINE.md" "$CLAUDE_MD" 2>/dev/null; then
-        echo ""
-        info_msg "Older distill reference found in CLAUDE.md"
-        info_msg "New version adds smart retrieval + pressure tracking"
-        echo ""
-        printf "  ${BOLD}Replace old line?${RESET} ${DIM}[Y/n]${RESET} "
-        read -r response < /dev/tty
-        if [[ "$response" =~ ^[Nn] ]]; then
-            skip_msg "Kept old reference"
-        else
-            sed -i.bak '/distill\/SPINE.md/d' "$CLAUDE_MD"
-            rm -f "$CLAUDE_MD.bak"
-            echo "" >> "$CLAUDE_MD"
-            echo "$DISTILL_LINE" >> "$CLAUDE_MD"
-            done_msg "CLAUDE.md upgraded"
-        fi
+    elif grep -q "distill" "$CLAUDE_MD" 2>/dev/null; then
+        # Older version reference — replace it
+        sed -i.bak '/distill/d' "$CLAUDE_MD"
+        rm -f "$CLAUDE_MD.bak"
+        echo "" >> "$CLAUDE_MD"
+        echo "$DISTILL_LINE" >> "$CLAUDE_MD"
+        done_msg "CLAUDE.md ${DIM}(upgraded)${RESET}"
     else
-        echo ""
-        printf "  ${BOLD}To work across sessions, distill adds one line to CLAUDE.md:${RESET}\n"
-        echo ""
-        printf "    ${CYAN}%s${RESET}\n" "$DISTILL_LINE"
-        echo ""
-        printf "  ${DIM}This enables:${RESET}\n"
-        printf "    ${DIM}• Smart knowledge retrieval before writing code${RESET}\n"
-        printf "    ${DIM}• Memory pressure tracking + automatic suggestions${RESET}\n"
-        printf "    ${DIM}• Observable: see what memories Claude accesses${RESET}\n"
-        echo ""
-        printf "  ${BOLD}Add this line?${RESET} ${DIM}[Y/n]${RESET} "
-        read -r response < /dev/tty
-        if [[ "$response" =~ ^[Nn] ]]; then
-            echo ""
-            fail_msg "Installation cancelled."
-            echo ""
-            printf "    ${DIM}This line is required. Without it, sessions can't${RESET}\n"
-            printf "    ${DIM}load knowledge or evolve globally.${RESET}\n"
-            echo ""
-            printf "    ${DIM}Run the installer again when ready.${RESET}\n"
-            rm -f "$CMD_DIR/distill.md"
-            rm -f "$DISTILL_DIR/distill-process.md"
-            rm -f "$DISTILL_DIR/distill-monitor.md"
-            rm -f "$DISTILL_DIR/.version"
-            echo ""
-            exit 1
-        else
-            echo "" >> "$CLAUDE_MD"
-            echo "$DISTILL_LINE" >> "$CLAUDE_MD"
-            done_msg "CLAUDE.md configured"
-        fi
+        echo "" >> "$CLAUDE_MD"
+        echo "$DISTILL_LINE" >> "$CLAUDE_MD"
+        done_msg "CLAUDE.md configured"
     fi
 else
     echo "$DISTILL_LINE" > "$CLAUDE_MD"
-    done_msg "Created CLAUDE.md with distill reference"
+    done_msg "Created CLAUDE.md"
 fi
 
 # ═══ MEMORY MIGRATION CHECK ═══
@@ -345,13 +220,8 @@ echo ""
 echo ""
 printf "  ${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"
 echo ""
-if [ "$MCP_INSTALLED" = true ]; then
-    printf "  ${GREEN}${BOLD}Installed with MCP server${RESET}\n"
-    printf "  ${DIM}Smart retrieval + observability enabled${RESET}\n"
-else
-    printf "  ${GREEN}${BOLD}Installed (fallback mode)${RESET}\n"
-    printf "  ${DIM}Reads SPINE directly — install Node 18+ for smart retrieval${RESET}\n"
-fi
+printf "  ${GREEN}${BOLD}Installed${RESET}\n"
+printf "  ${DIM}Zero dependencies. Just files.${RESET}\n"
 echo ""
 printf "  ${DIM}Version:  ${RESET}v${VERSION}\n"
 printf "  ${DIM}Command:  ${RESET}/distill\n"
@@ -359,11 +229,10 @@ printf "  ${DIM}Knowledge:${RESET} ~/.claude/distill/\n"
 echo ""
 if [ -n "$EXISTING_VERSION" ]; then
     printf "  ${CYAN}Upgraded${RESET} v${EXISTING_VERSION} → v${VERSION}\n"
+    echo ""
 fi
-echo ""
-printf "  ${DIM}Uninstall (removes command + server, keeps your learnings):${RESET}\n"
-printf "    ${DIM}claude mcp remove distill && rm ~/.claude/commands/distill.md${RESET}\n"
-printf "    ${DIM}Your knowledge stays in ~/.claude/distill/ — it's yours.${RESET}\n"
+printf "  ${DIM}Uninstall (keeps your learnings):${RESET}\n"
+printf "    ${DIM}rm -rf ~/.claude/distill ~/.claude/commands/distill.md ~/.claude/rules/distill.md${RESET}\n"
 echo ""
 printf "  ${PURPLE}say what matters. it's listening.${RESET}\n"
 echo ""

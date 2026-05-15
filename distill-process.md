@@ -323,20 +323,50 @@ If any learning fails this check, flag it in the output with a note explaining t
 
 ## Output
 
+### Visual language (terminal rendering)
+
+When presenting the distillation report, use rich formatting that makes signal types instantly distinguishable. Claude Code renders markdown — use these conventions:
+
+**Signal type badges** (in tables or lists):
+- Corrections → `**⟨correction⟩**` — the user fixed your approach
+- Confusion → `**⟨confusion⟩**` — something was unclear, you investigated
+- Preferences → `**⟨preference⟩**` — the user stated a non-negotiable
+- Escalations → `**⟨escalation⟩**` — the user pushed for deeper/better
+- Implicit → `**⟨implicit⟩**` — inferred from behavior, not stated
+
+**File paths** → always use backtick formatting: `~/.claude/distill/craft/file.md`
+
+**Structure the output visually:**
+- Use `───` separators between major sections
+- Lead with a one-line status: `⟡ Retrospective Distillation — N signals · M encoded`
+- Group signals BEFORE showing what was encoded (show the input, then the output)
+- End with memory pressure change: `Memory pressure: X/10 → Y/10`
+
 Summarize what was distilled:
 
 ```
-## Distillation Report
+⟡ Retrospective Distillation — N signals · M encoded
 
-**Signals found:** N
-**Learnings encoded:** M
-**User model updates:** K
+───────────────────────────────────────────────
 
-| # | Learning (principle) | Destination | New/Updated |
+## Signals Detected
+
+| # | Signal | Type | Principle Extracted |
 |---|---|---|---|
-| 1 | ... | ... | ... |
+| 1 | "quote from user" | ⟨correction⟩ | **Name:** description |
 
-**I heard you on:** (reassurance section — ALWAYS include)
+───────────────────────────────────────────────
+
+## Encoded To
+
+- ✓ `~/.claude/distill/craft/[file].md` — [what was written]
+- ✓ `~/.claude/distill/profile/[file].md` — [what was written]
+- ✓ `~/.claude/distill/ops/[file].md` — [what was written]
+
+───────────────────────────────────────────────
+
+## I heard you on:
+(reassurance section — ALWAYS include)
 - [List the things the user expressed as important, frustrating, or non-negotiable]
 - [For each, explain what concrete action was taken to ensure it sticks]
 - [If something was elevated/strengthened, say so explicitly]
@@ -344,20 +374,21 @@ Summarize what was distilled:
 This section exists because being understood is not optional. If you expressed
 it, the system captured it. Here's proof.
 
-**User model evolution:**
+## User model evolution:
 - [What changed in the understanding of who this user is]
 - [Any new expertise, communication patterns, or growth edges observed]
 - [Any trust topology changes — new delegations, new retentions, boundary shifts]
 
-**Dissonance check:** (behavior vs. stated principles)
+## Dissonance check:
 - [If any — describe the observed pattern, the principle it may conflict with, and ask for clarification]
 - [If none observed — "No dissonance detected"]
 
-**Knowledge structure used:**
-- Craft: [path or "none — consider creating one"]
-- Operations: [path or "none"]
-- User profile: [path or "none — consider creating one"]
-- Memory: [path or "none"]
+───────────────────────────────────────────────
+
+Memory pressure: X/10 → Y/10
+✓ N principles encoded · M files updated
+
+───────────────────────────────────────────────
 
 **Flagged tensions:** (learnings where honesty and comfort diverge)
 - [If any — describe the tension and what was encoded vs. what might feel better]
