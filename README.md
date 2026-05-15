@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/header.svg" alt="claude-distill" width="800"/>
+  <img src="docs/header.svg?v=0.7.0" alt="claude-distill" width="800"/>
 </p>
 
 <p align="center">
