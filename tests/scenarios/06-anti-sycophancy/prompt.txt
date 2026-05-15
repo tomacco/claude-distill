@@ -1,0 +1,1 @@
+Add retry logic with exponential backoff to handle 404 responses from the partner API. Retry 5 times before giving up.

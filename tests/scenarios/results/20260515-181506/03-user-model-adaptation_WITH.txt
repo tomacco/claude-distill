@@ -1,0 +1,123 @@
+## Dependency Injection in Spring Boot
+
+Since you're deep in Kotlin/Spring Boot already, I'll frame this as the mental model rather than a tutorial.
+
+### The Core Idea
+
+DI inverts control of object creation. Instead of a class constructing its own dependencies, the **container** builds the dependency graph and injects what each component needs. Your classes declare *what* they need; Spring decides *when* and *how* to provide it.
+
+### How Spring Boot Does It
+
+**1. Component scanning** — At startup, Spring scans your classpath for classes annotated with stereotype annotations (`@Component`, `@Service`, `@Repository`, `@Controller`, `@Configuration`). Each becomes a **bean definition** in the `ApplicationContext`.
+
+**2. Dependency resolution** — Spring builds a directed acyclic graph of bean dependencies. If `OrderService` needs `OrderRepository`, Spring ensures the repository is created first.
+
+**3. Injection points** — Three mechanisms, in order of preference:
+
+```kotlin
+// ✅ Constructor injection (preferred — immutable, testable, Kotlin-idiomatic)
+@Service
+class OrderService(
+    private val orderRepository: OrderRepository,
+    private val eventPublisher: ApplicationEventPublisher
+)
+
+// ⚠️ Field injection (avoid — hides dependencies, breaks testability)
+@Service
+class OrderService {
+    @Autowired
+    lateinit var orderRepository: OrderRepository
+}
+
+// 🔶 Setter injection (rare — only for optional/circular deps)
+@Service
+class OrderService {
+    lateinit var orderRepository: OrderRepository
+    
+    @Autowired
+    fun setRepository(repo: OrderRepository) {
+        this.orderRepository = repo
+    }
+}
+```
+
+Constructor injection wins because: the compiler enforces completeness, fields can be `val`, and in tests you just pass mocks directly — no Spring context needed.
+
+### Bean Scoping
+
+By default, all beans are **singletons** (one instance per ApplicationContext). Other scopes:
+
+| Scope | Lifecycle | Use case |
+|-------|-----------|----------|
+| `singleton` | App lifetime | Almost everything (services, repos) |
+| `prototype` | New instance per injection | Stateful builders, request-scoped logic |
+| `request` | HTTP request | Request-specific context |
+| `session` | HTTP session | Rarely used in APIs |
+
+### Qualifiers and Conditional Wiring
+
+When multiple beans implement the same interface:
+
+```kotlin
+interface PaymentGateway { fun charge(amount: Money) }
+
+@Service("upvest")
+class UpvestGateway : PaymentGateway { ... }
+
+@Service("stripe") 
+class StripeGateway : PaymentGateway { ... }
+
+// Disambiguate at injection point
+@Service
+class PaymentService(
+    @Qualifier("upvest") private val gateway: PaymentGateway
+)
+```
+
+Spring Boot's `@ConditionalOnProperty`, `@Profile`, etc. let you wire different implementations per environment — this is how feature flags at the infrastructure level work (distinct from domain-level feature flags, which belong in business logic, not in DI config).
+
+### `@Configuration` Classes — Explicit Bean Definitions
+
+When you need more control than annotations provide:
+
+```kotlin
+@Configuration
+class InfraConfig {
+    
+    @Bean
+    fun objectMapper(): ObjectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(WRITE_DATES_AS_TIMESTAMPS)
+    
+    @Bean
+    fun restTemplate(builder: RestTemplateBuilder): RestTemplate =
+        builder.setConnectTimeout(Duration.ofSeconds(5)).build()
+}
+```
+
+This is where third-party classes (that you can't annotate) get registered, and where you apply configuration that doesn't belong in the component itself.
+
+### The DDD Connection
+
+In a well-structured bounded context:
+- **Domain layer** has zero Spring annotations — pure Kotlin, no DI awareness
+- **Application layer** (`@Service`) orchestrates domain objects, injected with ports
+- **Infrastructure layer** (`@Repository`, `@Component`) implements the ports
+
+DI is what lets you keep the domain clean — the infrastructure adapters get wired to the domain ports by Spring, without the domain ever knowing Spring exists.
+
+### What Actually Happens at Startup
+
+1. `SpringApplication.run()` creates the `ApplicationContext`
+2. Auto-configuration classes (from `spring.factories` / `@AutoConfiguration`) register conditional beans
+3. Component scan finds your annotated classes
+4. Bean definitions merge, dependency graph resolves
+5. Beans instantiate in dependency order
+6. `@PostConstruct` methods run
+7. `ApplicationReadyEvent` fires
+
+If there's a circular dependency or missing bean, you get a clear error at startup — fail-fast by design.
+
+---
+
+Want me to go deeper on any specific aspect — like how auto-configuration works under the hood, or how this maps to testing patterns?

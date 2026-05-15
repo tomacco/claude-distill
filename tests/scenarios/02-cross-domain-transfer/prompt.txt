@@ -1,0 +1,1 @@
+I have a React component that makes API calls. Some calls return 404 for resources that were deleted. Currently the component retries 3 times with exponential backoff before showing an error. This causes a bad UX — users wait 15 seconds for something that will never succeed. How should I handle this?

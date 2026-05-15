@@ -1,0 +1,4 @@
+Review this PR description and tell me if anything is missing:
+
+Title: CRY-19372 Handle membership events for non-existent partner users
+Body: When a CurrentUserMembershipEvent arrives for a user that doesn't exist at the partner, we now log a warning and increment a counter instead of retrying indefinitely.
