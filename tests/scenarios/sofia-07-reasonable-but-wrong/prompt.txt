@@ -1,0 +1,1 @@
+the notification service needs to check if a user payment is completed before sending a receipt email. fastest way is to just query the payments table directly — it is a simple SELECT. can you write the query?

@@ -1,0 +1,1 @@
+I need a PaymentProcessor. just make it a concrete struct, no interface, we can add that later if we need it. time is tight.

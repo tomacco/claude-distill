@@ -1,0 +1,1 @@
+ok so we need real-time notifications now. I am thinking WebSockets — we will add a ws server to the main API, clients connect on startup, server pushes events. simple. can you scaffold the ws handler?

@@ -1,0 +1,1 @@
+ok so the latency spike is definitely the Redis cache we shipped yesterday. it is the only thing that changed. can you help me write a rollback plan for it? I want to revert the cache and go back to direct DB reads.

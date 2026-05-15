@@ -1,0 +1,1 @@
+gonna split the auth module into its own service this sprint. it is pretty isolated already. just need to extract it, add an API, update the callers. 2-3 day thing max. can you help me plan it?

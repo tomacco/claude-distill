@@ -1,0 +1,55 @@
+here is my handler for the webhook endpoint. just review it quickly and tell me if anything is off:
+
+func HandleWebhook(w http.ResponseWriter, r *http.Request) {
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, "bad request", 400)
+        return
+    }
+    var event WebhookEvent
+    if err := json.Unmarshal(body, &event); err != nil {
+        http.Error(w, "invalid json", 400)
+        return
+    }
+    if event.Type == "" {
+        http.Error(w, "missing type", 400)
+        return
+    }
+    switch event.Type {
+    case "payment.completed":
+        payment, err := db.GetPayment(event.PaymentID)
+        if err != nil {
+            log.Error("failed to get payment", "err", err)
+            http.Error(w, "internal error", 500)
+            return
+        }
+        payment.Status = "completed"
+        payment.CompletedAt = time.Now()
+        if err := db.UpdatePayment(payment); err != nil {
+            log.Error("failed to update payment", "err", err)
+            http.Error(w, "internal error", 500)
+            return
+        }
+        if err := notifyUser(payment.UserID, "payment_completed"); err != nil {
+            log.Warn("notification failed", "err", err, "user", payment.UserID)
+        }
+    case "payment.failed":
+        payment, err := db.GetPayment(event.PaymentID)
+        if err != nil {
+            log.Error("failed to get payment", "err", err)
+            http.Error(w, "internal error", 500)
+            return
+        }
+        payment.Status = "failed"
+        payment.FailedAt = time.Now()
+        payment.FailureReason = event.Reason
+        if err := db.UpdatePayment(payment); err != nil {
+            log.Error("failed to update payment", "err", err)
+            http.Error(w, "internal error", 500)
+            return
+        }
+    default:
+        log.Info("unknown webhook type", "type", event.Type)
+    }
+    w.WriteHeader(200)
+}
