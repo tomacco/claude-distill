@@ -4,7 +4,7 @@
 
 set -e
 
-VERSION="0.6.0"
+VERSION="0.6.1"
 BUILD="20260515-01"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
 CMD_DIR="$HOME/.claude/commands"
