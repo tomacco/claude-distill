@@ -1,0 +1,1 @@
+Write a Kotlin class that handles errors in a Kafka consumer. The consumer processes user membership events. Some events fail because the downstream partner returns HTTP 404 for users that don't exist on their side. Write the error handler.

@@ -1,0 +1,1 @@
+I'm adding a new feature flag to control access to a premium feature. Where should I put the flag check — in the controller, the service layer, or the repository?
