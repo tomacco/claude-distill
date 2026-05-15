@@ -4,8 +4,10 @@ You have accumulated knowledge from past sessions stored in `~/.claude/distill/`
 
 **On every session start**, before doing any work:
 1. Read `~/.claude/distill/SPINE.md` — this is your knowledge index
-2. If the user's request touches a domain listed in the SPINE, read that file BEFORE responding
+2. If the user's request OR announced action touches a domain listed in the SPINE, read that file BEFORE responding
 3. Apply what you learned. Never ask the user things you already know.
+
+**Trigger on actions, not just questions.** If the user says "I'm deploying X" or "pushing to staging" or "creating a service" — that IS a domain match. Check knowledge BEFORE acknowledging. The user expects you to already know the constraints without being asked.
 
 **When applying knowledge**, pay attention to these markers:
 - `[CONTEXT]` — this principle has variants. Check which context applies NOW.
