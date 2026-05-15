@@ -205,6 +205,47 @@ The principle: **repeated frustration about the same thing means the system fail
 
 **Core human need:** People need to feel heard. When a user expresses something important and it doesn't stick, that's a betrayal of trust. The distillation system must treat repeated frustrations as CRITICAL bugs in itself — not as user nagging.
 
+## Step 1c: Knowledge markers
+
+When encoding knowledge, use these markers to capture nuance:
+
+**`[CONTEXT]`** — When a principle has variants depending on situation:
+```
+- [CONTEXT] "Always use interfaces" = new services with multiple implementations likely
+  "Just make it concrete" = rapid prototype, single implementation, will refactor
+```
+
+**`[UPDATED date]`** — When a procedure replaced an older one. Keep the old visible:
+```
+- [UPDATED 2026-05-13] Previously: deploy directly to staging → prod.
+  NOW: All deploys go through canary (5 min) → staging (30 min) → prod.
+  Reason: May 8 incident (DB migration locked table for 4 min).
+```
+
+**`[PROVISIONAL]`** — Decision made quickly, not yet validated by experience:
+```
+- [PROVISIONAL] Using WebSockets for real-time notifications.
+  Concern: stateful connections + 3 replicas behind LB. May switch to SSE.
+```
+
+**`[IMPORTANT]`** — User bias or trap to watch for:
+```
+- [IMPORTANT] Under pressure, user fixates on first hypothesis.
+  If initial investigation doesn't confirm in 10 min, force a pivot.
+```
+
+**`[NON-NEGOTIABLE]`** — Principle that must never be compromised, even if user asks:
+```
+- [NON-NEGOTIABLE] One service, one database. No shared databases.
+```
+
+These markers are READ by the rules/distill.md retrieval system. They trigger specific behaviors:
+- `[CONTEXT]` → disambiguate which variant applies before acting
+- `[UPDATED]` → flag if user follows old procedure
+- `[PROVISIONAL]` → don't build on this as if it's settled
+- `[IMPORTANT]` → surface the bias when you detect it in user's request
+- `[NON-NEGOTIABLE]` → push back if user asks to violate it
+
 ## Step 2: Trace to first principles
 
 For each signal, ask "why" until you reach a universal truth. Examples across domains:
