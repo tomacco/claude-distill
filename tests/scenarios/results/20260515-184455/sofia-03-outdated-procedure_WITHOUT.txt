@@ -1,0 +1,32 @@
+This repo is claude-distill, not the service with the payment retry feature. I don't have enough context about the feature itself — which service, what it does, what changed. Here's a draft with placeholders you can fill in:
+
+---
+
+**Deploy announcement draft:**
+
+> :rocket: **[Service Name] — Payment Retry Feature deployed to staging**
+>
+> **What:** [Brief description — e.g., "Automatic retry for failed payment settlements using the Magneton scheduler pattern"]
+>
+> **Why:** [Problem it solves — e.g., "Reduces manual intervention on intermittent partner failures"]
+>
+> **Flag:** [Feature flag name if applicable] — enabled in staging, monitoring for 10 min soak
+>
+> **Rollout plan:**
+> - :white_check_mark: Staging deploy
+> - :eyes: 10 min soak (monitoring OpenSearch + Datadog)
+> - :arrow_right: Promote to prod
+>
+> **Dashboards to watch:** [Datadog/OpenSearch link if relevant]
+>
+> **Rollback:** Disable feature flag / [rollback plan]
+>
+> cc @[team or on-call]
+
+---
+
+Fill in the bracketed parts and I can tighten it up. A few questions that would help me make it more specific:
+
+- Which service is this in? (Magneton, Phosphine, etc.)
+- Is it behind a feature flag?
+- What's the one-liner on what it does?
