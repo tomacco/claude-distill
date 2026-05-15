@@ -1451,8 +1451,8 @@
     <pre class="neural-canvas" id="neural-canvas" aria-hidden="true"></pre>
     <div class="title-group">
         <h1 class="title">claude-<span>distill</span></h1>
-        <p class="tagline">every session makes all sessions better</p>
-        <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">say what matters. it's listening.</p>
+        <p class="tagline">not what it remembers &mdash; how it learns</p>
+        <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">first-principles memory for Claude Code</p>
     </div>
     <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
     <div class="scroll-hint" id="scroll-hint">
@@ -1504,59 +1504,59 @@
             <div class="how-num">1</div>
             <div class="how-icon">&#x1F4AC;</div>
             <h3>Work normally</h3>
-            <p>Use Claude Code as always. Express preferences, correct mistakes, teach things. Distill is listening in the background&nbsp;&mdash; no behavior change needed.</p>
+            <p>Express preferences, correct mistakes, teach things. Claude's built-in memory saves facts &mdash; distill watches for the deeper patterns behind them.</p>
         </div>
         <div class="how-arrow">&rarr;</div>
         <div class="how-step">
             <div class="how-num">2</div>
             <div class="how-icon">&#x2F;</div>
             <h3>Type <code>/distill</code></h3>
-            <p>When you feel the session was valuable. It harvests signals (corrections, preferences, surprises), traces each to a first principle, and encodes it.</p>
+            <p>It traces corrections to first principles, not surface observations. "Don't use the shared factory" becomes "blast radius awareness" &mdash; applicable everywhere.</p>
         </div>
         <div class="how-arrow">&rarr;</div>
         <div class="how-step">
             <div class="how-num">3</div>
             <div class="how-icon">&#x267B;</div>
-            <h3>Every session improves</h3>
-            <p>Next session &mdash; any project, any repo &mdash; Claude already knows what you taught it. No repetition. No forgetting. Compounding intelligence.</p>
+            <h3>Principles compound</h3>
+            <p>Next session &mdash; any project, any repo &mdash; Claude retrieves by relevance, not recency. Tiered storage means the right knowledge at the right time.</p>
         </div>
     </div>
 </div>
 
-<!-- ═══ WHAT IT CAPTURES — visual grid ═══ -->
+<!-- ═══ WHAT'S DIFFERENT — visual grid ═══ -->
 <div class="captures-section">
-    <div class="section-label reveal">What it captures</div>
-    <h2 class="section-heading reveal">The things that matter</h2>
+    <div class="section-label reveal">What's different from memory.md</div>
+    <h2 class="section-heading reveal">Principles, not observations</h2>
 
     <div class="captures-grid reveal">
         <div class="capture-card" style="border-color: var(--dendrite);">
-            <div class="capture-label">Corrections</div>
-            <div class="capture-example">"No &mdash; never modify the shared factory"</div>
-            <div class="capture-result">&rarr; Blast radius awareness encoded</div>
-        </div>
-        <div class="capture-card" style="border-color: var(--cortex);">
-            <div class="capture-label">Preferences</div>
-            <div class="capture-example">"Always use newspaper style"</div>
-            <div class="capture-result">&rarr; Code architecture standard set</div>
-        </div>
-        <div class="capture-card" style="border-color: var(--axon);">
-            <div class="capture-label">Expertise</div>
-            <div class="capture-example">"A 404 is permanent, stop retrying"</div>
-            <div class="capture-result">&rarr; Domain knowledge saved</div>
+            <div class="capture-label">memory.md saves</div>
+            <div class="capture-example">"User said don't modify the shared factory"</div>
+            <div class="capture-result" style="color:var(--dendrite)">Flat fact. No context for when it applies.</div>
         </div>
         <div class="capture-card" style="border-color: var(--synapse);">
-            <div class="capture-label">Who you are</div>
-            <div class="capture-example">Terse commands, prefers trace&rarr;understand&rarr;fix</div>
-            <div class="capture-result">&rarr; User model evolves</div>
+            <div class="capture-label">distill encodes</div>
+            <div class="capture-example">"Blast radius awareness: never modify shared infrastructure for one consumer"</div>
+            <div class="capture-result" style="color:var(--synapse)">First principle. Applies to any shared resource.</div>
+        </div>
+        <div class="capture-card" style="border-color: var(--dendrite);">
+            <div class="capture-label">memory.md saves</div>
+            <div class="capture-example">"User prefers public methods at the top"</div>
+            <div class="capture-result" style="color:var(--dendrite)">One rule. Lost in a flat file of 200 lines.</div>
+        </div>
+        <div class="capture-card" style="border-color: var(--synapse);">
+            <div class="capture-label">distill encodes</div>
+            <div class="capture-example">"Primera Plana: headlines at top, complexity in leaves. Non-negotiable."</div>
+            <div class="capture-result" style="color:var(--synapse)">Indexed, retrievable by domain, applied automatically.</div>
         </div>
     </div>
 </div>
 
 <!-- ═══ ARCHITECTURE — simple visual ═══ -->
 <div class="arch-section">
-    <div class="section-label reveal">Architecture</div>
-    <h2 class="section-heading reveal">Three tiers. 18 lines of config.</h2>
-    <p class="section-desc reveal">The entire retrieval system is one file: <code>~/.claude/rules/distill.md</code>. No MCP server. No database. No dependencies. Just files Claude reads natively.</p>
+    <div class="section-label reveal">Inspired by neuroscience</div>
+    <h2 class="section-heading reveal">Memory that works like memory</h2>
+    <p class="section-desc reveal">Your brain doesn't dump everything in one file. It has short-term, long-term, and procedural memory with active consolidation. Distill does the same &mdash; in 18 lines of config, no dependencies.</p>
 
     <div class="arch-visual reveal">
         <div class="arch-tier t1">
@@ -1617,24 +1617,28 @@
 
     <div class="faq-list">
         <details class="faq-item reveal">
-            <summary>Does it mess with my CLAUDE.md or memory files?</summary>
-            <p>Install adds <strong>one line</strong> to CLAUDE.md. After that, all knowledge lives in <code>~/.claude/distill/</code>. Your files are never modified.</p>
+            <summary>How is this different from Claude's built-in memory?</summary>
+            <p>Claude's memory saves <strong>observations</strong> &mdash; flat facts in one file. Distill saves <strong>principles</strong> &mdash; structured knowledge retrieved by relevance. Think of it as the difference between writing notes and actually studying them.</p>
         </details>
         <details class="faq-item reveal">
-            <summary>How do I uninstall?</summary>
-            <p><code>rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md</code><br>That's it. No traces.</p>
+            <summary>Does it replace memory.md?</summary>
+            <p>It complements it. Memory.md still captures quick facts. Distill handles the deeper patterns: why something works, when to apply it, and what principle it derives from. Both can coexist.</p>
         </details>
         <details class="faq-item reveal">
             <summary>Does it eat my context window?</summary>
-            <p>Distillation runs in a <strong>spawned sub-agent</strong>. Your main session stays untouched. Cost: ~500 tokens for signal harvest, sub-agent uses its own context.</p>
+            <p>Distillation runs in a <strong>spawned sub-agent</strong>. Your main session stays untouched. Retrieval costs ~18 lines loaded at session start (the rules file) plus whatever tier-2 files are relevant to your current task.</p>
+        </details>
+        <details class="faq-item reveal">
+            <summary>What makes retrieval "by relevance" work?</summary>
+            <p>The SPINE is an index with relevance hooks: "read this file <em>when working on Kafka consumers</em>". Claude matches your current task to the right knowledge file. No embeddings, no vector DB &mdash; just well-organized pointers.</p>
         </details>
         <details class="faq-item reveal">
             <summary>Is knowledge global across projects?</summary>
-            <p><strong>Yes.</strong> That's the point. A lesson from debugging Kafka on Monday helps your React work on Wednesday. Different repos, same accumulated intelligence.</p>
+            <p><strong>Yes.</strong> A principle learned debugging Kafka on Monday helps your React architecture on Wednesday. Different repos, same compounding intelligence.</p>
         </details>
         <details class="faq-item reveal">
-            <summary>What if I already have a memory system?</summary>
-            <p>Distill won't interfere. It uses its own directory. If you want to merge them, do it manually &mdash; you're always the authority.</p>
+            <summary>How do I uninstall?</summary>
+            <p><code>rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md</code><br>That's it. Your knowledge files are yours &mdash; back them up first if you want to keep them.</p>
         </details>
     </div>
 </div>
