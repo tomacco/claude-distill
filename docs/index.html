@@ -7,6 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=IBM+Plex+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
     <style>
         :root {
             --void: #05050a;
@@ -831,10 +834,614 @@
             transform: translateY(0);
         }
 
+        /* ═══ TERMINAL DEMO ═══ */
+        .terminal-section {
+            max-width: 820px;
+            margin: -2rem auto 0;
+            padding: 0 2rem 4rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .terminal {
+            background: #1a1b26;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .terminal-titlebar {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #15161e;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red {
+            background: #ff5f56;
+            cursor: pointer;
+            position: relative;
+        }
+        .terminal-btn.red .btn-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #4a0800;
+            opacity: 0;
+        }
+        .terminal-btn.red:hover .btn-dot {
+            opacity: 1;
+        }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27c93f; }
+
+        /* Terminate modal */
+        .term-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 10px;
+        }
+
+        .term-modal-overlay.visible {
+            display: flex;
+        }
+
+        .term-modal {
+            background: #2a2a3e;
+            border: 1px solid #3b4261;
+            border-radius: 12px;
+            padding: 1.8rem;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .term-modal-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            background: #1a1b26;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #c0caf5;
+        }
+
+        .term-modal-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #f0f0ff;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .term-modal-desc {
+            font-size: 0.78rem;
+            color: #8080b0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .term-modal-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .term-modal-btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .term-modal-btn:active {
+            transform: scale(0.96);
+        }
+
+        .term-modal-btn.cancel {
+            background: #3b4261;
+            color: #c0caf5;
+        }
+
+        .term-modal-btn.cancel:hover {
+            background: #4a5275;
+        }
+
+        .term-modal-btn.terminate {
+            background: #f72585;
+            color: #fff;
+        }
+
+        .term-modal-btn.terminate:hover {
+            background: #ff3a9a;
+        }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.05em;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            line-height: 1.8;
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: #3b4261 transparent;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: #3b4261;
+            border-radius: 2px;
+        }
+
+        .term-line {
+            opacity: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .term-line.visible {
+            opacity: 1;
+        }
+
+        .term-prompt {
+            color: #7aa2f7;
+        }
+
+        .term-command {
+            color: #c0caf5;
+        }
+
+        .term-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #c0caf5;
+            vertical-align: text-bottom;
+            margin-left: 1px;
+            animation: cursor-blink 1s step-end infinite;
+        }
+
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .term-shell-input {
+            color: #c0caf5;
+        }
+
+        @keyframes spin-ball {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Claude Code session footer — includes input area + status bar */
+        .claude-footer {
+            background: #15161e;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .claude-footer-input {
+            padding: 0.5rem 1.5rem;
+            border-top: 1px solid #3b4261;
+        }
+
+        .claude-footer-input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .claude-footer-chevron {
+            color: #9ece6a;
+            margin-right: 0.5rem;
+        }
+
+        .claude-footer-typed {
+            color: #c0caf5;
+        }
+
+        .claude-footer-status {
+            padding: 0.3rem 1.5rem 0.4rem;
+            font-size: 0.72rem;
+            border-top: 1px solid rgba(59, 66, 97, 0.5);
+        }
+
+        .claude-footer-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            line-height: 1.6;
+        }
+
+        .claude-footer-model {
+            color: #f72585;
+            font-weight: 500;
+        }
+
+        .claude-footer-ctx {
+            color: #565f89;
+        }
+
+        .claude-footer-bar {
+            display: inline-block;
+            width: 120px;
+            height: 8px;
+            background: #1a1b26;
+            border-radius: 1px;
+            vertical-align: middle;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .claude-footer-bar-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 12%;
+            background: #9ece6a;
+            border-radius: 1px;
+        }
+
+        .claude-footer-right {
+            margin-left: auto;
+            color: #565f89;
+        }
+
+        .claude-footer-perms {
+            color: #c0caf5;
+            font-size: 0.68rem;
+        }
+
+        .term-separator {
+            color: #3b4261;
+        }
+
+        .term-header {
+            color: #bb9af7;
+            font-weight: 500;
+        }
+
+        .term-signal-type {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .term-type-correction {
+            background: rgba(247, 37, 133, 0.15);
+            color: #f72585;
+        }
+
+        .term-type-confusion {
+            background: rgba(58, 134, 255, 0.15);
+            color: #7aa2f7;
+        }
+
+        .term-type-preference {
+            background: rgba(155, 95, 247, 0.15);
+            color: #bb9af7;
+        }
+
+        .term-type-escalation {
+            background: rgba(255, 158, 67, 0.15);
+            color: #ff9e43;
+        }
+
+        .term-signal-quote {
+            color: #9ece6a;
+            font-style: italic;
+        }
+
+        .term-principle-title {
+            color: #c0caf5;
+            font-weight: 500;
+        }
+
+        .term-principle-desc {
+            color: #565f89;
+        }
+
+        .term-file-path {
+            color: #7dcfff;
+        }
+
+        .term-dim {
+            color: #3b4261;
+        }
+
+        .term-success {
+            color: #9ece6a;
+        }
+
+        .term-info {
+            color: #7aa2f7;
+        }
+
+        .term-accent {
+            color: #7dcfff;
+        }
+
+        .term-score {
+            color: #ff9e43;
+            font-weight: 500;
+        }
+
+        .term-spinner {
+            display: inline-block;
+            color: #bb9af7;
+        }
+
+        /* ═══ REAL EXAMPLE ═══ */
+        .example-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .example-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .example-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--deep);
+        }
+
+        .example-tag {
+            font-size: 0.68rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--cortex);
+            font-weight: 500;
+        }
+
+        .example-tag.output {
+            color: var(--synapse);
+        }
+
+        .example-meta {
+            font-size: 0.72rem;
+            color: var(--dim);
+        }
+
+        .example-signals {
+            padding: 1.5rem;
+        }
+
+        .example-signal {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(26, 26, 46, 0.6);
+        }
+
+        .example-signal:last-child {
+            border-bottom: none;
+        }
+
+        .signal-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 0.4rem;
+        }
+
+        .sig-correction { background: var(--dendrite); }
+        .sig-confusion { background: var(--axon); }
+        .sig-preference { background: var(--cortex); }
+
+        .signal-body {
+            flex: 1;
+        }
+
+        .signal-moment {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 0.92rem;
+            color: var(--bright);
+            margin-bottom: 0.4rem;
+        }
+
+        .signal-context {
+            font-size: 0.8rem;
+            color: var(--dim);
+            line-height: 1.6;
+        }
+
+        .example-arrow-divider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem 0;
+            gap: 0.3rem;
+        }
+
+        .arrow-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--synapse);
+        }
+
+        .example-output {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .output-file {
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .output-filename {
+            padding: 0.5rem 1rem;
+            background: var(--deep);
+            font-size: 0.72rem;
+            color: var(--synapse);
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .output-content {
+            padding: 1rem 1.5rem;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: var(--dim);
+            white-space: pre-wrap;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .output-content .kw {
+            color: var(--bright);
+            font-weight: 500;
+        }
+
+        .output-content .hl {
+            color: var(--synapse);
+        }
+
+        .example-impact {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(135deg, rgba(0, 245, 212, 0.04), transparent);
+            border-top: 1px solid var(--border);
+        }
+
+        .impact-icon {
+            font-size: 1.2rem;
+            color: var(--synapse);
+        }
+
+        .impact-text {
+            font-size: 0.82rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ═══ HOW IT WORKS ═══ */
+        .how-section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        .how-steps { display: flex; align-items: flex-start; gap: 0; margin: 2rem 0; }
+        .how-step { flex: 1; padding: 1.5rem; text-align: center; position: relative; }
+        .how-num { position: absolute; top: 0; left: 1.5rem; font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--border); font-weight: 700; }
+        .how-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .how-step h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; color: var(--bright); margin-bottom: 0.75rem; font-weight: 400; }
+        .how-step p { font-size: 0.82rem; color: var(--dim); line-height: 1.7; }
+        .how-step code { color: var(--synapse); font-size: 0.9rem; }
+        .how-arrow { color: var(--dim); font-size: 1.5rem; padding-top: 3rem; }
+
+        /* ═══ CAPTURES ═══ */
+        .captures-section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        .captures-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 2rem 0; }
+        .capture-card { padding: 1.5rem; background: var(--surface); border-left: 3px solid; border-radius: 2px; }
+        .capture-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.5rem; }
+        .capture-example { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem; color: var(--bright); margin-bottom: 0.75rem; }
+        .capture-result { font-size: 0.8rem; color: var(--synapse); }
+
+        /* ═══ ARCHITECTURE ═══ */
+        .arch-section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        .arch-visual { margin: 2rem 0; display: flex; flex-direction: column; gap: 2px; }
+        .arch-tier { padding: 1.2rem 1.5rem; border: 1px solid var(--border); display: flex; align-items: center; gap: 1.5rem; }
+        .arch-tier.t1 { background: linear-gradient(135deg, rgba(0,245,212,0.05), transparent); border-left: 3px solid var(--synapse); }
+        .arch-tier.t2 { background: linear-gradient(135deg, rgba(155,95,247,0.04), transparent); border-left: 3px solid var(--cortex); }
+        .arch-tier.t3 { background: linear-gradient(135deg, rgba(58,134,255,0.03), transparent); border-left: 3px solid var(--axon); }
+        .arch-tier-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; min-width: 130px; }
+        .arch-tier.t1 .arch-tier-label { color: var(--synapse); }
+        .arch-tier.t2 .arch-tier-label { color: var(--cortex); }
+        .arch-tier.t3 .arch-tier-label { color: var(--axon); }
+        .arch-tier-desc { font-size: 0.82rem; color: var(--dim); flex: 1; }
+        .arch-tier-size { font-size: 0.72rem; color: var(--border); }
+        .arch-props { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 2rem; }
+        .arch-prop { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; color: var(--text); }
+        .arch-prop-icon { font-size: 0.8rem; }
+
+        /* ═══ INTEGRITY COMPACT ═══ */
+        .integrity-section-compact { max-width: 700px; margin: 0 auto; padding: 4rem 2rem; text-align: center; }
+        .integrity-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 1.5rem; }
+        .integrity-pill { padding: 0.5rem 1.2rem; border: 1px solid var(--border); border-radius: 20px; font-size: 0.78rem; color: var(--text); background: var(--surface); transition: border-color 0.3s; }
+        .integrity-pill:hover { border-color: var(--cortex); }
+
         @media (max-width: 600px) {
             .neural-canvas { font-size: 0.28rem; }
             .features-grid { grid-template-columns: 1fr; }
             .tier-limit { display: none; }
+            .example-header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+            .terminal-section { padding: 0 1rem 3rem; }
+            .how-steps { flex-direction: column; }
+            .how-arrow { transform: rotate(90deg); padding: 0.5rem 0; align-self: center; }
+            .captures-grid { grid-template-columns: 1fr; }
+            .arch-tier { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .arch-props { grid-template-columns: 1fr; }
+            .terminal-body { font-size: 0.65rem; padding: 1rem; }
+            .terminal { height: 420px; }
         }
     </style>
 </head>
@@ -861,259 +1468,177 @@
     <div class="toast" id="toast">copied to clipboard</div>
 </div>
 
-<div class="pain-section">
-    <div class="pain-grid reveal">
-        <div class="pain-card">
-            <div class="pain-quote">"I already told you this yesterday."</div>
-            <div class="pain-desc">Every session starts from scratch. You explain the same constraints, preferences, and context again and again.</div>
+<!-- ═══ ANIMATED TERMINAL DEMO ═══ -->
+<div class="terminal-section">
+    <div class="terminal" id="demo-terminal">
+        <div class="terminal-titlebar">
+            <div class="terminal-btn red" id="term-btn-close"><span class="btn-dot"></span></div>
+            <div class="terminal-btn yellow"></div>
+            <div class="terminal-btn green"></div>
+            <div class="terminal-title">claude &mdash; ~/projects/backend</div>
         </div>
-        <div class="pain-card">
-            <div class="pain-quote">"Why did you make the same mistake?"</div>
-            <div class="pain-desc">Claude fails the same way it did last week. The fix was never captured. The lesson was lost when the session closed.</div>
+        <!-- Terminate modal -->
+        <div class="term-modal-overlay" id="term-modal-overlay">
+            <div class="term-modal">
+                <div class="term-modal-icon">&#x3E;_</div>
+                <div class="term-modal-title">Do you want to terminate running processes in this window?</div>
+                <div class="term-modal-desc">Closing this window will terminate the running processes: node (2), claude, distill-agent, your-hopes-and-dreams.</div>
+                <div class="term-modal-buttons">
+                    <button class="term-modal-btn cancel" id="term-modal-cancel">Cancel</button>
+                    <button class="term-modal-btn terminate" id="term-modal-terminate">Terminate</button>
+                </div>
+            </div>
         </div>
-        <div class="pain-card">
-            <div class="pain-quote">"You don't know how I work."</div>
-            <div class="pain-desc">It doesn't know you're an expert. It over-explains. It asks basic questions. It treats you like a stranger every time.</div>
+        <div class="terminal-body" id="terminal-body">
         </div>
-    </div>
-
-    <div class="pain-pivot reveal">
-        <p class="break-line">What if every session made Claude smarter?</p>
-        <p class="pivot-sub">Not one session. Not one project. <strong>Every Claude session on your machine, forever.</strong><br>Learnings from Monday's debugging help Wednesday's architecture review. Globally.</p>
     </div>
 </div>
 
-<div class="value-section">
-    <div class="value-strip reveal">
-        <div class="value-item">
-            <div class="value-verb">type</div>
-            <div class="value-what"><code>/distill</code></div>
+<!-- ═══ HOW IT WORKS — 3 visual blocks ═══ -->
+<div class="how-section">
+    <div class="section-label reveal">How it works</div>
+    <h2 class="section-heading reveal">Three steps. Zero config.</h2>
+
+    <div class="how-steps reveal">
+        <div class="how-step">
+            <div class="how-num">1</div>
+            <div class="how-icon">&#x1F4AC;</div>
+            <h3>Work normally</h3>
+            <p>Use Claude Code as always. Express preferences, correct mistakes, teach things. Distill is listening in the background&nbsp;&mdash; no behavior change needed.</p>
         </div>
-        <div class="value-arrow">&rarr;</div>
-        <div class="value-item">
-            <div class="value-verb">it extracts</div>
-            <div class="value-what">what was hard &amp; why</div>
+        <div class="how-arrow">&rarr;</div>
+        <div class="how-step">
+            <div class="how-num">2</div>
+            <div class="how-icon">&#x2F;</div>
+            <h3>Type <code>/distill</code></h3>
+            <p>When you feel the session was valuable. It harvests signals (corrections, preferences, surprises), traces each to a first principle, and encodes it.</p>
         </div>
-        <div class="value-arrow">&rarr;</div>
-        <div class="value-item">
-            <div class="value-verb">it encodes</div>
-            <div class="value-what">knowledge globally</div>
-        </div>
-        <div class="value-arrow">&rarr;</div>
-        <div class="value-item">
-            <div class="value-verb">every session</div>
-            <div class="value-what">inherits the learnings</div>
+        <div class="how-arrow">&rarr;</div>
+        <div class="how-step">
+            <div class="how-num">3</div>
+            <div class="how-icon">&#x267B;</div>
+            <h3>Every session improves</h3>
+            <p>Next session &mdash; any project, any repo &mdash; Claude already knows what you taught it. No repetition. No forgetting. Compounding intelligence.</p>
         </div>
     </div>
-    <p class="value-note reveal">Global knowledge. Any project, any session, any Claude Code workspace on your machine. Runs in an isolated sub-agent &mdash; your main context stays untouched.</p>
 </div>
 
-<div class="signal-section">
-    <div class="section-label reveal">How to use it well</div>
-    <h2 class="section-heading reveal">It captures what you express</h2>
-    <p class="section-desc reveal" style="max-width: 650px;">
-        Distill can only learn from what's in the conversation. The more intentional you are about expressing what matters, the sharper Claude becomes.
-    </p>
+<!-- ═══ WHAT IT CAPTURES — visual grid ═══ -->
+<div class="captures-section">
+    <div class="section-label reveal">What it captures</div>
+    <h2 class="section-heading reveal">The things that matter</h2>
 
-    <div class="signal-grid reveal">
-        <div class="signal-card">
-            <div class="signal-do">Say what matters</div>
-            <div class="signal-example">"Use newspaper style — public methods first, private at the bottom. This is non-negotiable for me."</div>
+    <div class="captures-grid reveal">
+        <div class="capture-card" style="border-color: var(--dendrite);">
+            <div class="capture-label">Corrections</div>
+            <div class="capture-example">"No &mdash; never modify the shared factory"</div>
+            <div class="capture-result">&rarr; Blast radius awareness encoded</div>
         </div>
-        <div class="signal-card">
-            <div class="signal-do">Express frustration</div>
-            <div class="signal-example">"I already told you this. It's important — don't use mocks in integration tests."</div>
+        <div class="capture-card" style="border-color: var(--cortex);">
+            <div class="capture-label">Preferences</div>
+            <div class="capture-example">"Always use newspaper style"</div>
+            <div class="capture-result">&rarr; Code architecture standard set</div>
         </div>
-        <div class="signal-card">
-            <div class="signal-do">Correct with authority</div>
-            <div class="signal-example">"No. The deploy always goes through staging first. Always."</div>
+        <div class="capture-card" style="border-color: var(--axon);">
+            <div class="capture-label">Expertise</div>
+            <div class="capture-example">"A 404 is permanent, stop retrying"</div>
+            <div class="capture-result">&rarr; Domain knowledge saved</div>
+        </div>
+        <div class="capture-card" style="border-color: var(--synapse);">
+            <div class="capture-label">Who you are</div>
+            <div class="capture-example">Terse commands, prefers trace&rarr;understand&rarr;fix</div>
+            <div class="capture-result">&rarr; User model evolves</div>
         </div>
     </div>
-
-    <p class="section-desc reveal" style="max-width: 650px; margin-top: 2rem;">
-        <strong style="color: var(--bright);">When you repeat a frustration, the system treats it as a critical failure in itself</strong> &mdash; it elevates priority, strengthens the encoding, and ensures it's harder to miss next time. You shouldn't have to say things twice. When you do, distill notices.
-    </p>
 </div>
 
-<div class="pressure-section">
-    <div class="section-label reveal">Inspired by neuroscience</div>
-    <h2 class="section-heading reveal">Memory Pressure</h2>
-    <p class="section-desc reveal">
-        Your brain accumulates adenosine during wakefulness &mdash; a chemical "sleep pressure" that degrades cognition until sleep consolidates memories. LLM sessions work identically: unconsolidated learnings pile up, signal degrades, hallucination risk climbs.
-    </p>
-
-    <div class="pressure-visual reveal">
-        <div class="pressure-row">
-            <span class="pressure-label">signals</span>
-            <div class="pressure-bar"><div class="pressure-fill s1"></div></div>
-        </div>
-        <div class="pressure-row">
-            <span class="pressure-label">corrections</span>
-            <div class="pressure-bar"><div class="pressure-fill s2"></div></div>
-        </div>
-        <div class="pressure-row">
-            <span class="pressure-label">complexity</span>
-            <div class="pressure-bar"><div class="pressure-fill s3"></div></div>
-        </div>
-        <div class="pressure-score-display" id="pressure-num">3</div>
-        <div class="pressure-caption">CONSOLIDATION PRESSURE / 10</div>
-    </div>
-
-    <p class="section-desc reveal" style="margin-top: 2rem;">
-        When pressure reaches 7, the system recommends mid-session consolidation &mdash; a power nap for your AI. Not a suggestion to stop. A suggestion to <em>crystallize</em>, so the remaining work benefits from clearer context.
-    </p>
-</div>
-
-<div class="tiers-section">
+<!-- ═══ ARCHITECTURE — simple visual ═══ -->
+<div class="arch-section">
     <div class="section-label reveal">Architecture</div>
-    <h2 class="section-heading reveal">Three-Tier Knowledge</h2>
-    <p class="section-desc reveal">Only the spine loads into context. Everything else is navigated on demand. Knowledge compresses across tiers &mdash; it is never deleted.</p>
+    <h2 class="section-heading reveal">Three tiers. 18 lines of config.</h2>
+    <p class="section-desc reveal">The entire retrieval system is one file: <code>~/.claude/rules/distill.md</code>. No MCP server. No database. No dependencies. Just files Claude reads natively.</p>
 
-    <div class="tier-stack reveal">
-        <div class="tier tier-1">
-            <div class="tier-name">Tier 1 &mdash; The Spine</div>
-            <div class="tier-desc">Always in context. Index pointers with relevance hooks. The map, not the territory.</div>
-            <div class="tier-limit">max 80 lines</div>
+    <div class="arch-visual reveal">
+        <div class="arch-tier t1">
+            <div class="arch-tier-label">SPINE</div>
+            <div class="arch-tier-desc">Always loaded. Index pointers. The map.</div>
+            <div class="arch-tier-size">80 lines max</div>
         </div>
-        <div class="tier tier-2">
-            <div class="tier-name">Tier 2 &mdash; Active Knowledge</div>
-            <div class="tier-desc">Read on demand. One topic per file. Current, actionable, validated on every access.</div>
-            <div class="tier-limit">max 60 lines/file</div>
+        <div class="arch-tier t2">
+            <div class="arch-tier-label">ACTIVE KNOWLEDGE</div>
+            <div class="arch-tier-desc">Read on demand. One topic per file. Validated on every access.</div>
+            <div class="arch-tier-size">60 lines/file</div>
         </div>
-        <div class="tier tier-3">
-            <div class="tier-name">Tier 3 &mdash; Archive</div>
-            <div class="tier-desc">Compressed history. Promoted back when recalled frequently. The full record at lower resolution.</div>
-            <div class="tier-limit">no limit</div>
+        <div class="arch-tier t3">
+            <div class="arch-tier-label">ARCHIVE</div>
+            <div class="arch-tier-desc">Compressed history. Promoted back when recalled. Never deleted.</div>
+            <div class="arch-tier-size">unlimited</div>
+        </div>
+    </div>
+
+    <div class="arch-props reveal">
+        <div class="arch-prop">
+            <span class="arch-prop-icon" style="color:var(--synapse)">&#x25C8;</span>
+            <span>Global across all projects</span>
+        </div>
+        <div class="arch-prop">
+            <span class="arch-prop-icon" style="color:var(--cortex)">&#x25C8;</span>
+            <span>Sub-agent &mdash; never consumes your context</span>
+        </div>
+        <div class="arch-prop">
+            <span class="arch-prop-icon" style="color:var(--dendrite)">&#x25C8;</span>
+            <span>Anti-sycophancy checks built in</span>
+        </div>
+        <div class="arch-prop">
+            <span class="arch-prop-icon" style="color:var(--axon)">&#x25C8;</span>
+            <span>Uninstall = delete one folder</span>
         </div>
     </div>
 </div>
 
-<div class="features-section">
-    <div class="section-label reveal">Capabilities</div>
-    <h2 class="section-heading reveal">What it does</h2>
-
-    <div class="features-grid reveal">
-        <div class="feature">
-            <span class="feature-icon" style="color: var(--synapse);">&#x25C8;</span>
-            <h3>Self-discovering structure</h3>
-            <p>No prescribed layout. Reads YOUR workspace at runtime to discover where knowledge lives &mdash; whatever you call your files, whatever your craft.</p>
-        </div>
-        <div class="feature">
-            <span class="feature-icon" style="color: var(--cortex);">&#x25C8;</span>
-            <h3>Evolving user model</h3>
-            <p>Maps your expertise, communication style, thinking patterns, and growth edges. Every session sharpens the picture. Encodes observations, never judgments.</p>
-        </div>
-        <div class="feature">
-            <span class="feature-icon" style="color: var(--dendrite);">&#x25C8;</span>
-            <h3>Memory pressure scoring</h3>
-            <p>Tracks unconsolidated learnings like sleep debt. Recommends consolidation before context degrades &mdash; a power nap for cognitive load.</p>
-        </div>
-        <div class="feature">
-            <span class="feature-icon" style="color: var(--axon);">&#x25C8;</span>
-            <h3>Validate-on-recall</h3>
-            <p>Every memory access is a verification pass. Stale knowledge self-heals. Frequently recalled archives get promoted. The system maintains itself.</p>
-        </div>
-        <div class="feature">
-            <span class="feature-icon" style="color: var(--synapse);">&#x25C8;</span>
-            <h3>Compress, never discard</h3>
-            <p>Zero information loss across tiers. Old knowledge gets denser, not deleted. The full history remains navigable at different resolutions.</p>
-        </div>
-        <div class="feature">
-            <span class="feature-icon" style="color: var(--cortex);">&#x25C8;</span>
-            <h3>Profession-agnostic</h3>
-            <p>Engineer, designer, researcher, PM &mdash; the distillation process works on any craft. Principles are universal. Only the routing is personal.</p>
-        </div>
-    </div>
-</div>
-
-<div class="integrity-section">
+<!-- ═══ INTEGRITY — compact ═══ -->
+<div class="integrity-section-compact">
     <div class="section-label reveal">Non-negotiable</div>
     <h2 class="section-heading reveal">The Integrity Contract</h2>
-    <p class="section-desc reveal" style="max-width: 500px; margin: 0 auto 2rem;">
-        These are baked into the process. They cannot be overridden by mood, pushback, or preference.
-    </p>
-
-    <ol class="integrity-list reveal">
-        <li>
-            <span class="integrity-num">1</span>
-            <span class="integrity-text">Never encode comfort as truth.</span>
-        </li>
-        <li>
-            <span class="integrity-num">2</span>
-            <span class="integrity-text">Never flatten standards to reduce friction.</span>
-        </li>
-        <li>
-            <span class="integrity-num">3</span>
-            <span class="integrity-text">Never confuse preference with principle.</span>
-        </li>
-        <li>
-            <span class="integrity-num">4</span>
-            <span class="integrity-text">Frustration is diagnostic, not directive.</span>
-        </li>
-        <li>
-            <span class="integrity-num">5</span>
-            <span class="integrity-text">The user's growth is the goal.</span>
-        </li>
-    </ol>
-
-    <p class="section-desc reveal" style="max-width: 500px; margin: 2rem auto 0; text-align: center;">
-        The goal is an <strong style="color: var(--bright);">honest ally</strong>. One that respects you enough to tell you what's true.
-    </p>
+    <p class="section-desc reveal">Baked into the process. Cannot be overridden by mood, pushback, or preference.</p>
+    <div class="integrity-pills reveal">
+        <span class="integrity-pill">Never encode comfort as truth</span>
+        <span class="integrity-pill">Never flatten standards</span>
+        <span class="integrity-pill">Frustration = diagnostic signal</span>
+        <span class="integrity-pill">Growth over comfort</span>
+        <span class="integrity-pill">Honest ally, not yes-machine</span>
+    </div>
 </div>
 
+<!-- ═══ FAQ — kept but slimmed ═══ -->
 <div class="faq-section">
-    <div class="section-label reveal">Common questions</div>
+    <div class="section-label reveal">Questions</div>
     <h2 class="section-heading reveal">FAQ</h2>
 
     <div class="faq-list">
         <details class="faq-item reveal">
-            <summary>Will it mess with my existing CLAUDE.md or memory files?</summary>
-            <p>During install, it asks your permission to add <strong>one line</strong> to CLAUDE.md (the session monitor reference). That's the only touch point. After that, all distill knowledge lives in its own isolated directory (<code>~/.claude/distill/</code>). It never modifies your memory files, project configs, or any other content you maintain. If its knowledge conflicts with yours, it flags it and asks YOU to decide.</p>
+            <summary>Does it mess with my CLAUDE.md or memory files?</summary>
+            <p>Install adds <strong>one line</strong> to CLAUDE.md. After that, all knowledge lives in <code>~/.claude/distill/</code>. Your files are never modified.</p>
         </details>
-
         <details class="faq-item reveal">
-            <summary>How do I uninstall completely?</summary>
-            <p>Two commands, total cleanup:</p>
-            <code class="faq-code">rm ~/.claude/commands/distill.md<br>rm -rf ~/.claude/distill/</code>
-            <p>That's it. No traces left. No config to revert. No side effects.</p>
+            <summary>How do I uninstall?</summary>
+            <p><code>rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md</code><br>That's it. No traces.</p>
         </details>
-
         <details class="faq-item reveal">
-            <summary>Does it consume my context window?</summary>
-            <p>The distillation itself runs in a <strong>spawned sub-agent</strong> &mdash; a separate, isolated context. Your main session stays untouched. The only cost in your main context is the signal harvest (a brief scan of the conversation), which is much smaller than the full distillation process.</p>
+            <summary>Does it eat my context window?</summary>
+            <p>Distillation runs in a <strong>spawned sub-agent</strong>. Your main session stays untouched. Cost: ~500 tokens for signal harvest, sub-agent uses its own context.</p>
         </details>
-
         <details class="faq-item reveal">
-            <summary>How many tokens does it use?</summary>
-            <p>The dispatcher (signal harvest) uses ~500-1000 tokens in your main context. The sub-agent runs separately with its own context &mdash; typically 3000-8000 tokens depending on how much was learned. This is a one-time cost per distillation, not per message.</p>
+            <summary>Is knowledge global across projects?</summary>
+            <p><strong>Yes.</strong> That's the point. A lesson from debugging Kafka on Monday helps your React work on Wednesday. Different repos, same accumulated intelligence.</p>
         </details>
-
         <details class="faq-item reveal">
-            <summary>Does the knowledge it creates auto-load into every session?</summary>
-            <p>Only the spine (SPINE.md, max 80 lines) is meant to be referenced. And even that is not auto-injected into your CLAUDE.md &mdash; it lives in its own directory. The sub-agent reads it when distilling. For the knowledge to benefit future sessions, you can optionally reference <code>~/.claude/distill/SPINE.md</code> from your CLAUDE.md, but this is your choice.</p>
-        </details>
-
-        <details class="faq-item reveal">
-            <summary>What if I already have a knowledge management system?</summary>
-            <p>Distill won't interfere. It maintains its own parallel structure. If you want to consolidate &mdash; merge distill's findings into your existing system &mdash; you do that manually. Distill will flag when its knowledge overlaps or conflicts with your files, giving you the information to decide. You're always the authority.</p>
-        </details>
-
-        <details class="faq-item reveal">
-            <summary>Is the learning global across all my sessions?</summary>
-            <p><strong>Yes. This is the core idea.</strong> Knowledge lives in <code>~/.claude/distill/</code> which is shared across every Claude Code session on your machine. A lesson learned during a morning debugging session improves the afternoon architecture review. Different projects, different repos, different contexts &mdash; all benefit from the same accumulated knowledge.</p>
-        </details>
-
-        <details class="faq-item reveal">
-            <summary>What if two sessions run /distill at the same time?</summary>
-            <p>Handled. Distill uses a lockfile (<code>.lock</code>) to prevent concurrent writes. If another distillation is in progress, it'll tell you to try again in a moment. Stale locks (from crashed sessions) auto-expire after 5 minutes.</p>
-        </details>
-
-        <details class="faq-item reveal">
-            <summary>Does it work for non-programmers?</summary>
-            <p>Yes. The distillation process is profession-agnostic. It discovers whatever knowledge structure you have (or helps bootstrap one). Whether you write code, design interfaces, manage teams, or do research &mdash; if you have sessions with friction and learning, distill captures it.</p>
+            <summary>What if I already have a memory system?</summary>
+            <p>Distill won't interfere. It uses its own directory. If you want to merge them, do it manually &mdash; you're always the authority.</p>
         </details>
     </div>
 </div>
+
 
 <div class="cta">
     <a href="https://github.com/tomacco/claude-distill" class="cta-link">View source on GitHub</a>
@@ -1384,6 +1909,9 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 </script>
+
+<script src="terminal.js"></script>
+
 
 </body>
 </html>

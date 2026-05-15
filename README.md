@@ -126,12 +126,13 @@ You're always in control:
 ## Uninstall
 
 ```bash
+# Remove the command and server
+claude mcp remove distill
 rm ~/.claude/commands/distill.md
-rm -rf ~/.claude/distill/
 # Remove the 'Distill' line from ~/.claude/CLAUDE.md
 ```
 
-Clean. Total. No traces.
+Your learnings stay in `~/.claude/distill/` — they're yours. Delete them only if you want to. They're just markdown files with everything Claude learned from working with you.
 
 ---
 

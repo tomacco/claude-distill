@@ -50,6 +50,7 @@ Living document of the mechanisms in claude-distill, their current state, and im
 - [ ] Trust topology trend tracking (how delegation boundaries shift over time)
 - [ ] Proactive trust calibration ("you've been delegating X more — should I treat it as trusted territory now?")
 - [ ] Dissonance resolution history (track what was flagged, what user said, how it resolved)
+- [ ] **Distill rhythm learning:** Track when users actually distill (time into session, pressure level, trigger type: manual vs suggestion). After N sessions, detect their natural pattern and offer to auto-distill at that rhythm. "You usually distill after ~45min of dense work. Want me to just do it automatically at that point?" User opts in → fully automated consolidation at their natural cadence.
 
 ## Version & Distribution
 

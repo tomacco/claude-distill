@@ -432,6 +432,21 @@ Users on V1 can upgrade gradually:
 
 ---
 
+## Decisions Log
+
+### Folder structure: keep as-is (2026-05-08)
+Decision: Keep current subdirectory layout (craft/, ops/, profile/, projects/, feedback/, archive/).
+Reasoning: Compaction prevents scale issues (Tier 2 caps at ~80 files). MCP server doesn't care about FS layout — retrieves via spine + metadata. Users like browsing folders. No problem to solve here.
+
+### MCP registration: user scope (2026-05-08)
+Decision: Register via `claude mcp add --scope user` so the server is available globally across all projects.
+Reasoning: Distill knowledge is global. Per-project config would defeat the purpose. User scope lives in `~/.claude.json`.
+
+### Fallback when server is down: degrade to V1 (2026-05-08)
+Decision: If MCP tools aren't available, the monitor instruction falls back to "read SPINE.md directly." The system must never completely break because the server isn't running.
+
+---
+
 ## Open Questions
 
 1. **Server runtime:** Node.js (Claude Code ecosystem) or Python (ML/embedding ecosystem)?
