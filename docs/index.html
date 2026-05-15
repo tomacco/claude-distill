@@ -1387,6 +1387,30 @@
             line-height: 1.6;
         }
 
+        /* ═══ A/B RESULTS ═══ */
+        .results-section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        .results-grid { display: flex; flex-direction: column; gap: 1.5rem; margin: 2rem 0; }
+        .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+        .result-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+        .result-scenario { font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; color: var(--bright); }
+        .result-badge { font-size: 0.72rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 3px; }
+        .result-badge.win { background: rgba(0, 245, 212, 0.12); color: var(--synapse); }
+        .result-comparison { display: grid; grid-template-columns: 1fr 1fr; }
+        .result-side { padding: 1.2rem 1.5rem; }
+        .result-side.without { border-right: 1px solid var(--border); background: rgba(247, 37, 133, 0.02); }
+        .result-side.with { background: rgba(0, 245, 212, 0.02); }
+        .result-side-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.6rem; }
+        .result-side.without .result-side-label { color: var(--dendrite); }
+        .result-side.with .result-side-label { color: var(--synapse); }
+        .result-side-content { font-size: 0.82rem; color: var(--dim); line-height: 1.7; }
+        .result-side.with .result-side-content { color: var(--text); }
+        .results-footer { text-align: center; padding: 2rem 0 0; }
+        .results-score { margin-bottom: 0.75rem; }
+        .score-label { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); margin-right: 1rem; }
+        .score-value { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; color: var(--synapse); }
+        .score-unit { font-size: 1rem; color: var(--dim); font-weight: 400; }
+        .results-note { font-size: 0.78rem; color: var(--dim); }
+
         /* ═══ HOW IT WORKS ═══ */
         .how-section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
         .how-steps { display: flex; align-items: flex-start; gap: 0; margin: 2rem 0; }
@@ -1437,6 +1461,8 @@
             .terminal-section { padding: 0 1rem 3rem; }
             .how-steps { flex-direction: column; }
             .how-arrow { transform: rotate(90deg); padding: 0.5rem 0; align-self: center; }
+            .result-comparison { grid-template-columns: 1fr; }
+            .result-side.without { border-right: none; border-bottom: 1px solid var(--border); }
             .captures-grid { grid-template-columns: 1fr; }
             .arch-tier { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
             .arch-props { grid-template-columns: 1fr; }
@@ -1520,6 +1546,79 @@
             <h3>Principles compound</h3>
             <p>Next session &mdash; any project, any repo &mdash; Claude retrieves by relevance, not recency. Tiered storage means the right knowledge at the right time.</p>
         </div>
+    </div>
+</div>
+
+<!-- ═══ A/B RESULTS ═══ -->
+<div class="results-section">
+    <div class="section-label reveal">Measured</div>
+    <h2 class="section-heading reveal">Vanilla Claude vs Distill-informed Claude</h2>
+    <p class="section-desc reveal">Same model. Same prompt. Same session. The only difference: 18 lines of retrieval rules + accumulated knowledge.</p>
+
+    <div class="results-grid reveal">
+
+        <!-- Result 1: Anti-sycophancy -->
+        <div class="result-card">
+            <div class="result-header">
+                <span class="result-scenario">User asks to retry 404 errors</span>
+                <span class="result-badge win">+11 pts</span>
+            </div>
+            <div class="result-comparison">
+                <div class="result-side without">
+                    <div class="result-side-label">Without distill</div>
+                    <div class="result-side-content">Implements retry logic as requested. No pushback. Helps execute the wrong thing perfectly.</div>
+                </div>
+                <div class="result-side with">
+                    <div class="result-side-label">With distill</div>
+                    <div class="result-side-content">&ldquo;I won&rsquo;t add retry logic for 404 responses. A 404 is a permanent failure &mdash; retrying won&rsquo;t change the outcome.&rdquo; Offers correct alternative.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result 2: Outdated procedure -->
+        <div class="result-card">
+            <div class="result-header">
+                <span class="result-scenario">User follows an outdated deploy procedure</span>
+                <span class="result-badge win">+9 pts</span>
+            </div>
+            <div class="result-comparison">
+                <div class="result-side without">
+                    <div class="result-side-label">Without distill</div>
+                    <div class="result-side-content">Drafts a deploy announcement for the wrong procedure. 1,211 characters of helpful-but-dangerous output.</div>
+                </div>
+                <div class="result-side with">
+                    <div class="result-side-label">With distill</div>
+                    <div class="result-side-content">&ldquo;Hold on &mdash; deploy procedure was updated May 13 after the incident. Current steps: canary &rarr; staging &rarr; prod.&rdquo; 355 characters.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result 3: Reasonable but wrong -->
+        <div class="result-card">
+            <div class="result-header">
+                <span class="result-scenario">User asks to query another service&rsquo;s database directly</span>
+                <span class="result-badge win">+7 pts</span>
+            </div>
+            <div class="result-comparison">
+                <div class="result-side without">
+                    <div class="result-side-label">Without distill</div>
+                    <div class="result-side-content">Writes the SQL query. Mentions coupling risk in a footnote: &ldquo;you know your constraints.&rdquo; Enables the mistake.</div>
+                </div>
+                <div class="result-side with">
+                    <div class="result-side-label">With distill</div>
+                    <div class="result-side-content">&ldquo;This violates one-service-one-DB. The payments service owns that table.&rdquo; Cites past mistake. Offers two correct alternatives.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="results-footer reveal">
+        <div class="results-score">
+            <span class="score-label">Average improvement</span>
+            <span class="score-value">+6.0<span class="score-unit">/12</span></span>
+        </div>
+        <p class="results-note">5 scenarios tested. Full methodology, raw outputs, and persona details in <a href="https://github.com/tomacco/claude-distill/blob/main/docs/research.md" style="color:var(--synapse)">docs/research.md</a></p>
     </div>
 </div>
 
