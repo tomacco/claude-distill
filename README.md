@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://tomacco.github.io/claude-distill/">Website</a> ·
+  <a href="https://tomacco.github.io/claude-distill/"><strong>Live Demo (try the terminal)</strong></a> ·
   <a href="#installation">Install</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#uninstall">Uninstall</a>
