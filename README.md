@@ -42,11 +42,17 @@ We A/B tested the same prompts with and without distill knowledge. Same model, s
 
 ## Installation
 
+**macOS / Linux / WSL** (bash):
 ```bash
 curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
 ```
 
-<sub>100 lines, no sudo, writes only to `~/.claude/`. [Read it first](install.sh) if you're the responsible kind.</sub>
+**Windows** (PowerShell):
+```powershell
+irm https://raw.githubusercontent.com/tomacco/claude-distill/main/install.ps1 | iex
+```
+
+<sub>No sudo, writes only to `~/.claude/` (`%USERPROFILE%\.claude\` on Windows). [Read install.sh](install.sh) / [install.ps1](install.ps1) first if you're the responsible kind.</sub>
 
 This installs:
 
@@ -135,8 +141,14 @@ Claude with distill **pushes back** when you're about to make a mistake it alrea
 
 ## Uninstall
 
+**macOS / Linux / WSL:**
 ```bash
 rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md
+```
+
+**Windows** (PowerShell):
+```powershell
+Remove-Item -Recurse -Force $HOME\.claude\distill, $HOME\.claude\commands\distill.md, $HOME\.claude\rules\distill.md
 ```
 
 Your knowledge files are yours. Back them up if you want to keep them.
