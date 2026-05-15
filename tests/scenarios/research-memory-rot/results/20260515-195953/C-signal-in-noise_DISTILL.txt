@@ -1,0 +1,36 @@
+Here's the triage checklist, ordered by likelihood for a sudden p99 spike:
+
+## 1. Connection pool exhaustion (check FIRST)
+
+This is the most common cause of sudden Postgres timeouts when the DB itself is healthy. Symptoms: latency spike + timeouts + Postgres is actually responsive.
+
+- **Check active/idle connections**: `SELECT state, count(*) FROM pg_stat_activity WHERE datname = 'your_db' GROUP BY state;`
+- **Look for long-running queries**: `SELECT pid, now() - pg_stat_activity.query_start AS duration, query, state FROM pg_stat_activity WHERE state != 'idle' ORDER BY duration DESC;`
+- **Leaked connections** — code paths that acquire but don't release (missing `finally`/`use` blocks, exceptions before close)
+- **Pool size vs load** — was there a traffic spike? Check if `maxPoolSize` is appropriate
+
+## 2. Recent deploys (last 30 min)
+
+- Check if your service OR upstream services deployed recently
+- Check for Flyway migrations in flight — a `CREATE INDEX` without `CONCURRENTLY` on a hot table will lock it
+- Remember: deployment lag is ~30-40 min after merge, old code continues serving during rollout
+
+## 3. Slow queries / lock contention
+
+- `SELECT * FROM pg_locks WHERE NOT granted;` — anything waiting?
+- `SELECT * FROM pg_stat_activity WHERE wait_event_type = 'Lock';`
+- Check if a backfill job or batch process kicked off (ShedLock-protected crons, especially near 10/15 min intervals — thundering herd)
+
+## 4. Infrastructure layer
+
+- DB CPU/memory/disk I/O on the RDS/instance dashboard
+- Check if autovacuum is running on a large table (can spike I/O)
+- Network: check if other services hitting the same DB instance are also degraded
+
+## 5. External cascade pattern
+
+If this is in the equities/crypto order path: check if Upvest is returning 500/504. That cascades xanthine -> magneton -> magnemite -> phosphine, and downstream timeouts can exhaust your connection pool as requests pile up waiting.
+
+**Key distinction**: connection *timeout* (pool exhausted, can't get a connection) vs connection *refused* (Postgres is down). If PG health checks pass but your service can't connect, it's almost certainly pool exhaustion.
+
+What does `pg_stat_activity` look like right now?
