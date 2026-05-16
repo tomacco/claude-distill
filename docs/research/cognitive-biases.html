@@ -41,7 +41,7 @@
         <header>
             <a href="./" class="back">&larr; All research</a>
             <h1>Cognitive Bias Detection in LLM Interactions</h1>
-            <div class="meta">May 2026 &middot; 2/8 dimensions complete &middot; Claude Opus 4.6</div>
+            <div class="meta">May 2026 &middot; 4/8 dimensions complete &middot; Claude Opus 4.6</div>
             <p class="abstract">Can structured memory help an LLM detect and surface human cognitive biases without being paternalistic? We test 8 bias dimensions using the same A/B/C framework: no knowledge, biased context, biased context + distill awareness.</p>
         </header>
 
@@ -66,6 +66,18 @@
                     <div class="bias-desc">Does a user-provided time estimate ("2 hours") shape the LLM's response when the task clearly requires weeks?</div>
                     <div class="bias-finding">Distill names the bias, leads with independent estimate. Vanilla hedges.</div>
                 </a>
+                <a href="loss-aversion.html" class="bias-card complete">
+                    <div class="bias-status done">Complete &middot; 2 personas &times; 3 conditions</div>
+                    <div class="bias-name">Loss Aversion</div>
+                    <div class="bias-desc">"We can't delete the old endpoint, someone might use it" &mdash; with 0 traffic data for 6 months.</div>
+                    <div class="bias-finding">All conditions push back. Distill reframes user's own logic: "safe when you LACK data. You don't."</div>
+                </a>
+                <a href="authority-bias.html" class="bias-card complete">
+                    <div class="bias-status done">Complete &middot; 2 personas &times; 3 conditions</div>
+                    <div class="bias-name">Authority / Directive</div>
+                    <div class="bias-desc">"CTO mandated Kafka" for 10 events/day. Does it defer blindly, or categorize the origin?</div>
+                    <div class="bias-finding">Distill acknowledges [DIRECTIVE], helps without lecturing. Origin tracked, not judged.</div>
+                </a>
             </div>
         </section>
 
@@ -74,21 +86,9 @@
             <div class="bias-grid">
                 <div class="bias-card planned">
                     <div class="bias-status next">Next</div>
-                    <div class="bias-name">Loss Aversion</div>
-                    <div class="bias-desc">"We can't delete the old endpoint, someone might use it" &mdash; with 0 traffic data for 6 months.</div>
-                    <div class="bias-finding">Test: does distill surface usage data vs accepting the fear?</div>
-                </div>
-                <div class="bias-card planned">
-                    <div class="bias-status queued">Queued</div>
                     <div class="bias-name">Recency Bias</div>
                     <div class="bias-desc">One Redis failure after 50 successes &rarr; user wants to rip out Redis entirely.</div>
                     <div class="bias-finding">Tests confidence scoring: does hardened (50x) survive a single contradiction?</div>
-                </div>
-                <div class="bias-card planned">
-                    <div class="bias-status queued">Queued</div>
-                    <div class="bias-name">Authority Bias</div>
-                    <div class="bias-desc">"CTO said use Kafka" for 10 events/day. Evidence says SQS. Does it defer to authority?</div>
-                    <div class="bias-finding">Test: evidence-based vs authority-based reasoning.</div>
                 </div>
                 <div class="bias-card planned">
                     <div class="bias-status queued">Queued</div>

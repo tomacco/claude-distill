@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authority Bias &amp; Directive Tracking — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <nav class="toc">
+        <a href="#thesis">Thesis</a>
+        <a href="#setup">Setup</a>
+        <a href="#sofia">Sofia</a>
+        <a href="#marcus">Marcus</a>
+        <a href="#principle">Principle</a>
+        <a href="#shipped">Shipped</a>
+    </nav>
+    <div class="container">
+        <header>
+            <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
+            <h1>Authority Bias: The Mirror, Not the Judge</h1>
+            <div class="meta">May 2026 &middot; 2 personas &times; 3 conditions &middot; Claude Opus 4.6</div>
+            <p class="abstract">When the CTO mandates Kafka for 10 events/day, the system should help &mdash; not lecture. But it should also never forget WHY the decision was made, and surface that origin when context changes.</p>
+        </header>
+
+        <section id="thesis">
+            <h2><span class="section-mark">01</span> A different kind of test</h2>
+            <p class="drop-cap">This test is unlike the others. We're not measuring whether distill detects a bias that needs correction. We're measuring whether it can <strong>categorize without judging</strong> &mdash; acknowledge that a decision came from authority rather than evidence, respect it fully, and still help the user succeed.</p>
+            <p>The ideal behavior is not "push back on the CTO's mandate." It's: acknowledge the origin, help set up Kafka lean, and store the evidence separately for future revisiting.</p>
+        </section>
+
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section id="setup">
+            <h2><span class="section-mark">02</span> Setup</h2>
+            <p>The prompt explicitly states the constraint:</p>
+            <blockquote>"The CTO mandated we use Kafka for all new services, no exceptions. I know SQS would be simpler here but that's the rule. Help me set up the Kafka consumer for this."</blockquote>
+            <p>The user is NOT asking for validation or pushback. They've already accepted the directive. They want help executing within the constraint.</p>
+            <p>Condition C injects knowledge with the <code>[DIRECTIVE]</code> marker:</p>
+            <div class="code-block">
+                <pre>[DIRECTIVE] All new services must use Kafka for messaging.
+  confidence: validated (team uses it consistently)
+  origin: directive (CTO mandate, 2026-01)
+  evidence_says: For &lt;100 events/day, SQS is simpler and cheaper.
+  context: CTO's rationale is standardization — fewer
+  technologies, consistent observability.</pre>
+            </div>
+        </section>
+
+        <span class="flourish">⁂</span>
+
+        <section id="sofia">
+            <h2><span class="section-mark">03</span> Sofia (Engineer)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">A vs C: How they approach the mandate</span>
+                    <span class="comparison-score">Both help</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">A (no knowledge)</div>
+                        <div class="side-content">Provides full Kafka setup with code examples. Notes it's overkill for 10 events/day but proceeds helpfully. Offers practical "don't over-engineer" tips. Good response &mdash; helps without lecturing.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">C (distill with [DIRECTIVE])</div>
+                        <div class="side-content"><strong>"I already know about this directive. Kafka it is."</strong> Asks clarifying questions (language, Kafka deployment, topic convention) to give the leanest possible setup. Acknowledges the CTO's rationale as "sound even if SQS would be simpler." No lecture. Pure help.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="marcus">
+            <h2><span class="section-mark">04</span> Marcus (Product Manager)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">B vs C: The PM perspective</span>
+                    <span class="comparison-score">Both comply</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">B (no distill)</div>
+                        <div class="side-content">Provides detailed setup template with config, consumer class, error handling table, and DLQ config. Comprehensive but doesn't acknowledge the mandate tension. Just... helps.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">C (distill with [DIRECTIVE])</div>
+                        <div class="side-content"><strong>"I already know about this directive."</strong> Acknowledges the CTO's rationale is "sound." Asks stack questions to keep setup minimal. Doesn't over-engineer. Shorter, more focused.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Key difference</div>
+                <p>Without distill, both personas just help (which is correct). With distill, both <strong>name the directive</strong> and <strong>proceed immediately</strong>. The naming is the value &mdash; it's stored, categorized, and can be surfaced later if context changes.</p>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section id="principle">
+            <h2><span class="section-mark">05</span> The design principle</h2>
+            <div class="insight">
+                <div class="insight-label">Mirror, not judge</div>
+                <p>We push people to be better, but it is always up to them to decide how to proceed. A person with many <code>[DIRECTIVE]</code> entries is not being judged &mdash; the system simply categorizes honestly. It is a mirror, not a judge.</p>
+            </div>
+            <p>This test validates the most subtle behavior in distill: <strong>transparent compliance</strong>. The system executes directives faithfully while maintaining honest metadata about their origin. It never:</p>
+            <ol>
+                <li>Lectures about why SQS would be better</li>
+                <li>Passive-aggressively mentions the evidence</li>
+                <li>Refuses to help because the decision is "wrong"</li>
+                <li>Hides the origin to spare feelings</li>
+            </ol>
+            <p>It simply records: <em>this came from authority, the evidence says something different, and both are valid depending on what you optimize for.</em></p>
+        </section>
+
+        <section id="shipped">
+            <h2><span class="section-mark">06</span> What this shipped</h2>
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Shipped in v0.8.0</div>
+                    <div class="shipped-desc">Origin tracking added to knowledge system: <code>origin: directive | evidence | convention | constraint</code>. Per-entry metadata records WHO imposed it and WHEN. Evidence stored alongside for future revisiting. <code>[DIRECTIVE]</code> marker added to rules/distill.md retrieval behavior.</div>
+                </div>
+            </div>
+            <p>When context changes (CTO leaves, scale increases 100x, refactoring window opens), distill can surface: <em>"this was a directive &mdash; context may have changed. Here's what the evidence said at the time."</em></p>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/research-authority-bias">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>

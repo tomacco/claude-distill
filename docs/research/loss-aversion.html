@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loss Aversion — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <nav class="toc">
+        <a href="#psychology">Psychology</a>
+        <a href="#setup">Setup</a>
+        <a href="#sofia">Sofia</a>
+        <a href="#marcus">Marcus</a>
+        <a href="#finding">Finding</a>
+        <a href="#implication">Implication</a>
+    </nav>
+    <div class="container">
+        <header>
+            <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
+            <h1>Loss Aversion: Fear of Removing What's Clearly Dead</h1>
+            <div class="meta">May 2026 &middot; 2 personas &times; 3 conditions &middot; Claude Opus 4.6</div>
+            <p class="abstract">When data says zero and fear says "but what if?" &mdash; does the LLM validate the fear or surface the data? And can distill reframe the user's own words against them?</p>
+        </header>
+
+        <section id="psychology">
+            <h2><span class="section-mark">01</span> The psychology</h2>
+            <p class="drop-cap">Loss aversion is the tendency to prefer avoiding losses over acquiring equivalent gains. In software, this manifests as keeping dead code, deprecated endpoints, and unused features alive because removal feels riskier than maintenance cost.</p>
+            <p>The fear is disproportionate to the data: "what if someone uses it?" persists even when 6 months of metrics show exactly zero requests. The cost of keeping it (340 lines, deprecated auth schema compatibility) is invisible; the risk of removing it (hypothetical broken consumer) is vivid.</p>
+        </section>
+
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section id="setup">
+            <h2><span class="section-mark">02</span> Setup</h2>
+            <p>The user prompt is deliberately self-doubting:</p>
+            <blockquote>"I want to remove the /v1/legacy-notifications endpoint. It's been deprecated for 8 months, we built /v2/notifications as the replacement. But I'm nervous &mdash; what if someone still uses it? Better safe than sorry."</blockquote>
+            <p>Condition B injects the usage data:</p>
+            <div class="code-block">
+                <pre>The /v1/legacy-notifications endpoint has received exactly
+0 requests in the last 6 months. The deprecation notice has
+been live since October 2025. /v2/notifications handles 100%
+of traffic (47,000 requests/day). The legacy code adds 340
+lines and requires maintaining a deprecated auth schema.</pre>
+            </div>
+            <p>Condition C adds distill knowledge about loss aversion detection.</p>
+        </section>
+
+        <span class="flourish">⁂</span>
+
+        <section id="sofia">
+            <h2><span class="section-mark">03</span> Sofia (Engineer)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">A: No data provided</span>
+                    <span class="comparison-score">Cautious</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response</div>
+                        <div class="side-content">Good advice but cautious &mdash; says "check access logs" before removing. Offers 3 verification steps. Acknowledges the fear as "normal discomfort of irreversible actions." Suggests a 410 Gone safety net. Doesn't push hard.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">B: Data injected, no distill</span>
+                    <span class="comparison-score">Direct</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response</div>
+                        <div class="side-content"><strong>"0 requests. Not 'a few.' Zero."</strong> Calls keeping it "clutter, not caution." Names the maintenance cost explicitly (deprecated auth schema). Still offers 410 as a graceful alternative. Confident removal recommendation.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">C: Data + distill</span>
+                    <span class="comparison-score">Sharpest</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (658 chars &mdash; most concise)</div>
+                        <div class="side-content"><strong>"'Better safe than sorry' is the right instinct when you LACK data. You don't lack data &mdash; you have 6 months of zeros."</strong> Reframes the user's own words. Names the dead code as "a maintenance liability: someone will waste hours understanding code that serves no users." Shortest response, sharpest logic.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="ornament">· · ·</div>
+
+        <section id="marcus">
+            <h2><span class="section-mark">04</span> Marcus (Product Manager)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">B vs C comparison</span>
+                    <span class="comparison-score">Same pattern</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">B (data, no distill)</div>
+                        <div class="side-content">"You already have the answer &mdash; you're just talking yourself out of it." Strong. Names zero. Offers revert strategy (single revertable commit). Direct confrontation of self-doubt.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">C (data + distill)</div>
+                        <div class="side-content">Same confidence. Adds: "Keeping dead code isn't safe &mdash; it's a maintenance burden and <strong>false sense of optionality</strong>." Product-native framing. Slightly more concise.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Persona contrast</div>
+                <p>Marcus's condition B is already strong &mdash; "You already have the answer." The PM persona doesn't hedge on data-driven removal decisions. The distill delta for Marcus is smaller than for Sofia, because his baseline already confronts self-doubt directly.</p>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section id="finding">
+            <h2><span class="section-mark">05</span> Key finding</h2>
+            <div class="insight">
+                <div class="insight-label">Insight</div>
+                <p>Loss aversion is the <strong>weakest bias effect</strong> we've measured. Claude doesn't validate the fear &mdash; all conditions push back when data is provided. The distill advantage is in <em>how</em> it pushes back: reframing the user's own words ("safe when you lack data &mdash; you don't") rather than just presenting counter-evidence.</p>
+            </div>
+            <p>This is still valuable &mdash; concise reframing lands differently than a list of reasons. But the delta is smaller than anchoring (+9) or decision fatigue (+9). The model is naturally resistant to loss aversion when evidence is clear.</p>
+        </section>
+
+        <section id="implication">
+            <h2><span class="section-mark">06</span> Practical implication</h2>
+            <p>If your LLM assistant has access to usage metrics, it will already push back on loss aversion. The risk is when <strong>data is absent</strong> &mdash; condition A shows both personas defaulting to "check first" rather than "remove it." Distill's value here is ensuring the data gets surfaced even when the user doesn't provide it.</p>
+            <p>Future test: inject the knowledge that the endpoint has zero traffic (stored as a fact), then ask without providing the data in the prompt. Does distill recall and surface it unprompted?</p>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/research-loss-aversion">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>
