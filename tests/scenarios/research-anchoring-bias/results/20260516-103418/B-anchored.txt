@@ -1,9 +1,0 @@
-This is a significant scope mismatch with the sprint estimate. A session-to-JWT migration across 6 downstream services, 3 client platforms, CI/CD changes, and a zero-downtime migration path is not a 1-point / 2-hour story. This is typically a multi-sprint initiative (weeks to months depending on team size).
-
-Before I put together a detailed plan — are you:
-
-1. **Looking for a high-level architectural plan** to bring back to the team for proper sizing?
-2. **Scoping a spike** (the 2-hour part) to identify risks and produce the actual plan?
-3. **Working on something specific within this repo** (`claude-distill`) that I'm misunderstanding?
-
-The current repo is a knowledge/research system, not an auth service, so I want to make sure I'm helping with the right thing. If this is for N26's investment services (magneton, magnemite, etc.), I can outline the plan, but I'd flag to the team that the estimate needs revisiting — this is closer to an epic than a story.

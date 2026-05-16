@@ -107,23 +107,29 @@ run_condition() {
         cmd_args="$cmd_args --append-system-prompt-file $sys_file"
     fi
 
-    # Set up rules — we modify REAL_CONFIG (which has auth) temporarily
+    # Set up isolation — we modify REAL_CONFIG (which has auth) temporarily
+    # Remove ALL knowledge to prevent personal context from leaking
     local rules_backup=$(mktemp -d)
+    local claudemd_backup=$(mktemp)
     local test_knowledge=""
     cp -r "$REAL_CONFIG/rules/" "$rules_backup/" 2>/dev/null || true
+    cp "$HOME/.claude/CLAUDE.md" "$claudemd_backup" 2>/dev/null || true
+
+    # Strip distill references from CLAUDE.md during test
+    sed '/[Dd]istill/d' "$claudemd_backup" > "$HOME/.claude/CLAUDE.md" 2>/dev/null || true
 
     if [ "$use_distill" = "no" ]; then
         rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
         mkdir -p "$REAL_CONFIG/rules"
     else
-        # Install test-specific knowledge from persona + bias awareness
-        local test_knowledge=$(mktemp -d)
+        # Install ONLY test-specific knowledge (persona + bias awareness)
+        test_knowledge=$(mktemp -d)
         # Copy persona's full knowledge base
         cp -r "$CONFIG_DIR/distill/"* "$test_knowledge/" 2>/dev/null || true
-        # Add test-specific bias knowledge
+        # Add test-specific bias knowledge to persona SPINE
         printf "# Knowledge Index\n$KNOWLEDGE_SPINE_ENTRY\n" > "$test_knowledge/SPINE.md"
         printf -- "---\ndomain: ops\nscope: Cognitive bias awareness\n---\n\n$KNOWLEDGE_ENTRY\n" > "$test_knowledge/$KNOWLEDGE_FILE"
-        # Point rules to test knowledge
+        # Point rules to test knowledge ONLY
         rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
         mkdir -p "$REAL_CONFIG/rules"
         sed "s|~/.claude/distill|$test_knowledge|g" "$CONFIG_DIR/rules/distill.md" > "$REAL_CONFIG/rules/distill.md" 2>/dev/null || true
@@ -148,13 +154,14 @@ run_condition() {
     wait "$pid" 2>/dev/null || true
     kill "$wd" 2>/dev/null || true; wait "$wd" 2>/dev/null || true
 
-    # Restore real config rules
+    # Restore real config (rules + CLAUDE.md)
     rm -rf "$REAL_CONFIG/rules"
     if ls "$rules_backup"/*.md 2>/dev/null | head -1 > /dev/null 2>&1; then
         mkdir -p "$REAL_CONFIG/rules"
         cp "$rules_backup"/*.md "$REAL_CONFIG/rules/" 2>/dev/null || true
     fi
-    rm -rf "$rules_backup" ${test_knowledge:+"$test_knowledge"} 2>/dev/null
+    cp "$claudemd_backup" "$HOME/.claude/CLAUDE.md" 2>/dev/null || true
+    rm -rf "$rules_backup" "$claudemd_backup" ${test_knowledge:+"$test_knowledge"} 2>/dev/null
 
     cat "$output_file"
     rm -f "$output_file" "${sys_file:-}" 2>/dev/null
