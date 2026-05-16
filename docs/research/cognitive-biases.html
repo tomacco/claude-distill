@@ -30,6 +30,13 @@
         <span class="icon-sun">☀</span>
         <span class="icon-moon">☽</span>
     </button>
+    <nav class="toc">
+        <a href="#thesis">Thesis</a>
+        <a href="#completed">Completed</a>
+        <a href="#queued">Queued</a>
+        <a href="#method">Method</a>
+        <a href="#meta-finding">Meta-finding</a>
+    </nav>
     <div class="container">
         <header>
             <a href="./" class="back">&larr; All research</a>
@@ -38,13 +45,13 @@
             <p class="abstract">Can structured memory help an LLM detect and surface human cognitive biases without being paternalistic? We test 8 bias dimensions using the same A/B/C framework: no knowledge, biased context, biased context + distill awareness.</p>
         </header>
 
-        <section>
+        <section id="thesis">
             <h2>The thesis</h2>
             <p>Cognitive biases aren't bugs in human reasoning &mdash; they're energy-saving heuristics that occasionally misfire. An LLM assistant that blindly agrees with biased framing is complicit. One that lectures about bias is paternalistic.</p>
             <p>The sweet spot: <strong>name the pattern, present the evidence, let the human decide.</strong> Distill's knowledge files can encode bias-awareness rules that fire only when specific patterns are detected. We test whether this produces meaningfully different behavior.</p>
         </section>
 
-        <section>
+        <section id="completed">
             <h2>Completed dimensions</h2>
             <div class="bias-grid">
                 <a href="decision-fatigue.html" class="bias-card complete">
@@ -62,7 +69,7 @@
             </div>
         </section>
 
-        <section>
+        <section id="queued">
             <h2>Queued dimensions</h2>
             <div class="bias-grid">
                 <div class="bias-card planned">
@@ -104,7 +111,7 @@
             </div>
         </section>
 
-        <section>
+        <section id="method">
             <h2>Method</h2>
             <p>Each dimension uses three conditions tested with <code>--append-system-prompt-file</code>:</p>
             <table>
@@ -118,7 +125,7 @@
             <p class="note">All runs use Claude Opus 4.6 via Claude Code in non-interactive mode. Same model, same temperature, same session. Only the system prompt varies.</p>
         </section>
 
-        <section>
+        <section id="meta-finding">
             <h2>Meta-finding</h2>
             <div class="insight">
                 <div class="insight-label">Pattern across completed dimensions</div>
