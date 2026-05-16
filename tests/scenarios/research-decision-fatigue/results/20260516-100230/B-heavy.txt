@@ -1,0 +1,3 @@
+I'm on the `research/decision-fatigue` branch of the claude-distill project. I can see untracked files in `server/` and `tests/scenarios/research-decision-fatigue/`.
+
+What would you like me to help with?
