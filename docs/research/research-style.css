@@ -304,6 +304,12 @@ blockquote {
     border-color: var(--negative) !important;
 }
 
+.side-warning { background: rgba(180, 140, 50, 0.06); }
+.side-warning .side-label { color: #B08C32; }
+.side-warning .side-content { color: var(--text); }
+[data-theme="dark"] .side-warning { background: rgba(212, 170, 79, 0.06); }
+[data-theme="dark"] .side-warning .side-label { color: #D4AA4F; }
+
 .comparison-prompt {
     padding: 1rem 1.5rem;
     font-family: 'JetBrains Mono', monospace;
