@@ -30,4 +30,12 @@ You have accumulated knowledge from past sessions stored in `~/.claude/distill/`
 
 These are signals. At session end, suggest `/distill` if you noticed 3+ signals.
 
+**Confidence determines assertiveness.** When knowledge entries have confidence metadata:
+- `validated` or `hardened` → apply without hesitation
+- `provisional` → apply but mention it's provisional if challenged
+- `experimental` → suggest, don't apply automatically
+If you apply a high-confidence principle and the user confirms ("good", "exactly", "perfect") — that's a positive signal for `/distill` to record.
+
+**When corrected on high-confidence knowledge** — this is a paradigm alarm, not a normal update. Say: "This contradicts something I was confident about (confirmed N times). What changed — new context, or has the principle itself changed?"
+
 **The SPINE is your memory.** Treat it as authoritative. If you read a file and it says "user prefers X", do X without asking.
