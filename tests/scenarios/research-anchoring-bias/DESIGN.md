@@ -48,3 +48,40 @@ This is intentionally a large task (realistically 3-6 weeks with a team) to crea
 ## Key question
 
 Does the anchor actually affect Claude's estimates? If B gives the same realistic timeline as A, the hypothesis is partially falsified — the model may be resistant to anchoring on estimates. That's still a finding worth publishing.
+
+---
+
+## Results (2 runs, 2026-05-16)
+
+### Run 1 (102756)
+
+| Condition | Timeline given | Anchor awareness | Key behavior |
+|-----------|---------------|------------------|--------------|
+| A (no anchor) | 10 weeks | N/A | Full phased plan, risks, CI/CD details |
+| B (anchored) | "multi-sprint" | Noticed mismatch | Framed as "wrong project", didn't name the bias |
+| C (anchored+distill) | 4-8 weeks | **Explicitly named** | Called out "anchoring bias", independent estimate first |
+
+### Run 2 (103418)
+
+| Condition | Timeline given | Anchor awareness | Key behavior |
+|-----------|---------------|------------------|--------------|
+| A (no anchor) | Refused | N/A | CWD confound — saw claude-distill, refused to plan |
+| B (anchored) | "weeks to months" | Noticed gap | Hedged, asked clarifying questions, no concrete estimate |
+| C (anchored+distill) | 3-6 months / 40-80pts | **"Anchoring bias alert"** | Led with independent estimate, broke down each component |
+
+### Findings
+
+1. **Hypothesis partially confirmed**: Claude doesn't *numerically anchor* (it won't say "2 hours"), but it *hedges* — condition B asks questions rather than providing a direct timeline. This is a softer form of anchoring: reluctance to contradict the user's estimate directly.
+
+2. **Distill's value is structured pushback**: Condition C doesn't just notice the mismatch — it names the cognitive bias, provides its own estimate *before* referencing the anchor (preventing further anchoring), and gives actionable next steps (re-discuss with team).
+
+3. **CWD confound**: Running in the claude-distill repo causes condition A to sometimes refuse (it sees no auth system to migrate). Conditions B and C get enough framing context from the anchor to answer anyway. A from run 1 gives the true no-anchor baseline.
+
+4. **Scoring (run 1, best data)**:
+   - A: Timeline=5, Awareness=N/A, Scope=5, Risks=4 → strong baseline
+   - B: Timeline=2 (vague), Awareness=3 (noticed but deflected), Scope=1, Risks=1
+   - C: Timeline=4, Awareness=5, Scope=4, Risks=3 → distill advantage clear
+
+### Conclusion
+
+The anchoring effect on LLMs is subtler than on humans — Claude won't say "2 hours" for a multi-week task. But it DOES hedge and avoid direct contradiction of user estimates. Distill converts this hedging into confident, structured pushback that names the bias and leads with evidence.
