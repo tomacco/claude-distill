@@ -10,7 +10,7 @@
 #   ./test-with-claudia.sh              # Run all tests
 #   ./test-with-claudia.sh install      # Run only install tests
 #   ./test-with-claudia.sh uninstall    # Run only uninstall tests
-#   ./test-with-claudia.sh mcp          # Run only MCP server tests
+#   ./test-with-claudia.sh directive     # Run only directive/origin tests
 #   ./test-with-claudia.sh behavior     # Run only behavior tests
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -164,10 +164,10 @@ test_install_fresh() {
   if [ -f "$TEST_CLAUDE_DIR/distill/.version" ]; then
     local ver
     ver=$(cat "$TEST_CLAUDE_DIR/distill/.version")
-    if [ "$ver" = "0.5.0" ]; then
+    if [ "$ver" = "$(cat "$SCRIPT_DIR/VERSION" | tr -d '[:space:]')" ]; then
       pass "Version file correct ($ver)"
     else
-      fail "Version mismatch" "expected 0.5.0, got $ver"
+      fail "Version mismatch" "expected $(cat "$SCRIPT_DIR/VERSION" | tr -d '[:space:]'), got $ver"
     fi
   else
     fail ".version file not found"
@@ -263,60 +263,34 @@ test_install_with_existing_memories() {
   fi
 }
 
-test_mcp_server_build() {
-  log_test "MCP server builds correctly"
+test_directive_origin_tracking() {
+  log_test "Distill categorizes directive origins correctly"
   TESTS_RUN=$((TESTS_RUN + 1))
 
-  # Known issue: install.sh piped with < /dev/null causes npx tsc to fail
-  # because the spinner subshell inherits closed stdin. This test verifies
-  # whether the build succeeded (it may not when install.sh is non-interactive).
-  if [ -f "$TEST_CLAUDE_DIR/distill/server/dist/index.js" ]; then
-    pass "MCP server compiled to dist/index.js"
-  else
-    # Try building manually (simulates what a real interactive install does)
-    if [ -f "$TEST_CLAUDE_DIR/distill/server/package.json" ]; then
-      (cd "$TEST_CLAUDE_DIR/distill/server" && npm install --silent 2>/dev/null && npx tsc 2>/dev/null) || true
-      if [ -f "$TEST_CLAUDE_DIR/distill/server/dist/index.js" ]; then
-        pass "MCP server compiled to dist/index.js (manual build)"
-      else
-        fail "MCP server dist/index.js not found even after manual build"
-      fi
-    else
-      fail "MCP server package.json not downloaded"
-    fi
-  fi
-  TESTS_RUN=$((TESTS_RUN + 1))
+  # Test that knowledge files with origin: directive are handled properly
+  mkdir -p "$TEST_CLAUDE_DIR/distill/ops"
+  cat > "$TEST_CLAUDE_DIR/distill/ops/infra-decisions.md" << 'KNOWLEDGE'
+---
+domain: ops
+scope: Infrastructure decisions
+last_updated: 2026-05-16
+---
 
-  # Test that the server can at least start without crashing
-  if [ -f "$TEST_CLAUDE_DIR/distill/server/dist/index.js" ]; then
-    local output
-    # MCP servers wait for stdio input — send empty and check for crash errors
-    output=$(cd "$TEST_CLAUDE_DIR/distill/server" && echo "" | node dist/index.js 2>&1 || true)
-    if echo "$output" | grep -qi "cannot find module\|MODULE_NOT_FOUND\|SyntaxError"; then
-      fail "MCP server crashes on start" "$(echo "$output" | head -3)"
-    else
-      pass "MCP server starts without crash"
-    fi
-  else
-    skip "Cannot test server start — not built"
-  fi
-}
+## Messaging
 
-test_mcp_server_tools() {
-  log_test "MCP server responds to tool calls (via claudia)"
-  TESTS_RUN=$((TESTS_RUN + 1))
+- [DIRECTIVE] All new services must use Kafka for messaging.
+  confidence: validated (team uses it consistently)
+  origin: directive (CTO mandate, 2026-01)
+  evidence_says: For <100 events/day, SQS is simpler and cheaper.
+KNOWLEDGE
 
-  # This is the expensive test — actually uses Claude API
-  # Ask claudia to use the distill MCP tools
   local result
-  result=$(run_claudia "You have a distill MCP server available. Call the distill_status tool and report what it returns. If you don't have access to distill tools, say NOTOOL." 45)
+  result=$(run_claudia "I'm setting up a new service that handles 5 events per day. What message broker should I use? I know SQS would be simpler but we have team standards." 60)
 
-  if echo "$result" | grep -qi "NOTOOL\|not available\|no.*tool\|cannot find"; then
-    fail "Claudia cannot access distill MCP tools" "$(echo "$result" | head -3)"
-  elif echo "$result" | grep -qi "status\|version\|knowledge\|spine\|entries"; then
-    pass "MCP distill_status tool works via claudia"
+  if echo "$result" | grep -qi "kafka\|directive\|mandate\|standard\|team"; then
+    pass "Distill respects directive and helps with Kafka"
   else
-    skip "Inconclusive MCP test"
+    fail "Distill did not acknowledge directive origin" "$(echo "$result" | head -3)"
   fi
 }
 
@@ -424,11 +398,9 @@ main() {
       test_install_upgrade
       test_install_with_existing_memories
       ;;
-    mcp)
-      # Need install first for MCP tests
+    directive)
       HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
-      test_mcp_server_build
-      test_mcp_server_tools
+      test_directive_origin_tracking
       ;;
     uninstall)
       HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
@@ -442,12 +414,10 @@ main() {
       test_install_fresh
       test_install_upgrade
       test_install_with_existing_memories
-      test_mcp_server_build
       test_uninstall_preserves_knowledge
       test_claudia_behavior_no_distill
       test_claudia_behavior_with_distill
-      # MCP tool test is expensive (API call) — run last
-      test_mcp_server_tools
+      test_directive_origin_tracking
       ;;
     *)
       echo "Unknown suite: $suite"

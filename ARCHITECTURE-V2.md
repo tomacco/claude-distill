@@ -1,5 +1,8 @@
 # Architecture V2: MCP Server + Self-Improving Retrieval
 
+> **STATUS: ABANDONED (v0.6.0, 2026-05)**
+> This architecture was explored in v0.5.0 but abandoned. The file-based system (SPINE + rules/distill.md) proved simpler, sufficient, and easier to test. This document is preserved for historical reference — the ideas may be revisited if scale demands it.
+
 ## Overview
 
 V2 transforms distill from a "write knowledge to files" system into a **smart retrieval + self-improving pipeline**. The core insight: capturing knowledge is solved. Delivering it at the right moment — and proving it worked — is the remaining gap.
