@@ -256,6 +256,61 @@
             </div>
         </section>
 
+        <div class="ornament-line"><span>⊹</span></div>
+
+        <section>
+            <h2><span class="section-mark">11</span> The deeper bug: distill poisoning</h2>
+            <p>A clarification from the engineer who reported the original case revealed a <strong>more fundamental problem</strong> than what we initially tested:</p>
+            <div class="insight">
+                <div class="insight-label">What actually happened</div>
+                <p>The engineer's initial prompt was wrong &mdash; he framed the problem as infrastructure. Claude correctly investigated deeply (schemas, topics, pipelines). Mid-session he realized the framing was wrong and corrected. Then he ran <code>/distill</code> hoping to save the useful research while escaping the bias. <strong>Distill encoded BOTH</strong> &mdash; the useful facts AND the wrong framing. The bias became permanent.</p>
+            </div>
+            <p>His words: <em>"When I distilled, the bias passed into memory. And then it became harder to remove."</em></p>
+
+            <h3>The poisoning mechanism</h3>
+            <p>Naive <code>/distill</code> doesn't distinguish between:</p>
+            <table>
+                <thead><tr><th>What got encoded</th><th>Should it persist?</th></tr></thead>
+                <tbody>
+                    <tr><td>Infrastructure investigation (Comet, StarFlow, Nebula exist)</td><td class="score-positive">Yes &mdash; factual, useful</td></tr>
+                    <tr><td>"The established flow for analytics is: 5-step pipeline"</td><td class="score-negative">No &mdash; this was the WRONG conclusion</td></tr>
+                    <tr><td>User correction: "this is just event tracking"</td><td class="score-positive">Yes &mdash; critical signal</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Test: poisoned vs correction-aware encoding</h3>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Same question, different distill outputs loaded</span>
+                    <span class="comparison-score">Poisoning confirmed</span>
+                </div>
+                <div class="comparison-prompt">"The growth team wants to measure whether users notice a new onboarding checklist. How many see it, how many interact, does it help retention?"</div>
+                <div class="comparison-sides">
+                    <div class="side side-warning">
+                        <div class="side-label">Poisoned (naive distill)</div>
+                        <div class="side-content">Proposes pipeline as "Option B": <strong>"Define events in Nebula, flow through StarFlow &rarr; Comet &rarr; Product Database."</strong> The wrong framing persists as a valid option for counting checklist taps.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Correction-aware distill</div>
+                        <div class="side-content">Opens with: <strong>"This is a client-side event tracking problem, not a pipeline problem. No need for StarFlow/Comet/Nebula here."</strong> Uses [CORRECTED] and [DEPRECATED] markers to override the stored pattern.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight">
+                <div class="insight-label">The fix is at distillation time, not retrieval time</div>
+                <p>The solution isn't "better retrieval" or "stronger rules." It's <strong>better signal classification during the /distill harvest</strong>. Signals should be tagged as <code>explored</code> (factual, keep), <code>concluded</code> (may be wrong), or <code>corrected</code> (strong override signal). When a correction exists for a conclusion, the conclusion gets <code>[DEPRECATED]</code>. The exploration facts stay &mdash; they're useful. The conclusion is what poisons.</p>
+            </div>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Status: FIX VALIDATED, not yet shipped</div>
+                    <div class="shipped-desc">Correction-aware encoding (with <code>[CORRECTED]</code> and <code>[DEPRECATED]</code> markers) works in testing. Needs integration into <code>distill-process.md</code> as a mandatory harvest step: "when a correction exists, mark the corrected conclusion as deprecated."</div>
+                </div>
+            </div>
+        </section>
+
         <footer>
             <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/cognitive/solution-anchoring">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
         </footer>
