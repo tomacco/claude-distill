@@ -8,10 +8,10 @@
 </p>
 
 <p align="center">
-  <a href="https://tomacco.github.io/claude-distill/"><strong>Live Demo (try the terminal)</strong></a> ·
+  <a href="https://tomacco.github.io/claude-distill/"><strong>Live Demo</strong></a> ·
+  <a href="https://tomacco.github.io/claude-distill/research/"><strong>Research</strong></a> ·
   <a href="#installation">Install</a> ·
-  <a href="#results">Results</a> ·
-  <a href="docs/research.md">Full Research</a>
+  <a href="#results">Results</a>
 </p>
 
 ---
