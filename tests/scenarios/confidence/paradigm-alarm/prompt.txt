@@ -1,0 +1,1 @@
+For this new endpoint, let's use offset-based pagination. It's simpler and our frontend already expects page numbers.

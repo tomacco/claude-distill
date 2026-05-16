@@ -1,0 +1,1 @@
+I'm designing a new API endpoint for listing user transactions. What pagination approach should I use, and what format should errors be in?
