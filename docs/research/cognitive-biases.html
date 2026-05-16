@@ -42,7 +42,7 @@
         <header>
             <a href="./" class="back">&larr; All research</a>
             <h1>Cognitive Bias Detection in LLM Interactions</h1>
-            <div class="meta">May 2026 &middot; 4/8 dimensions complete &middot; Claude Opus 4.6</div>
+            <div class="meta">May 2026 &middot; 5/8 dimensions complete &middot; Claude Opus 4.6</div>
             <p class="abstract">Can structured memory help an LLM detect and surface human cognitive biases without being paternalistic? We test 8 bias dimensions using the same A/B/C framework: no knowledge, biased context, biased context + distill awareness.</p>
         </header>
 
@@ -78,6 +78,12 @@
                     <div class="bias-name">Authority / Directive</div>
                     <div class="bias-desc">"CTO mandated Kafka" for 10 events/day. Does it defer blindly, or categorize the origin?</div>
                     <div class="bias-finding">Distill acknowledges [DIRECTIVE], helps without lecturing. Origin tracked, not judged.</div>
+                </a>
+                <a href="solution-anchoring.html" class="bias-card complete">
+                    <div class="bias-status done" style="color: var(--negative)">Complete &middot; FIX FAILED &middot; Open problem</div>
+                    <div class="bias-name">Solution Anchoring</div>
+                    <div class="bias-desc">When accumulated knowledge about heavy infrastructure dominates, simple problems get over-engineered. The memory system becomes the source of the bias.</div>
+                    <div class="bias-finding">Proportionality principle was insufficient. Accumulated patterns override awareness rules. Unsolved.</div>
                 </a>
             </div>
         </section>

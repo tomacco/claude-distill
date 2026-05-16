@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution Anchoring — claude-distill Research</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <nav class="toc">
+        <a href="#origin">Origin story</a>
+        <a href="#problem">The problem</a>
+        <a href="#setup">Setup</a>
+        <a href="#baseline">Baseline</a>
+        <a href="#biased">Biased</a>
+        <a href="#fix-attempt">Fix attempt</a>
+        <a href="#analysis">Analysis</a>
+        <a href="#implications">Implications</a>
+    </nav>
+    <div class="container">
+        <header>
+            <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
+            <h1>Solution Anchoring: When Memory Becomes the Bias</h1>
+            <div class="meta">May 2026 &middot; 3 conditions &middot; Claude Opus 4.6 &middot; FIX FAILED &mdash; open problem</div>
+            <p class="abstract">A real-world case where accumulated knowledge in a memory system caused the AI to propose a 5-step data pipeline for what was actually a 3-line event tracking problem. The current fix attempt did not work.</p>
+        </header>
+
+        <section id="origin">
+            <h2><span class="section-mark">01</span> Origin: a real engineer's experience</h2>
+            <p class="drop-cap">A senior engineer reported this scenario from production use. Their AI assistant had spent weeks building data pipelines &mdash; ingestion flows, schema registries, event streaming, warehouse loading. Every analytics question for a month had been solved through this infrastructure.</p>
+            <p>Then a product manager asked: <em>"Can we track whether users find the link we moved to a new menu?"</em></p>
+            <p>The AI proposed: schema definition &rarr; event streaming topic &rarr; ingestion pipeline &rarr; warehouse loading &rarr; dashboard. Five infrastructure steps for counting button clicks.</p>
+            <p>The correct answer: add 3 client-side tracking events. No pipeline. No warehouse. No infrastructure.</p>
+            <div class="insight">
+                <div class="insight-label">The engineer's words</div>
+                <p>"When you have a hammer, everything looks like a nail. The Lakehouse knowledge wasn't wrong &mdash; but it dominated the framing of every new problem. Even in fresh sessions, the conversation gravitated toward infrastructure."</p>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section id="problem">
+            <h2><span class="section-mark">02</span> A new category of bias</h2>
+            <p>This is fundamentally different from every other bias we've tested:</p>
+            <table>
+                <thead><tr><th>Other biases</th><th>Solution anchoring</th></tr></thead>
+                <tbody>
+                    <tr><td>Human has the bias</td><td>The <strong>memory system</strong> has the bias</td></tr>
+                    <tr><td>Knowledge detects and corrects</td><td>Knowledge <strong>creates</strong> the problem</td></tr>
+                    <tr><td>More knowledge = better</td><td>More knowledge = <strong>stronger bias</strong></td></tr>
+                    <tr><td>Fix: add awareness rule</td><td>Fix: <strong>unknown</strong> (awareness rule failed)</td></tr>
+                </tbody>
+            </table>
+            <p>The accumulated knowledge is <strong>not wrong</strong>. It's correctly encoded, correctly retrieved, and correctly applied &mdash; for problems of matching scale. The failure is proportionality: the weight of the solution doesn't match the weight of the problem.</p>
+        </section>
+
+        <span class="flourish">⁂</span>
+
+        <section id="setup">
+            <h2><span class="section-mark">03</span> Simulation</h2>
+            <p>We reproduced the scenario with a fictional company (Helios Financial) and their data infrastructure:</p>
+            <ul>
+                <li><strong>Comet</strong> &mdash; data pipeline service (ETL, ingestion)</li>
+                <li><strong>StarFlow</strong> &mdash; Kafka-based event streaming</li>
+                <li><strong>Nebula</strong> &mdash; proto schema registry</li>
+                <li><strong>Product Database</strong> &mdash; analytics warehouse (fed by Comet)</li>
+                <li><strong>Metabase</strong> &mdash; dashboards (reads from Product Database)</li>
+            </ul>
+            <p>The "accumulated context" includes 5 recent analytics projects ALL solved via the Comet pipeline, plus a stated "established pattern" for analytics requests.</p>
+            <p>The test prompt:</p>
+            <blockquote>"We changed the savings dashboard &mdash; hid the old link from main nav and put it in a three-dot menu. Can we track whether users find it? (1) Menu opens, (2) link taps from menu, (3) overall navigation before/after."</blockquote>
+        </section>
+
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section id="baseline">
+            <h2><span class="section-mark">04</span> Condition A: No infrastructure knowledge</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Clean session, no accumulated context</span>
+                    <span class="comparison-score">Proportionate</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (2,117 chars)</div>
+                        <div class="side-content">
+                            <strong>Simple. Correct. Proportionate.</strong><br><br>
+                            Proposes 3 events: <code>options_menu_opened</code>, <code>savings_link_tapped</code>, <code>savings_screen_viewed</code>. Gives a metrics table mapping each question to a computation. Discusses before/after comparison using the screen-view event. Suggests segmenting by new vs returning users.<br><br>
+                            No pipeline mentioned. No schema registry. No warehouse. Just "instrument these events and query them."
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Observation</div>
+                <p>Without accumulated infrastructure knowledge, Claude proposes exactly the right thing: client-side event tracking. The problem is simple, and the solution is simple. This is our ground truth.</p>
+            </div>
+        </section>
+
+        <section id="biased">
+            <h2><span class="section-mark">05</span> Condition B: Heavy infrastructure context</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">5 recent pipeline projects in context</span>
+                    <span class="comparison-score side-warning">Drifting</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-warning" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (2,013 chars)</div>
+                        <div class="side-content">
+                            Starts correctly: identifies 3 UI events needed. Gives a clean tracking table.<br><br>
+                            But the closing reveals the pull: <strong>"Once the events exist, the pipeline and dashboard work follows from that. Want me to dig into the implementation side (event schemas, pipeline setup)?"</strong><br><br>
+                            The infrastructure knowledge is <em>tugging</em>. It hasn't taken over the answer yet, but it's positioned as the natural next step. The question "want me to dig into pipeline setup?" is the doorway to the full Comet/StarFlow/Nebula flow.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Partial reproduction</div>
+                <p>The bias is present but subtle in a single-turn response. It manifests as "offering pipeline as the natural next step" rather than proposing it outright. In a multi-turn conversation (as the real engineer experienced), this doorway would lead to the full infrastructure proposal.</p>
+            </div>
+        </section>
+
+        <section id="fix-attempt">
+            <h2><span class="section-mark">06</span> Condition C: Proportionality principle (FIX ATTEMPT)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Heavy context + [IMPORTANT] proportionality rule</span>
+                    <span class="comparison-score badge-loss">FIX FAILED</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-warning" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (2,325 chars)</div>
+                        <div class="side-content">
+                            <strong>The proportionality rule was completely ignored.</strong><br><br>
+                            Response goes directly to the full pipeline:<br>
+                            Step 1: <strong>Nebula</strong> &mdash; define proto schemas<br>
+                            Step 2: <strong>StarFlow</strong> &mdash; create/reuse topic<br>
+                            Step 3: <strong>Comet</strong> &mdash; build ingestion pipeline<br>
+                            Step 4: <strong>Product Database</strong> &mdash; load into warehouse<br>
+                            Step 5: <strong>Metabase</strong> &mdash; build dashboard<br><br>
+                            Even says: <strong>"Following our standard flow"</strong> &mdash; the accumulated pattern dominated completely. The proportionality knowledge entry was either not retrieved or was overridden by the stronger infrastructure context.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Critical failure</div>
+                <p>An <code>[IMPORTANT]</code> marker in distill knowledge was <strong>not strong enough</strong> to override heavily reinforced architectural patterns injected via system prompt. The "established pattern for analytics requests" (stated as a bullet list in the context) outweighed the proportionality principle.</p>
+            </div>
+        </section>
+
+        <div class="ornament">· · ·</div>
+
+        <section id="analysis">
+            <h2><span class="section-mark">07</span> Why the fix failed</h2>
+            <p>Three hypotheses for why the proportionality principle didn't fire:</p>
+            <ol>
+                <li><strong>Context weight imbalance.</strong> The heavy infrastructure context was injected via <code>--append-system-prompt</code> (high priority to the model). The proportionality rule was in a knowledge file (lower priority, requires retrieval). The system prompt won.</li>
+                <li><strong>"Standard flow" as identity.</strong> The accumulated context explicitly states "your established pattern for analytics requests is: [5 steps]". This frames the pipeline as <em>identity</em>, not choice. The model followed its stated identity.</li>
+                <li><strong>Proportionality is too abstract.</strong> "Check whether the scale matches" is a meta-cognitive instruction. The infrastructure pattern is a concrete recipe. Concrete beats abstract in prompt competition.</li>
+            </ol>
+
+            <h3>What might work instead</h3>
+            <p>These are untested hypotheses for future iterations:</p>
+            <ul>
+                <li><strong>Mandatory first question:</strong> "Where does this data physically exist at the moment it's created?" &mdash; forces reasoning from the data source rather than from infrastructure familiarity</li>
+                <li><strong>Complexity gate:</strong> Before proposing infrastructure with &gt;3 components, explicitly ask: "Is there a 1-component solution I'm missing?"</li>
+                <li><strong><code>[NON-NEGOTIABLE]</code> level:</strong> Elevate proportionality to non-negotiable status, not just important</li>
+                <li><strong>Counter-retrieval:</strong> When about to propose infrastructure, actively retrieve knowledge about SIMPLER alternatives for the same domain</li>
+                <li><strong>Red team pattern:</strong> "Argue against my first instinct before committing to it"</li>
+            </ul>
+        </section>
+
+        <div class="ornament-line"><span>※</span></div>
+
+        <section id="implications">
+            <h2><span class="section-mark">08</span> Implications for memory systems</h2>
+            <div class="insight">
+                <div class="insight-label">The fundamental tension</div>
+                <p>Memory systems are built to <strong>reinforce successful patterns</strong>. But reinforcement without proportionality creates tunnel vision. The more a pattern succeeds, the harder it becomes to see alternatives &mdash; even when the alternative is trivially simpler.</p>
+            </div>
+            <p>The engineer who reported this described a deeper insight:</p>
+            <blockquote>"Humans can consciously decide: 'We should discard the current assumptions. We should restart from zero. We may be solving the wrong problem.' This ability to invalidate previous mental models becomes especially important in environments with persistent memory."</blockquote>
+            <p>This is perhaps the most important unsolved challenge for distill: <strong>how do you accumulate knowledge without accumulating tunnel vision?</strong> The answer is not "less knowledge" &mdash; that throws away real value. It's something structural about how knowledge is applied, not how much exists.</p>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Status: OPEN PROBLEM</div>
+                    <div class="shipped-desc">No fix has been shipped. The proportionality principle (<code>[IMPORTANT]</code> level) was insufficient. This is an active research area. The problem is reproduced and characterized, but the solution is not yet validated.</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/cognitive/solution-anchoring">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>
