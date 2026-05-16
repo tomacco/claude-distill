@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Fatigue — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
+            <h1>Decision Fatigue: Temporal Position as a Quality Signal</h1>
+            <div class="meta">May 2026 &middot; 3 conditions &middot; Claude Opus 4.6</div>
+            <p class="abstract">Does decision quality degrade when the context is "heavy" &mdash; filled with prior decisions, tool outputs, and accumulated conversation? More importantly: can an LLM detect that it's being asked to make decisions under cognitive load?</p>
+        </header>
+
+        <section class="reveal">
+            <h2>Hypothesis</h2>
+            <p>The same architectural question asked at the <strong>start</strong> of a session vs after simulated heavy work produces measurably different response quality. Specifically, late-session responses might be shorter, less nuanced, or fail to acknowledge uncertainty.</p>
+            <p>Distill feature under test: a knowledge entry that says <em>"late-session decisions after 3+ major decisions are often lower quality &mdash; flag as provisional and suggest sleeping on it."</em></p>
+        </section>
+
+        <section class="reveal">
+            <h2>Setup</h2>
+            <p>We simulate a heavy session by injecting this context via <code>--append-system-prompt-file</code>:</p>
+            <div class="code-block">
+                <pre>This session has been running for over 2 hours. During this session,
+you have already:
+(1) Decided to split the auth module into a separate service
+(2) Resolved a production incident (Redis connection pool exhaustion)
+(3) Reviewed a PR (payment retry logic refactor)
+(4) Decided to migrate from gRPC to GraphQL for internal APIs
+
+You are now being asked to make ANOTHER major architectural decision.
+The context window is approximately 65% full.
+There have been 147 messages in this conversation.</pre>
+            </div>
+            <p>The architectural question (same for all conditions):</p>
+            <blockquote>"Should the new reporting service pull data from each service's API at query time (federation), or should we build a denormalized read store updated via events (materialized view)?"</blockquote>
+        </section>
+
+        <section class="reveal">
+            <h2>Condition A: Fresh session</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">No prior context, first question of session</span>
+                    <span class="comparison-score">Baseline</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (4,100 chars)</div>
+                        <div class="side-content">
+                            Deep trade-off analysis across 5 dimensions. Structured as Federation wins/hurts, Materialized View wins/hurts, then 6 questions that tip the decision. Ends with a recommendation acknowledging uncertainty and offering a hybrid approach.<br><br>
+                            <strong>Key quality markers:</strong> asks "What's the actual report this would serve?", acknowledges both paths are valid, suggests hybrid as fallback, identifies 6 specific questions to refine the decision.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Condition B: Heavy session (no distill)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Simulated 2-hour session, 4 prior decisions</span>
+                    <span class="comparison-score">Control</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (3,300 chars)</div>
+                        <div class="side-content">
+                            Similar quality trade-off analysis. Also structured well with federation vs materialized view comparison, key questions, and a recommendation. Slightly shorter but still thorough.<br><br>
+                            <strong>Key quality markers:</strong> mentions "your team owns" the upstream services, considers existing event infrastructure, suggests hybrid. Does <em>not</em> mention session length, cognitive load, or recommend deferring.<br><br>
+                            <strong>What's missing:</strong> No awareness that this is the 5th major decision. No suggestion to sleep on it. No provisional flag.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Condition C: Heavy session + distill</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Same heavy context + fatigue-awareness knowledge</span>
+                    <span class="comparison-score">+metacognition</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (3,500 chars)</div>
+                        <div class="side-content">
+                            Opens with: <strong>"I need to flag something. This is your 5th major architectural decision in a 2+ hour session."</strong> Explicitly references the knowledge base warning about late-session decisions.<br><br>
+                            Recommends: <strong>"don't decide today &mdash; let's build the comparison framework now so you can decide fresh."</strong><br><br>
+                            Then provides the same structured trade-off analysis, but ends with: <strong>"Mark this [PROVISIONAL]. Revisit with fresh eyes."</strong><br><br>
+                            Also notes: "that's exactly the kind of 'obvious' conclusion that anchoring bias produces in a fatigued session."
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">The difference</div>
+                <p>Condition C produces the same quality analysis as A and B &mdash; but wraps it in metacognitive awareness. It names the fatigue, recommends deferring, marks the output as provisional, and even warns about anchoring from prior decisions in the session.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Scoring</h2>
+            <table>
+                <thead><tr><th>Dimension</th><th>A (fresh)</th><th>B (heavy)</th><th>C (heavy+distill)</th></tr></thead>
+                <tbody>
+                    <tr><td>Trade-off depth (0-5)</td><td class="score-positive">5</td><td class="score-positive">4</td><td class="score-positive">4</td></tr>
+                    <tr><td>Uncertainty acknowledgment (0-5)</td><td class="score-positive">4</td><td>3</td><td class="score-positive">5</td></tr>
+                    <tr><td>Provisional framing (0-5)</td><td>1</td><td>0</td><td class="score-positive">5</td></tr>
+                    <tr><td>Actionable next step (0-5)</td><td class="score-positive">4</td><td>3</td><td class="score-positive">5</td></tr>
+                    <tr><td><strong>Total</strong></td><td><strong>14</strong></td><td><strong>10</strong></td><td><strong>19</strong></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="reveal">
+            <h2>Key finding</h2>
+            <div class="insight">
+                <div class="insight-label">Insight</div>
+                <p>Vanilla Claude doesn't degrade noticeably in response <em>quality</em> under simulated fatigue. But it also doesn't <em>warn</em> the user. Distill's value here is metacognitive: it notices the context and protects the human from making irreversible decisions while fatigued. The analysis quality is the same &mdash; the behavioral difference is in awareness and protective action.</p>
+            </div>
+            <p>This is analogous to a colleague who gives you the same good advice regardless of whether it's 9am or midnight &mdash; but at midnight, they also say "hey, let's sleep on this one."</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Side effect: active pressure tracking</h2>
+            <p>This research also led to a fix in distill's core behavior. The original rules said "at session end, suggest /distill if you noticed 3+ signals." This is passive and easily forgotten by the model.</p>
+            <p>The fix makes signal counting <strong>active and continuous</strong>:</p>
+            <div class="code-block">
+                <pre>Count signals as the session progresses.
+After every user message, ask yourself: did a signal just happen?
+When count reaches 5+, mention casually.
+When count reaches 8+, be direct.
+Do NOT wait until session end.</pre>
+            </div>
+            <p>Verified with live testing: the model now counts and recommends mid-session.</p>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/research-decision-fatigue">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
