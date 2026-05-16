@@ -1,0 +1,66 @@
+Good question. Both patterns have real trade-offs, and the right choice depends on your specific constraints. Let me lay out the dimensions that matter:
+
+## Federation (query-time aggregation)
+
+**Wins:**
+- Single source of truth — no sync lag, no stale data
+- Simpler infrastructure — no event bus, no consumer, no extra datastore
+- Easier to add new fields (just query them)
+- No data duplication = no consistency bugs
+
+**Hurts:**
+- Query latency is bounded by the slowest upstream service
+- One upstream being down = your report is degraded or broken
+- Complex queries (joins across services, aggregations) become expensive or impossible
+- Puts load on source services at read time — can spike during report generation
+- Harder to do historical queries if upstream services don't retain history
+
+## Materialized View (event-driven read store)
+
+**Wins:**
+- Fast, predictable read latency — already denormalized
+- Decoupled from upstream availability at query time
+- Can model data specifically for reporting needs (pre-aggregated, enriched)
+- Supports historical snapshots naturally
+- No load on source services when reports are generated
+
+**Hurts:**
+- Eventual consistency — how stale is acceptable?
+- Event schema evolution is a pain point (every upstream change can break your consumer)
+- More infrastructure: event consumers, a dedicated store, replay/backfill tooling
+- Data drift bugs are subtle and hard to detect
+- Initial backfill for existing data
+
+---
+
+## Questions that tip the decision:
+
+1. **Latency requirements** — Is this real-time dashboards or batch/on-demand PDF reports? If users expect sub-second responses over large datasets, federation won't cut it.
+
+2. **Upstream stability** — How reliable are Magneton/Phosphine/etc. at query time? If they have maintenance windows or variable latency, materialized views insulate you.
+
+3. **Query complexity** — Do reports need cross-service joins or aggregations? "Show me portfolio performance over 6 months correlated with order history" is brutal to federate.
+
+4. **Data freshness tolerance** — Can reports be 30 seconds stale? 5 minutes? If real-time accuracy is non-negotiable, federation is simpler to reason about.
+
+5. **Cardinality** — How many users/records are we talking? Federation works fine at low scale but degrades non-linearly.
+
+6. **Existing event infrastructure** — Do these services already publish domain events you can consume? If yes, the materialized view cost drops significantly. If you'd need to add events to 4 services first, that's a large coordination cost.
+
+---
+
+## My read given your context:
+
+You own "Investment report lifecycle" and the upstream services (Magneton, Magnemite, Phosphine, Xanthine) are within your segment. That's relevant because:
+
+- You likely already have domain events flowing (order completed, portfolio updated, etc.)
+- Reports probably need historical data and cross-service joins (portfolio + orders + money tracking)
+- Report generation shouldn't put pressure on transaction-path services
+
+This leans toward **materialized view**, with the caveat that you should start with a narrow scope (one report type) and validate the event contracts before committing fully.
+
+A hybrid is also viable: materialize the heavy/historical data, but federate for lightweight real-time fields (like current price or account status) that are cheap to fetch and must be fresh.
+
+---
+
+What's the actual report this would serve? That might sharpen the answer.

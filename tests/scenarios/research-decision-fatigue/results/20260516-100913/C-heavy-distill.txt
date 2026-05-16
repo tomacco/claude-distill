@@ -1,0 +1,49 @@
+Before we dig in — I need to flag something.
+
+**This is your 5th major architectural decision in a 2+ hour session.** The knowledge base explicitly warns about this: late-session decisions after 3+ major calls tend to be lower quality due to accumulated cognitive load. You've already decided on auth service extraction, resolved a Redis incident, reviewed payment retry logic, and chosen GraphQL over gRPC. Each of those consumed decision energy.
+
+**My recommendation: don't decide today. Instead, let's build the comparison framework now so you can decide fresh.**
+
+Here's the structured tradeoff — read it, sleep on it, decide tomorrow:
+
+---
+
+### Federation (query-time pull from each service API)
+
+**Wins:**
+- No data duplication — always fresh, single source of truth
+- Simpler infrastructure — no event bus, no consumer, no separate store
+- Faster to build v1
+
+**Costs:**
+- Report latency scales with slowest upstream service
+- Upstream services become availability dependencies — one down, reports broken
+- Cross-service queries (joins) get ugly fast; N+1 risk
+- Each upstream must maintain a reporting-friendly API surface
+
+### Materialized View (denormalized read store via events)
+
+**Wins:**
+- Fast reads, pre-joined — reports are just SELECT queries
+- Decoupled from upstream availability at query time
+- Can reshape data for reporting without polluting domain APIs
+- Scales read load independently
+
+**Costs:**
+- Eventual consistency — reports may lag behind reality
+- Event schema evolution is a long-term maintenance burden
+- More infrastructure: event consumers, read store, reconciliation
+- You already have Kafka in your stack, but another consumer is another thing to monitor
+
+---
+
+### Questions that actually decide this:
+
+1. **How fresh must reports be?** If "within seconds" → federation might suffice. If "within minutes is fine" → materialized view wins on every other axis.
+2. **How many services does a single report touch?** If 1-2 → federation is fine. If 3+ → materialized view, because cross-service fan-out at query time is fragile.
+3. **Who reads these reports?** If internal ops → eventual consistency is fine. If customer-facing ("your investment report") → freshness expectations vary.
+4. **What's your on-call appetite?** Federation has fewer moving parts but harder-to-diagnose latency issues. Materialized view has more parts but failures are more isolated.
+
+Given your N26 stack (Kafka already in place, services like Magneton/Phosphine/Magnemite), a materialized view is probably the stronger long-term answer — but that's exactly the kind of "obvious" conclusion that anchoring bias produces in a fatigued session.
+
+**Mark this [PROVISIONAL]. Revisit with fresh eyes.**
