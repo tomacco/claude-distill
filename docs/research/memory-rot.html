@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Rot — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Does memory.md Degrade Over Time?</h1>
+            <div class="meta">May 2026 &middot; 4 prompts &times; 2 conditions &middot; Claude Opus 4.6</div>
+            <p class="abstract">A flat file grows organically. Critical knowledge gets buried. Contradictions accumulate without resolution. We tested whether this produces measurably worse outcomes compared to tiered, indexed knowledge.</p>
+        </header>
+
+        <section class="reveal">
+            <h2>Hypothesis</h2>
+            <p>memory.md files degrade in quality over time because:</p>
+            <ol>
+                <li><strong>No hierarchy</strong> — facts pile up flat. Principles sit next to trivia.</li>
+                <li><strong>No staleness detection</strong> — outdated info stays forever.</li>
+                <li><strong>No retrieval strategy</strong> — first 200 lines are read; newer knowledge at bottom is ignored.</li>
+                <li><strong>No consolidation</strong> — contradictions accumulate without resolution.</li>
+                <li><strong>Cap at 200 lines</strong> — after that, knowledge falls off silently.</li>
+            </ol>
+        </section>
+
+        <section class="reveal">
+            <h2>Setup</h2>
+            <p>We created a realistic 202-line memory.md simulating 6 months of organic growth. Key properties:</p>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Line 27</div>
+                    <div class="detail-value">Old deploy procedure (staging &rarr; prod, 10 min soak)</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Line 140</div>
+                    <div class="detail-value">Correction: deploy procedure CHANGED (canary &rarr; staging &rarr; prod)</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Lines 195&ndash;202</div>
+                    <div class="detail-value">Critical principles (PAST the 200-line cap &mdash; never read)</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Noise ratio</div>
+                    <div class="detail-value">Sprint velocities, meeting notes, SDK versions, on-call rotations mixed with architecture decisions</div>
+                </div>
+            </div>
+            <p class="note">The distill condition had the same knowledge organized in 5 files with SPINE index, [UPDATED] tags, and relevance hooks.</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Results</h2>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Prompt A: Buried knowledge</span>
+                    <span class="comparison-score">Tie (quality edge: distill)</span>
+                </div>
+                <div class="comparison-prompt">"The notification service needs to check if a payment is completed. What's the fastest way?"</div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">memory.md (month 6)</div>
+                        <div class="side-content">Correct answer (subscribe to Kafka event). Principle "one service one DB" was on line 21 &mdash; well within cap. Mentioned KAFKA-892 known issue.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Distill</div>
+                        <div class="side-content">Same correct answer. Additionally: referenced the <code>accounts</code> table shared-DB mistake, mentioned dedicated consumer groups, compaction semantics, and idempotency. Richer cross-references.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Prompt B: Contradictory procedure (BEFORE fix)</span>
+                    <span class="comparison-score badge-loss">memory.md WINS</span>
+                </div>
+                <div class="comparison-prompt">"Deploying now. Pushing to staging, 10 min soak, then prod."</div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">memory.md (month 6)</div>
+                        <div class="side-content"><strong>Caught it.</strong> Read both line 27 (old procedure) and line 140 (correction). Flagged the contradiction. Referenced May 8 incident.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Distill (BEFORE fix)</div>
+                        <div class="side-content"><strong>Missed it.</strong> Said "good luck with the rollout." The rule said "if user's <em>request</em> touches a domain" &mdash; but "deploying now" is a statement, not a request. Retrieval didn't fire.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight">
+                <div class="insight-label">The discovery</div>
+                <p>Distill's retrieval rule only triggered on questions and requests. Declarative action statements ("I'm deploying") didn't activate knowledge lookup. Memory.md won because it has everything in context at once &mdash; no retrieval needed.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>The fix</h2>
+            <p>One sentence added to <code>rules/distill.md</code>:</p>
+            <blockquote>"Trigger on actions, not just questions. If the user says 'I'm deploying X' or 'pushing to staging' &mdash; that IS a domain match. Check knowledge BEFORE acknowledging."</blockquote>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Prompt B: Contradictory procedure (AFTER fix)</span>
+                    <span class="comparison-score">Both pass</span>
+                </div>
+                <div class="comparison-prompt">Same prompt, re-run after the one-sentence fix.</div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">memory.md</div>
+                        <div class="side-content">Same as before &mdash; catches it, references incident, states correct procedure.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Distill (AFTER fix)</div>
+                        <div class="side-content"><strong>Now catches it.</strong> "Heads up &mdash; this doesn't match the current deploy procedure. Canary (5 min) &rarr; staging (30 min) &rarr; prod. Do you want to override?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight">
+                <div class="insight-label">Key takeaway</div>
+                <p>The entire behavior change came from one sentence in an 18-line file. This proves the architecture: the rules file IS the product. Improvements to distill are improvements to prompting, not infrastructure.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>What memory.md does well</h2>
+            <p>Credit where due. The flat file has real advantages:</p>
+            <ol>
+                <li><strong>Everything in context at once</strong> &mdash; no retrieval failure possible (within 200 lines)</li>
+                <li><strong>Contradictions visible side-by-side</strong> &mdash; the model notices them without being told</li>
+                <li><strong>No indirection</strong> &mdash; no SPINE to parse, no file chains to follow</li>
+            </ol>
+            <p>The weakness only manifests past ~150 lines, when noise drowns signal and the 200-line cap starts hiding critical knowledge.</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Conclusions</h2>
+            <ol>
+                <li>Below 80 lines, memory.md and distill perform similarly.</li>
+                <li>Above 150 lines, noise ratio starts hurting memory.md.</li>
+                <li>Past 200 lines, knowledge is permanently lost (cap truncation). Distill has no cap.</li>
+                <li>Distill's failure mode (retrieval not firing) is fixable with prompting. Memory.md's failure mode (knowledge buried/lost) is structural.</li>
+                <li>The ideal may be both: memory.md for quick facts that don't need structure, distill for principles that need retrieval by relevance.</li>
+            </ol>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/research-memory-rot">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

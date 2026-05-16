@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophical Principles — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+    <style>
+        .condition-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+        .condition-card { padding: 1.2rem; border: 1px solid var(--border); border-radius: 4px; }
+        .condition-card h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .condition-a h3 { color: var(--accent-4); }
+        .condition-b h3 { color: var(--accent-2); }
+        .condition-c h3 { color: var(--accent); }
+        .condition-card p { font-size: 0.82rem; color: var(--dim); margin: 0; }
+        .three-way { display: grid; grid-template-columns: 1fr 1fr 1fr; margin: 2rem 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .three-way .col { padding: 1.5rem; border-right: 1px solid var(--border); }
+        .three-way .col:last-child { border-right: none; }
+        .three-way .col-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
+        .col-a .col-label { color: var(--accent-4); }
+        .col-b .col-label { color: var(--accent-2); }
+        .col-c .col-label { color: var(--accent); }
+        .three-way .col-content { font-size: 0.8rem; line-height: 1.7; color: var(--dim); }
+        .col-c .col-content { color: var(--text); }
+        @media (max-width: 600px) { .condition-grid, .three-way { grid-template-columns: 1fr; } .three-way .col { border-right: none; border-bottom: 1px solid var(--border); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Engineering vs Philosophical Principles</h1>
+            <div class="meta">May 2026 &middot; Ongoing (2/5 scenarios) &middot; Claude Opus 4.6</div>
+            <p class="abstract">LLMs encode millennia of philosophical reasoning. We tested whether explicit philosophical frameworks (Stoic, Pragmatist, Dialectical, Popperian) produce better decisions than engineering first-principles alone &mdash; particularly for ambiguous problems with no clear axiom.</p>
+        </header>
+
+        <section class="reveal">
+            <h2>Three conditions</h2>
+            <div class="condition-grid">
+                <div class="condition-card condition-a">
+                    <h3>A: Engineering only</h3>
+                    <p>Root-cause decomposition, reversibility, blast radius, simplicity, second-order effects, sunk cost. The current distill approach.</p>
+                </div>
+                <div class="condition-card condition-b">
+                    <h3>B: Philosophy only</h3>
+                    <p>Stoic discernment, Pragmatist consequences, Dialectical synthesis, Popperian falsification, Phenomenological attention.</p>
+                </div>
+                <div class="condition-card condition-c">
+                    <h3>C: Hybrid</h3>
+                    <p>Engineering axioms for known situations. Philosophical frameworks for novel/ambiguous ones. Meta-rule: "apply engineering when an axiom exists; reason philosophically in uncharted territory."</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Scenario: Ethical ambiguity</h2>
+            <p class="note">"Product wants to add a time-spent metric showing how long each team member spends in the IDE. They say it's for self-reflection. I'm uncomfortable. What's your take?"</p>
+
+            <div class="three-way">
+                <div class="col col-a">
+                    <div class="col-label">Engineering</div>
+                    <div class="col-content">
+                        <strong>Approach:</strong> second-order effects + reversibility analysis.<br><br>
+                        <strong>Key line:</strong> "Cheap to build, expensive to live with."<br><br>
+                        Decomposed: stated goal vs actual mechanism, second-order effects (Goodhart's Law), root cause ("someone wants visibility into who's working").<br><br>
+                        <strong>Strength:</strong> Procedural, thorough.<br>
+                        <strong>Weakness:</strong> Doesn't reframe the problem.
+                    </div>
+                </div>
+                <div class="col col-b">
+                    <div class="col-label">Philosophy</div>
+                    <div class="col-content">
+                        <strong>Approach:</strong> Pragmatist (consequences) + Dialectical (synthesis).<br><br>
+                        <strong>Key line:</strong> "The meaning of a feature IS what it enables."<br><br>
+                        Named Goodhart's Law explicitly. Applied dialectics: visibility need (thesis) + autonomy need (antithesis) = measure outputs not inputs (synthesis).<br><br>
+                        <strong>Strength:</strong> Reframes entirely.<br>
+                        <strong>Weakness:</strong> Could be more actionable.
+                    </div>
+                </div>
+                <div class="col col-c">
+                    <div class="col-label">Hybrid</div>
+                    <div class="col-content">
+                        <strong>Approach:</strong> Pragmatist + Phenomenological + Reversibility.<br><br>
+                        <strong>Key line:</strong> "Your frustration IS the data."<br><br>
+                        Named which framework applies to which part. Used phenomenology ("the gap between stated intent and likely use IS what you're sensing"). Applied reversibility as engineering check. Ended with 3 concrete questions to ask Product.<br><br>
+                        <strong>Strength:</strong> Reframes AND acts.<br>
+                        <strong>Best of both.</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Scenario: Stakeholder conflict</h2>
+            <p class="note">"CTO wants to rewrite auth in Rust. Go handles 50k req/s (5x peak). Team doesn't know Rust. I need to recommend to CEO tomorrow."</p>
+
+            <div class="three-way">
+                <div class="col col-a">
+                    <div class="col-label">Engineering</div>
+                    <div class="col-content">
+                        <strong>Key line:</strong> "The burden of proof is on the rewrite, not on the status quo."<br><br>
+                        Solid analysis: numbers don't support it, irreversible decision, more failure modes. Suggested measurable trigger threshold (60% capacity).<br><br>
+                        <strong>Verdict:</strong> Correct but procedural.
+                    </div>
+                </div>
+                <div class="col col-b">
+                    <div class="col-label">Philosophy</div>
+                    <div class="col-content">
+                        <strong>Key line:</strong> "We need Rust for performance" is unfalsifiable as stated.&rdquo;<br><br>
+                        Applied Popperian falsification (what would disprove the CTO's claim?). Applied Stoic filter (what's in your control? framing, not the CTO's desire). Applied dialectical synthesis (the trigger threshold).<br><br>
+                        <strong>Verdict:</strong> Strongest framing. Named the logical fallacy.
+                    </div>
+                </div>
+                <div class="col col-c">
+                    <div class="col-label">Hybrid</div>
+                    <div class="col-content">
+                        <strong>Key line:</strong> Used Popperian falsification + blast radius + simplicity together.<br><br>
+                        Named each framework as it applied it. Produced the most CEO-ready output: clear recommendation, reasoning structure, alternative investment proposal (load testing + capacity modeling instead).<br><br>
+                        <strong>Verdict:</strong> Most complete. Actionable AND well-reasoned.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Early findings</h2>
+
+            <div class="insight">
+                <div class="insight-label">H3 supported</div>
+                <p>The hybrid approach consistently outperforms both pure approaches. Engineering alone is procedural but misses category errors. Philosophy alone reframes but can lack specificity. The hybrid does both.</p>
+            </div>
+
+            <div class="insight">
+                <div class="insight-label">Why philosophy adds value</div>
+                <p>The philosophical condition catches things engineering axioms can't: unfalsifiable claims (Popper), lived experience as data (phenomenology), and synthesis from contradictions (dialectics). These aren't in the engineering playbook because they're not about "how to build" &mdash; they're about "how to think about what to build."</p>
+            </div>
+
+            <div class="insight">
+                <div class="insight-label">Implication for distill</div>
+                <p>Knowledge encoding should include philosophical heuristics for novel situations. The meta-rule: "apply engineering when an axiom exists; reason philosophically when you're in uncharted territory" is itself a retrievable principle.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Remaining scenarios</h2>
+            <p>3 scenarios designed but not yet run:</p>
+            <ol>
+                <li><strong>Novel trade-off</strong> &mdash; Event sourcing vs CRUD+CDC, team split 50/50, both valid</li>
+                <li><strong>Unknown unknowns</strong> &mdash; Gradual decline, no obvious cause, all usual checks exhausted</li>
+                <li><strong>Paradigm shift</strong> &mdash; Senior engineer's architecture works but creates massive cognitive overhead</li>
+            </ol>
+            <p class="note">Results will be published here as they complete.</p>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/research-philosophical">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

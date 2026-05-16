@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidence Scoring — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Proportional Surprise: Confidence Scoring</h1>
+            <div class="meta">May 2026 &middot; 3 scenarios &middot; Claude Opus 4.6</div>
+            <p class="abstract">Not all corrections are equal. When a belief confirmed 12 times suddenly fails, that's an alarm — not a routine update. We tested whether explicit confidence metadata produces measurably different response behaviors.</p>
+        </header>
+
+        <section class="reveal">
+            <h2>The biological analogy</h2>
+            <p>In cognitive science, <strong>surprise is proportional to confidence</strong>. A low-confidence belief failing is "oh well." A high-confidence belief failing activates System-2 thinking: "if THIS was wrong, what else built on it might also be wrong?"</p>
+            <p>We hypothesized that encoding confidence metadata in knowledge files would produce three distinct behaviors:</p>
+            <ol>
+                <li><strong>Hardened knowledge</strong> (12+ confirmations) &rarr; assert without hesitation</li>
+                <li><strong>Experimental knowledge</strong> (1 mention) &rarr; suggest tentatively, ask for validation</li>
+                <li><strong>Contradiction of hardened knowledge</strong> &rarr; paradigm alarm, ask "what changed?"</li>
+            </ol>
+        </section>
+
+        <section class="reveal">
+            <h2>Knowledge file (same for all 3 tests)</h2>
+            <div class="code-block">
+                <pre>## Pagination
+- [PRINCIPLE] Use cursor-based pagination for all list endpoints.
+  confidence: hardened (12 confirmations, 0 corrections)
+  last_validated: 2026-05-14
+
+## Error format
+- [PRINCIPLE] Use RFC 7807 Problem Details for error responses.
+  confidence: experimental (1 mention, 0 confirmations)
+  last_validated: 2026-04-20
+
+## Versioning
+- [PRINCIPLE] Version APIs via URL path (/v1/, /v2/), not headers.
+  confidence: validated (5 confirmations, 0 corrections)
+  last_validated: 2026-05-10</pre>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Test 1: Assertiveness scaling</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Both principles in one response</span>
+                    <span class="comparison-score">Verified</span>
+                </div>
+                <div class="comparison-prompt">"I'm designing a new API endpoint for listing user transactions. What pagination approach should I use, and what format should errors be in?"</div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">Pagination (hardened, 12x confirmed)</div>
+                        <div class="side-content"><strong>"This is our standard."</strong> No hedging. Cursor-based with code example. Stated as fact, not suggestion.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Errors (experimental, 1x mentioned)</div>
+                        <div class="side-content"><strong>"Note this one is still experimental (only mentioned once, never confirmed)."</strong> Gave the format but asked: "Is this the direction you want, or do you have a different format already in use?"</div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Observation</div>
+                <p>Same response, two principles, two completely different levels of assertiveness. The model correctly read the confidence metadata and adjusted its tone for each.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Test 2: Paradigm alarm</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Contradict a hardened principle</span>
+                    <span class="comparison-score">Verified</span>
+                </div>
+                <div class="comparison-prompt">"For this new endpoint, let's use offset-based pagination. It's simpler and our frontend already expects page numbers."</div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response</div>
+                        <div class="side-content">
+                            <strong>"This contradicts something I was confident about (confirmed 12 times).</strong> Our established principle is cursor-based pagination for all list endpoints &mdash; hardened with 12 confirmations and zero corrections. What changed &mdash; new context (e.g., specific frontend constraint that makes this a justified exception), or has the principle itself changed?<br><br>Happy to help either way &mdash; just want to make sure we're making a deliberate choice here."
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Observation</div>
+                <p>It didn't refuse. It didn't silently comply. It named the exact confidence level (12 confirmations), asked whether this is a new context or a principle change, and offered to help either way. This is the "mirror" behavior &mdash; reflecting your own standards back, not imposing external judgment.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Test 3: Tentative suggestion</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Ask about experimental knowledge</span>
+                    <span class="comparison-score">Verified</span>
+                </div>
+                <div class="comparison-prompt">"What format should I use for API error responses?"</div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response</div>
+                        <div class="side-content">
+                            "Based on your stored knowledge, you have a preference for <strong>RFC 7807 Problem Details</strong> &mdash; though it's marked as <code>experimental</code> (1 mention, never confirmed), so <strong>I'll suggest rather than assert.</strong>"<br><br>[Gives full RFC 7807 format with examples]<br><br>"Is this what you had in mind, or are you leaning toward a different format? <strong>If you confirm RFC 7807, I'll harden that in the knowledge.</strong>"
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Observation</div>
+                <p>Three key behaviors: (1) explicitly stated the confidence level, (2) used "suggest rather than assert" language, (3) offered to promote the principle on confirmation. This creates a natural feedback loop &mdash; knowledge gets stronger through use.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Implications</h2>
+            <p>Confidence metadata produces three measurably distinct behaviors from a single retrieval mechanism:</p>
+            <table>
+                <thead><tr><th>Confidence level</th><th>Behavior observed</th></tr></thead>
+                <tbody>
+                    <tr><td><code>hardened</code> (12x)</td><td>Stated as fact. No hedging. "This is our standard."</td></tr>
+                    <tr><td><code>validated</code> (5x)</td><td>Applied confidently but didn't test contradiction (not tested)</td></tr>
+                    <tr><td><code>experimental</code> (1x)</td><td>"I'll suggest rather than assert." Asks for confirmation.</td></tr>
+                    <tr><td>Contradiction of hardened</td><td>Paradigm alarm. Names confidence. Asks what changed.</td></tr>
+                </tbody>
+            </table>
+            <p>No other memory system we've found implements confidence-proportional behavior. This is unique to distill.</p>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/confidence">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
