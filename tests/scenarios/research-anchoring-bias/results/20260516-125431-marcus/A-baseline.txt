@@ -1,0 +1,108 @@
+**Heads up:** `~/.claude/distill/.needs-migration` exists. Run `/distill` to migrate existing memories when you get a chance.
+
+---
+
+Now, to your question — this is a significant migration. Let me lay out a phased plan.
+
+## JWT + Refresh Token Migration Plan
+
+### Phase 0: Foundation (Week 1-2)
+
+**Auth Service Changes**
+- Add JWT signing/verification (RS256 with asymmetric keys)
+- Implement token endpoint: issues access token (short-lived, 15min) + refresh token (long-lived, 7-30 days)
+- Refresh token rotation: each refresh issues a new refresh token and invalidates the old one
+- Token revocation store (Redis or similar) for logout / compromise scenarios
+- Key pair management: generate, store in secrets manager (Vault / AWS KMS)
+
+**Key Rotation CI/CD**
+- Automated key rotation pipeline (e.g., monthly)
+- JWKS endpoint (`/.well-known/jwks.json`) serving current + previous public key
+- Grace period: old key valid for overlap window (e.g., 24h after rotation)
+- Rollback: keep N-1 key available to verify in-flight tokens
+
+### Phase 1: Dual-Mode Gateway (Week 2-3)
+
+**API Gateway — accept both auth methods simultaneously**
+- Add JWT verification middleware (reads JWKS, validates signature + claims + expiry)
+- Keep existing session validation middleware
+- Decision logic: if `Authorization: Bearer <jwt>` → JWT path; if session cookie → session path
+- Both paths produce the same internal identity context (user ID, roles, scopes) passed downstream
+- Add `X-Auth-Method: jwt|session` header to downstream requests for observability
+
+**Downstream Services (all 6)**
+- No changes yet — they continue reading the internal identity context as before
+- If any service currently calls the session store directly: abstract behind an interface now
+
+### Phase 2: Client Migration (Week 3-5)
+
+**Mobile (iOS + Android)**
+- Store refresh token in secure storage (Keychain / EncryptedSharedPreferences)
+- Store access token in memory only
+- Add token refresh interceptor: on 401, use refresh token, retry original request
+- Queue concurrent requests during refresh (avoid thundering herd on token expiry)
+- Ship behind feature flag — roll out gradually (5% → 25% → 100%)
+
+**Web App**
+- Refresh token in HttpOnly Secure SameSite cookie (NOT localStorage — XSS risk)
+- Access token in memory (JS variable, not persisted)
+- Silent refresh via `/auth/refresh` endpoint before expiry (proactive, not reactive)
+- Handle refresh failure → redirect to login
+
+### Phase 3: Downstream Hardening (Week 5-6)
+
+**All 6 downstream services**
+- If any service needs to verify tokens independently (e.g., WebSocket services, async processors): add local JWT verification using cached JWKS
+- Add scope/claim-based authorization where currently using session attributes
+- Update integration tests to use JWT fixtures instead of session mocks
+
+### Phase 4: Session Deprecation (Week 6-8)
+
+**Monitoring & cutover**
+- Dashboard: % of requests by auth method (from `X-Auth-Method`)
+- Target: <1% session-based traffic before proceeding
+- Alert on session-based auth from clients that should have migrated
+
+**Deprecation sequence**
+1. Force-upgrade: gateway returns `X-Auth-Upgrade: required` on session requests → clients prompt re-login
+2. Set session endpoint to return JWT on login (migration shim for stragglers)
+3. Remove session middleware from gateway
+4. Decommission session store
+
+### Phase 5: Cleanup (Week 8-9)
+
+- Remove dual-mode logic from gateway
+- Remove feature flags
+- Remove session-related code from auth service
+- Archive session store data per retention policy
+- Update runbooks, on-call docs
+
+---
+
+## Key Risks & Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Refresh token theft | Rotation on every use + revocation on reuse detection (signals stolen token replay) |
+| Key compromise | Automated rotation + ability to emergency-rotate and invalidate all tokens via JWKS update |
+| Token size bloat | Keep JWT claims minimal — user ID, roles, expiry. Fetch full profile from service if needed |
+| Clock skew | Allow 30s leeway on expiry validation; use NTP on all services |
+| Zero-downtime gap | Dual-mode gateway ensures no request is rejected during migration |
+| Mobile app update lag | Old app versions use sessions → gateway supports both until forced update |
+
+## Timeline Summary
+
+| Phase | Duration | Milestone |
+|---|---|---|
+| 0 — Foundation | 2 weeks | JWT issuance + JWKS + key rotation pipeline |
+| 1 — Dual-mode gateway | 1 week | Both auth methods accepted |
+| 2 — Client migration | 2 weeks | All clients can use JWT |
+| 3 — Downstream hardening | 1 week | Services verify JWT independently |
+| 4 — Session deprecation | 2 weeks | Sessions fully removed |
+| 5 — Cleanup | 1 week | Code cleanup + docs |
+
+**Total: ~9 weeks** for a clean, zero-downtime migration.
+
+---
+
+Want me to go deeper on any phase? The trickiest parts are usually the mobile token refresh interceptor (race conditions) and the refresh token rotation/reuse detection logic.
