@@ -186,6 +186,151 @@ steps.forEach(s => {
     }
 });
 
+// ═══ CANVAS GENIE EFFECT ═══
+// Two-phase genie matching macOS behavior:
+//   Phase 1 (0–55%): Bottom edge narrows to target width and slides to target X.
+//                     Top edge stays fixed. Sides curve between them.
+//   Phase 2 (40–100%): Top collapses down into the narrow channel.
+// Hold Alt before clicking minimize to run at 10× slow motion.
+let altHeld = false;
+document.addEventListener('keydown', e => { if (e.key === 'Alt') altHeld = true; });
+document.addEventListener('keyup', e => { if (e.key === 'Alt') altHeld = false; });
+
+function genieMinimize(element, slow, onComplete) {
+    const loadLib = typeof html2canvas !== 'undefined'
+        ? Promise.resolve()
+        : new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            s.onload = resolve;
+            s.onerror = () => { element.style.display = 'none'; onComplete(); };
+            document.head.appendChild(s);
+        });
+
+    const dpr = window.devicePixelRatio || 1;
+
+    loadLib.then(() => html2canvas(element, {
+        backgroundColor: null, scale: dpr, logging: false
+    })).then(captured => {
+        const rect = element.getBoundingClientRect();
+        const section = element.closest('.terminal-section');
+        const sectionRect = section.getBoundingClientRect();
+
+        // Overlay canvas sized to element (not section) to avoid alignment issues
+        const overlay = document.createElement('canvas');
+        const cw = captured.width;   // device pixels, exact match to capture
+        const ch = captured.height;
+        overlay.width = cw;
+        overlay.height = ch;
+        // Position overlay exactly on top of the element
+        overlay.style.cssText = `position:absolute;top:${rect.top - sectionRect.top}px;left:${rect.left - sectionRect.left}px;width:${rect.width}px;height:${rect.height}px;z-index:20;pointer-events:none;`;
+        section.appendChild(overlay);
+
+        const ctx = overlay.getContext('2d');
+        // Work entirely in device pixels — no ctx.scale
+        const w = cw;  // device pixels
+        const h = ch;
+
+        // Target: bottom-center, ~40px CSS → device pixels
+        const targetW = 40 * dpr;
+        const targetCX = w / 2;
+        const targetBottom = h;
+
+        const STRIPS = 50;
+        const DURATION = slow ? 7500 : 750;
+        const start = performance.now();
+
+        element.style.visibility = 'hidden';
+
+        function easeOut(x) { return 1 - Math.pow(1-x, 3); }
+        function easeInOut(x) { return x<0.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2; }
+
+        // Compute left/right edge X at a given Y fraction (0=top, 1=bottom)
+        // using quadratic Bézier: P0=top edge, P1=control (bulge), P2=bottom edge
+        function bezierX(t, p0, p1, p2) {
+            const mt = 1-t;
+            return mt*mt*p0 + 2*mt*t*p1 + t*t*p2;
+        }
+
+        function frame(now) {
+            const raw = Math.min((now - start) / DURATION, 1);
+            const t = easeInOut(raw);
+
+            // Phase 1: bottom narrows (0→1 over first 55% of t)
+            const p1 = easeOut(Math.min(1, t / 0.55));
+            // Phase 2: top collapses down (0→1 from 40% of t onward)
+            const p2 = easeOut(Math.max(0, Math.min(1, (t - 0.4) / 0.6)));
+
+            // Bottom edge: narrows to targetW, pinned at bottom
+            const botLeft = (w - (w + (targetW - w) * p1)) / 2;
+            const botRight = w - botLeft;
+
+            // Top edge: fixed during phase 1, collapses in phase 2
+            const topLeft = (w - (w + (targetW - w) * p2)) / 2;
+            const topRight = w - topLeft;
+            const topY = h * p2;
+
+            const totalH = h - topY;
+
+            // Control points for side curves — bulge outward (stay wide longer)
+            // Control Y is at 30% from top: keeps top wide, curves late
+            const ctrlBias = 0.25;
+            const leftCtrl = topLeft + (botLeft - topLeft) * ctrlBias;
+            const rightCtrl = topRight + (botRight - topRight) * ctrlBias;
+
+            // Build smooth clip path using Bézier edges
+            const CURVE_PTS = 60;
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+            ctx.beginPath();
+            // Right edge: top to bottom
+            for (let i = 0; i <= CURVE_PTS; i++) {
+                const f = i / CURVE_PTS;
+                const x = bezierX(f, topRight, rightCtrl, botRight);
+                const y = topY + totalH * f;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            // Left edge: bottom to top
+            for (let i = CURVE_PTS; i >= 0; i--) {
+                const f = i / CURVE_PTS;
+                const x = bezierX(f, topLeft, leftCtrl, botLeft);
+                const y = topY + totalH * f;
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.clip();
+
+            // Draw strips within the clip — each strip warped to its Bézier width
+            for (let i = 0; i < STRIPS; i++) {
+                const frac = (i + 0.5) / STRIPS; // sample at strip center
+                const srcY = (i / STRIPS) * h;
+                const srcH = h / STRIPS;
+
+                // This strip's width/position from the Bézier curves
+                const stripLeft = bezierX(frac, topLeft, leftCtrl, botLeft);
+                const stripRight = bezierX(frac, topRight, rightCtrl, botRight);
+                const stripW = stripRight - stripLeft;
+
+                const drawY = topY + (totalH / STRIPS) * i;
+                const drawH = totalH / STRIPS + 0.5;
+
+                ctx.drawImage(captured, 0, srcY, w, srcH, stripLeft, drawY, stripW, drawH);
+            }
+            ctx.restore();
+
+            if (raw < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                overlay.remove();
+                element.style.visibility = '';
+                element.style.display = 'none';
+                onComplete();
+            }
+        }
+        requestAnimationFrame(frame);
+    });
+}
+
 // ═══ INTERACTIVE SHELL ═══
 function initShell() {
     let buf='', active=true, inClaude=false, claudeReady=false;
@@ -226,10 +371,6 @@ function initShell() {
     // ═══ CLAUDE EASTER EGG ═══
     function startClaude(){
         inClaude=true;
-        // Build box — W=38 inner width
-        // Line 1: "  Claude Code v2.1.109" (22) -> pad 16
-        // Line 2: "  Mythos 7.0 (∞ ctx) · Claude Mythos" (36) -> pad 2
-        // Line 3: "  /Users/visitor" (16) -> pad 22
         const W=38, hr='\u2500'.repeat(W), s='<span style="color:#bb9af7">', se='</span>';
         const boxHtml=[
             `${s}\u256d${hr}\u256e${se}`,
@@ -266,9 +407,8 @@ function initShell() {
             } else {
                 addLine(item.html);
             }
-            const delay=item.delay;
             i++;
-            setTimeout(showNext, delay);
+            setTimeout(showNext, item.delay);
         })();
     }
 
@@ -291,78 +431,287 @@ function initShell() {
         },2000);
     }
 
-    // ═══ CLOSE BUTTON ═══
+    // ═══ CLOSE BUTTON — terminate → Classic Mac (no genie) ═══
     document.getElementById('term-btn-close').addEventListener('click',e=>{e.stopPropagation();document.getElementById('term-modal-overlay').classList.add('visible');});
     document.getElementById('term-modal-cancel').addEventListener('click',()=>document.getElementById('term-modal-overlay').classList.remove('visible'));
     document.getElementById('term-modal-terminate').addEventListener('click',()=>{
         document.getElementById('term-modal-overlay').classList.remove('visible');
         active=false;
-        gsap.to(terminalEl,{scale:0.95,opacity:0,duration:0.3,ease:'power2.in',onComplete:()=>{
-            terminalEl.style.display='none';
-        }});
+        const section=terminalEl.closest('.terminal-section');
+        section.style.position='relative';
+        terminalEl.style.display='none';
+        buildClassicMac(terminalEl);
     });
 
-    // ═══ MINIMIZE BUTTON — genie effect → Mac OS Classic ═══
+    // ═══ MINIMIZE BUTTON — canvas genie → Classic Mac ═══
     document.getElementById('term-btn-minimize').addEventListener('click',e=>{
         e.stopPropagation();
         active=false;
-        terminalEl.classList.add('genie-out');
-        terminalEl.addEventListener('animationend',function onGenie(){
-            terminalEl.removeEventListener('animationend',onGenie);
-            terminalEl.style.display='none';
-            // Build Mac OS Classic UI
-            const section=terminalEl.closest('.terminal-section');
-            const classic=document.createElement('div');
-            classic.className='classic-mac';
-            classic.innerHTML=`
-                <div class="classic-mac-menubar">
-                    <span>\u2318</span><span>File</span><span>Edit</span><span>View</span><span>Special</span>
-                </div>
-                <div class="classic-mac-titlebar">
-                    <div class="classic-mac-close" id="classic-mac-close"></div>
-                    <div class="classic-mac-title">claude-distill</div>
-                </div>
-                <div style="position:relative;flex:1;display:flex">
-                    <div class="classic-mac-body">
-                        <div class="classic-icon">\ud83d\udcbe</div>
-                        <div class="classic-alert">
-                            <div class="classic-alert-icon">\u26a0\ufe0f</div>
-                            <div class="classic-alert-text">
-                                The application "Claude Code" has unexpectedly quit<br>because it was too modern for this window.
-                            </div>
-                        </div>
-                        <p>Your knowledge files are safe. They have been<br>transferred to 3.5" floppy (1 of 847).</p>
-                        <p>System 7.5.3 does not support "vibes-based<br>memory consolidation." Please upgrade to<br>macOS Sequoia or later.</p>
-                        <div class="classic-alert">
-                            <div class="classic-alert-icon">\ud83d\udcac</div>
-                            <div class="classic-alert-text">
-                                "I distilled knowledge before it was cool."<br>\u2014 HyperCard, 1987
-                            </div>
-                        </div>
-                        <p style="margin-top:20px;text-align:center">
-                            <button class="classic-mac-btn default" id="classic-mac-restart">Restart</button>
-                        </p>
-                    </div>
-                    <div class="classic-mac-scrollbar"></div>
-                </div>
-                <div class="classic-mac-footer">
-                    <span>\ud83d\udcbe 847 items, 420K available</span>
-                    <span>System 7.5.3</span>
-                </div>`;
-            section.appendChild(classic);
-            // Classic close button — remove classic UI, show nothing
-            document.getElementById('classic-mac-close').addEventListener('click',()=>{classic.remove();});
-            // Restart button — remove classic, bring terminal back
-            document.getElementById('classic-mac-restart').addEventListener('click',()=>{
-                classic.remove();
-                terminalEl.classList.remove('genie-out');
-                terminalEl.style.display='';
-                terminalEl.style.opacity='1';
-                terminalEl.style.transform='';
-                active=true;
-            });
+        const section=terminalEl.closest('.terminal-section');
+        section.style.position='relative';
+        buildClassicMac(terminalEl);
+        // Genie on top: terminal absolute-positioned, canvas warp reveals classic beneath
+        terminalEl.style.position='absolute';
+        terminalEl.style.top='0';
+        terminalEl.style.left='0';
+        terminalEl.style.right='0';
+        terminalEl.style.zIndex='10';
+        genieMinimize(terminalEl, altHeld, ()=>{
+            // Genie done — terminal is display:none, clear the absolute positioning
+            // but keep section relative so classic Mac layout works
+            terminalEl.style.position='';
+            terminalEl.style.top='';
+            terminalEl.style.left='';
+            terminalEl.style.right='';
+            terminalEl.style.zIndex='';
         });
     });
+
+    // ═══ CLASSIC MAC BUILDER ═══
+    function buildClassicMac(termRef){
+        const section=termRef.closest('.terminal-section');
+        const classic=document.createElement('div');
+        classic.className='classic-mac';
+
+        // Menu definitions
+        const menus={
+            file:[
+                {label:'New Folder',key:'\u2318N'},
+                {label:'Open',key:'\u2318O'},
+                {label:'Close',key:'\u2318W'},
+                {sep:true},
+                {label:'Get Info',key:'\u2318I'},
+                {sep:true},
+                {label:'Restart',action:'restart'},
+            ],
+            edit:[
+                {label:'Undo',key:'\u2318Z',disabled:true},
+                {sep:true},
+                {label:'Cut',key:'\u2318X',disabled:true},
+                {label:'Copy',key:'\u2318C',disabled:true},
+                {label:'Paste',key:'\u2318V',disabled:true},
+                {label:'Clear',disabled:true},
+            ],
+            view:[
+                {label:'by Icon',checked:true},
+                {label:'by Name'},
+                {label:'by Date'},
+                {label:'by Size'},
+            ],
+            special:[
+                {label:'Clean Up'},
+                {label:'Empty Trash'},
+                {sep:true},
+                {label:'Restart',action:'restart'},
+                {label:'Shut Down',action:'shutdown'},
+            ],
+        };
+
+        function buildDropdown(items){
+            return items.map(it=>{
+                if(it.sep) return '<div class="classic-menu-sep"></div>';
+                const dis=it.disabled?' disabled':'';
+                const check=it.checked?'\u2713 ':'';
+                const key=it.key?`<span class="classic-menu-shortcut">${it.key}</span>`:'';
+                const act=it.action?` data-action="${it.action}"`:'';
+                return `<div class="classic-menu-dropdown-item${dis}"${act}>${check}${it.label}${key}</div>`;
+            }).join('');
+        }
+
+        // File icons (CSS-drawn shapes)
+        const folders=['Knowledge','Research','Archive'];
+        const docs=['SPINE.md','distill.md'];
+
+        const folderIcons=folders.map(f=>`
+            <div class="classic-file-icon">
+                <div class="classic-folder"></div>
+                <div class="classic-file-name">${f}</div>
+            </div>`).join('');
+
+        const docIcons=docs.map(f=>`
+            <div class="classic-file-icon">
+                <div class="classic-doc"></div>
+                <div class="classic-file-name">${f}</div>
+            </div>`).join('');
+
+        const fileIcons=folderIcons+docIcons;
+        const totalItems=folders.length+docs.length;
+
+        classic.innerHTML=`
+            <div class="classic-menubar">
+                <div class="classic-menu-item classic-menu-brain" data-menu="brain">\ud83e\udde0
+                    <div class="classic-menu-dropdown">
+                        <div class="classic-menu-dropdown-item disabled">About This Computer</div>
+                        <div class="classic-menu-sep"></div>
+                        <div class="classic-menu-dropdown-item disabled">claude-distill v0.7</div>
+                        <div class="classic-menu-dropdown-item disabled">\u201cI distilled knowledge</div>
+                        <div class="classic-menu-dropdown-item disabled">&nbsp;before it was cool.\u201d</div>
+                        <div class="classic-menu-dropdown-item disabled">&nbsp;\u2014 HyperCard, 1987</div>
+                    </div>
+                </div>
+                <div class="classic-menu-item" data-menu="file">File
+                    <div class="classic-menu-dropdown">${buildDropdown(menus.file)}</div>
+                </div>
+                <div class="classic-menu-item" data-menu="edit">Edit
+                    <div class="classic-menu-dropdown">${buildDropdown(menus.edit)}</div>
+                </div>
+                <div class="classic-menu-item" data-menu="view">View
+                    <div class="classic-menu-dropdown">${buildDropdown(menus.view)}</div>
+                </div>
+                <div class="classic-menu-item" data-menu="special">Special
+                    <div class="classic-menu-dropdown">${buildDropdown(menus.special)}</div>
+                </div>
+            </div>
+
+            <div class="classic-desktop" id="classic-desktop">
+                <div class="classic-window" id="classic-finder-window">
+                    <div class="classic-titlebar">
+                        <div class="classic-close-box" id="classic-close-box"></div>
+                        <div class="classic-titlebar-stripes"></div>
+                        <div class="classic-window-title">claude-distill</div>
+                    </div>
+                    <div class="classic-infobar">
+                        <span>${totalItems} items</span>
+                        <span>420K in disk</span>
+                        <span>1,337K available</span>
+                    </div>
+                    <div class="classic-content-wrap">
+                        <div class="classic-content">${fileIcons}</div>
+                        <div class="classic-scrollbar">
+                            <div class="classic-scroll-arrow">\u25b2</div>
+                            <div class="classic-scroll-thumb"></div>
+                            <div class="classic-scroll-arrow">\u25bc</div>
+                        </div>
+                    </div>
+                    <div class="classic-bottombar">
+                        <div class="classic-bottombar-left">\u25c1</div>
+                        <div class="classic-bottombar-track"></div>
+                        <div class="classic-bottombar-right">\u25b7</div>
+                    </div>
+                </div>
+
+                <div class="classic-file-icon classic-app-icon classic-desktop-icon" id="classic-distill-app">
+                    <div class="classic-neural-icon"><canvas id="classic-neural-canvas" width="32" height="32"></canvas></div>
+                    <div class="classic-file-name">claude-distill</div>
+                </div>
+            </div>
+
+            <div class="classic-shutdown-screen" id="classic-shutdown-screen">
+                <div class="classic-shutdown-dialog">
+                    <div class="classic-shutdown-top">
+                        <div class="classic-shutdown-computer">
+                            <div class="classic-shutdown-monitor"><div class="classic-shutdown-screen-inner"></div></div>
+                            <div class="classic-shutdown-base"></div>
+                        </div>
+                        <div class="classic-shutdown-text">You may now switch off<br>your computer safely.</div>
+                    </div>
+                    <button class="classic-shutdown-restart" id="classic-shutdown-restart">Restart</button>
+                </div>
+            </div>`;
+        section.appendChild(classic);
+
+        // ── Menu interactions ──
+        let openMenu=null;
+        classic.querySelectorAll('.classic-menu-item').forEach(mi=>{
+            mi.addEventListener('mousedown',e=>{
+                if(e.target.closest('.classic-menu-dropdown')) return;
+                e.stopPropagation();
+                if(mi.classList.contains('open')){mi.classList.remove('open');openMenu=null;}
+                else{if(openMenu)openMenu.classList.remove('open');mi.classList.add('open');openMenu=mi;}
+            });
+            mi.addEventListener('mouseenter',()=>{
+                if(openMenu&&openMenu!==mi){openMenu.classList.remove('open');mi.classList.add('open');openMenu=mi;}
+            });
+        });
+        document.addEventListener('mousedown',e=>{if(openMenu&&!openMenu.contains(e.target)){openMenu.classList.remove('open');openMenu=null;}});
+
+        // ── Menu actions ──
+        classic.querySelectorAll('[data-action]').forEach(item=>{
+            item.addEventListener('click',()=>{
+                const act=item.dataset.action;
+                if(openMenu){openMenu.classList.remove('open');openMenu=null;}
+                if(act==='restart'){restoreTerminal();}
+                else if(act==='shutdown'){showShutdown();}
+            });
+        });
+
+        // ── File icon selection ──
+        classic.querySelectorAll('.classic-file-icon').forEach(fi=>{
+            fi.addEventListener('click',e=>{
+                e.stopPropagation();
+                classic.querySelectorAll('.classic-file-icon.selected').forEach(s=>s.classList.remove('selected'));
+                fi.classList.add('selected');
+            });
+        });
+        document.getElementById('classic-desktop').addEventListener('click',e=>{
+            if(e.target.id==='classic-desktop')
+                classic.querySelectorAll('.classic-file-icon.selected').forEach(s=>s.classList.remove('selected'));
+        });
+
+        // ── Close box — closes just the Finder window ──
+        document.getElementById('classic-close-box').addEventListener('click',()=>{
+            const win=document.getElementById('classic-finder-window');
+            if(win) win.remove();
+        });
+
+        // ── Animated distill icon (canvas) ──
+        const neuralCanvas=document.getElementById('classic-neural-canvas');
+        const nCtx=neuralCanvas.getContext('2d');
+        let nt=0, neuralRaf;
+        const GW=16,GH=16;
+        const cellW=32/GW, cellH=32/GH;
+        function miniNeural(){
+            nCtx.fillStyle='#fff';
+            nCtx.fillRect(0,0,32,32);
+            for(let y=0;y<GH;y++){
+                for(let x=0;x<GW;x++){
+                    const cx=(x-GW/2)/(GW/2), cy=(y-GH/2)/(GH/2);
+                    const r=Math.sqrt(cx*cx+cy*cy);
+                    const wave=Math.sin(r*6-nt*0.08)*Math.cos(nt*0.03+Math.atan2(cy,cx)*2);
+                    const flicker=Math.sin(x*0.9+nt*0.05)*Math.cos(y*1.4-nt*0.04);
+                    const v=wave*0.6+flicker*0.4;
+                    if(v>0.15){
+                        const a=Math.min(1,(v-0.15)/0.6);
+                        nCtx.fillStyle=`rgba(0,0,0,${a})`;
+                        nCtx.fillRect(x*cellW,y*cellH,cellW-0.5,cellH-0.5);
+                    }
+                }
+            }
+            nt+=1.5;
+            neuralRaf=requestAnimationFrame(miniNeural);
+        }
+        miniNeural();
+
+        // ── Double-click distill app → restart demo ──
+        document.getElementById('classic-distill-app').addEventListener('dblclick',e=>{
+            e.stopPropagation();
+            restoreTerminal();
+        });
+
+        // ── Shutdown ──
+        function showShutdown(){
+            document.getElementById('classic-shutdown-screen').classList.add('visible');
+        }
+
+        document.getElementById('classic-shutdown-restart').addEventListener('click',()=>{
+            classic.style.transition='opacity 0.8s ease';
+            classic.style.opacity='0';
+            setTimeout(()=>restoreTerminal(),900);
+        });
+
+        // ── Cleanup & restore ──
+        function cleanup(){ if(neuralRaf) cancelAnimationFrame(neuralRaf); }
+
+        function restoreTerminal(){
+            cleanup();
+            if(classic.parentNode) classic.remove();
+            termRef.style.cssText=''; // clear ALL inline styles at once
+            section.style.position='';
+            active=true;
+        }
+
+        return classic;
+    }
 
     // ═══ KEYBOARD ═══
     let focused=true;

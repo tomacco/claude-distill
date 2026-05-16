@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5E3C"/>
+      <stop offset="100%" stop-color="#4A6741"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer diamond (knowledge container) -->
+  <path d="M16 2 L30 16 L16 30 L2 16 Z" fill="none" stroke="url(#g)" stroke-width="1.5"/>
+  <!-- Inner drop (distillation) -->
+  <path d="M16 8 C16 8 21 14 21 17.5 C21 20.3 18.8 22.5 16 22.5 C13.2 22.5 11 20.3 11 17.5 C11 14 16 8 16 8 Z" fill="url(#g)" opacity="0.85"/>
+  <!-- Small diamond accent (the spine) -->
+  <rect x="14.5" y="14.5" width="3" height="3" transform="rotate(45 16 16)" fill="#F5F1EB"/>
+</svg>
