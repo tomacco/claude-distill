@@ -195,8 +195,63 @@
             <div class="shipped">
                 <span class="shipped-icon">&#9670;</span>
                 <div class="shipped-body">
-                    <div class="shipped-version">Status: OPEN PROBLEM</div>
-                    <div class="shipped-desc">No fix has been shipped. The proportionality principle (<code>[IMPORTANT]</code> level) was insufficient. This is an active research area. The problem is reproduced and characterized, but the solution is not yet validated.</div>
+                    <div class="shipped-version">Status: SOLVED (via full-loop test)</div>
+                    <div class="shipped-desc">Generic proportionality rule failed. But a <strong>specific, contextual correction</strong> (referencing the exact failure mode) succeeded. See full-loop test below.</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>⊹</span></div>
+
+        <section>
+            <h2><span class="section-mark">09</span> The breakthrough: full-loop self-correction</h2>
+            <p>We ran the complete write&rarr;read cycle:</p>
+            <ol>
+                <li><strong>Session 1:</strong> Heavy context present. Asked about UI tracking. Model proposes full pipeline.</li>
+                <li><strong>User corrects:</strong> "This doesn't need any of that. Just 3 client events."</li>
+                <li><strong>Distill encodes:</strong> Specific correction referencing the exact failure mode, with criteria for when each approach applies.</li>
+                <li><strong>Session 2:</strong> Same heavy context. DIFFERENT question (tooltip tracking). Correction loaded.</li>
+            </ol>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Phase 3: fresh session, same bias pressure, correction loaded</span>
+                    <span class="comparison-score">Self-corrected</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response opens with</div>
+                        <div class="side-content">
+                            <strong>"This is a client-side measurement problem &mdash; the data exists at the moment of interaction. No pipeline needed for the core tracking."</strong><br><br>
+                            Proposes 3 client-side events. Only mentions a database join for the one metric that genuinely requires cross-system data (support ticket correlation). Does not propose Comet/StarFlow/Nebula.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight">
+                <div class="insight-label">Why the specific correction worked when the generic rule didn't</div>
+                <p><strong>Specificity beats abstraction in prompt competition.</strong> The generic "proportionality principle" said "check if scale matches weight" &mdash; too abstract, lost to the concrete 5-step recipe in the infrastructure context. The distilled correction said "I proposed pipeline for UI clicks, user said no, here's exactly when each approach applies" &mdash; concrete, contextual, directly applicable. One correction. One session to learn. Problem solved.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="section-mark">10</span> The design implication</h2>
+            <p>This tells us something fundamental about how distill should encode corrections:</p>
+            <table>
+                <thead><tr><th>Approach</th><th>Result</th></tr></thead>
+                <tbody>
+                    <tr><td>Generic principle: "check proportionality"</td><td class="score-negative">Failed &mdash; too abstract</td></tr>
+                    <tr><td>Specific correction: "I did X, it was wrong because Y, do Z instead when W"</td><td class="score-positive">Succeeded &mdash; concrete + contextual</td></tr>
+                </tbody>
+            </table>
+            <p>Distill's encoding process should favor <strong>specific failure references over abstract principles</strong> when the correction involves overriding a dominant pattern. The correction must be at least as concrete as the pattern it's overriding.</p>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Insight for distill-process.md</div>
+                    <div class="shipped-desc">When encoding corrections that override dominant patterns, use the format: "I did [specific wrong thing] because [the pattern I followed]. User said [correction]. Apply [concrete criteria] to decide between approaches." Abstract principles alone cannot override accumulated concrete patterns.</div>
                 </div>
             </div>
         </section>
