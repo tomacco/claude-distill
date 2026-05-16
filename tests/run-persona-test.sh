@@ -115,8 +115,12 @@ run_condition() {
     cp -r "$REAL_CONFIG/rules/" "$rules_backup/" 2>/dev/null || true
     cp "$HOME/.claude/CLAUDE.md" "$claudemd_backup" 2>/dev/null || true
 
-    # Strip distill references from CLAUDE.md during test
-    sed '/[Dd]istill/d' "$claudemd_backup" > "$HOME/.claude/CLAUDE.md" 2>/dev/null || true
+    # Blank CLAUDE.md during test to prevent personal context leakage
+    echo "# Test session — no personal context" > "$HOME/.claude/CLAUDE.md"
+    # Hide personal distill knowledge (rename so it's not discoverable)
+    if [ -d "$REAL_CONFIG/distill" ] && [ ! -d "$REAL_CONFIG/_distill_hidden" ]; then
+        mv "$REAL_CONFIG/distill" "$REAL_CONFIG/_distill_hidden"
+    fi
 
     if [ "$use_distill" = "no" ]; then
         rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
@@ -161,6 +165,10 @@ run_condition() {
         cp "$rules_backup"/*.md "$REAL_CONFIG/rules/" 2>/dev/null || true
     fi
     cp "$claudemd_backup" "$HOME/.claude/CLAUDE.md" 2>/dev/null || true
+    # Restore hidden personal distill
+    if [ -d "$REAL_CONFIG/_distill_hidden" ] && [ ! -d "$REAL_CONFIG/distill" ]; then
+        mv "$REAL_CONFIG/_distill_hidden" "$REAL_CONFIG/distill"
+    fi
     rm -rf "$rules_backup" "$claudemd_backup" ${test_knowledge:+"$test_knowledge"} 2>/dev/null
 
     cat "$output_file"
