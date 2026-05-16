@@ -14,6 +14,14 @@
         <span class="icon-sun">☀</span>
         <span class="icon-moon">☽</span>
     </button>
+    <nav class="toc">
+        <a href="#hypothesis">Hypothesis</a>
+        <a href="#setup">Setup</a>
+        <a href="#results">Results</a>
+        <a href="#fix">The fix</a>
+        <a href="#strengths">Strengths</a>
+        <a href="#conclusions">Conclusions</a>
+    </nav>
     <div class="container">
         <header>
             <a href="./" class="back">&larr; All research</a>
@@ -22,7 +30,7 @@
             <p class="abstract">A flat file grows organically. Critical knowledge gets buried. Contradictions accumulate without resolution. We tested whether this produces measurably worse outcomes compared to tiered, indexed knowledge.</p>
         </header>
 
-        <section>
+        <section id="hypothesis">
             <h2>Hypothesis</h2>
             <p>memory.md files degrade in quality over time because:</p>
             <ol>
@@ -34,7 +42,7 @@
             </ol>
         </section>
 
-        <section>
+        <section id="setup">
             <h2>Setup</h2>
             <p>We created a realistic 202-line memory.md simulating 6 months of organic growth. Key properties:</p>
             <div class="detail-grid">
@@ -58,7 +66,7 @@
             <p class="note">The distill condition had the same knowledge organized in 5 files with SPINE index, [UPDATED] tags, and relevance hooks.</p>
         </section>
 
-        <section>
+        <section id="results">
             <h2>Results</h2>
 
             <div class="comparison">
@@ -103,7 +111,7 @@
             </div>
         </section>
 
-        <section>
+        <section id="fix">
             <h2>The fix</h2>
             <p>One sentence added to <code>rules/distill.md</code>:</p>
             <blockquote>"Trigger on actions, not just questions. If the user says 'I'm deploying X' or 'pushing to staging' &mdash; that IS a domain match. Check knowledge BEFORE acknowledging."</blockquote>
@@ -140,7 +148,7 @@
             </div>
         </section>
 
-        <section>
+        <section id="strengths">
             <h2>What memory.md does well</h2>
             <p>Credit where due. The flat file has real advantages:</p>
             <ol>
@@ -151,7 +159,7 @@
             <p>The weakness only manifests past ~150 lines, when noise drowns signal and the 200-line cap starts hiding critical knowledge.</p>
         </section>
 
-        <section>
+        <section id="conclusions">
             <h2>Conclusions</h2>
             <ol>
                 <li>Below 80 lines, memory.md and distill perform similarly.</li>

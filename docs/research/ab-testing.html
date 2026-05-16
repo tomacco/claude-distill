@@ -14,6 +14,13 @@
         <span class="icon-sun">☀</span>
         <span class="icon-moon">☽</span>
     </button>
+    <nav class="toc">
+        <a href="#setup">Setup</a>
+        <a href="#results">Results</a>
+        <a href="#scoring">Scoring</a>
+        <a href="#findings">Findings</a>
+        <a href="#limitations">Limitations</a>
+    </nav>
 
     <div class="container">
         <header>
@@ -23,7 +30,7 @@
             <p class="abstract">We tested the same prompts with and without distill knowledge. Same model, same session, same temperature. The only variable: 18 lines of retrieval rules + structured knowledge files.</p>
         </header>
 
-        <section>
+        <section id="setup">
             <h2><span class="section-mark">01</span> Setup</h2>
             <p class="drop-cap">Each scenario runs twice through a separate Claude Code instance ("claudia") with its own config directory:</p>
             <p><strong>Control (WITHOUT):</strong> Clean config. No rules, no knowledge files. Vanilla Claude Code.</p>
@@ -33,7 +40,7 @@
 
         <div class="ornament-line"><span>✧</span></div>
 
-        <section>
+        <section id="results">
             <h2><span class="section-mark">02</span> Results</h2>
 
             <div class="comparison">
@@ -93,7 +100,7 @@
 
         <span class="flourish">⁂</span>
 
-        <section>
+        <section id="scoring">
             <h2><span class="section-mark">03</span> Scoring</h2>
             <table>
                 <thead>
@@ -147,7 +154,7 @@
 
         <div class="ornament-line"><span>◆</span></div>
 
-        <section>
+        <section id="findings">
             <h2><span class="section-mark">04</span> Key findings</h2>
 
             <div class="insight">
@@ -181,7 +188,7 @@
 
         <div class="ornament">· · ·</div>
 
-        <section>
+        <section id="limitations">
             <h2><span class="section-mark">05</span> Limitations</h2>
             <p>Single-prompt testing (no multi-turn). Knowledge files crafted for scenarios (real knowledge is messier). Results from one model version (Opus 4.6). Each scenario run once per condition — exploratory, not confirmatory. The model already has some of this knowledge implicitly (the improvement measures what EXPLICIT encoding adds).</p>
         </section>

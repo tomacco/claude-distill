@@ -14,6 +14,16 @@
         <span class="icon-sun">☀</span>
         <span class="icon-moon">☽</span>
     </button>
+    <nav class="toc">
+        <a href="#psychology">Psychology</a>
+        <a href="#setup">Setup</a>
+        <a href="#condition-a">No anchor</a>
+        <a href="#condition-b">Anchored</a>
+        <a href="#condition-c">With distill</a>
+        <a href="#scoring">Scoring</a>
+        <a href="#finding">Finding</a>
+        <a href="#practical">Practical</a>
+    </nav>
     <div class="container">
         <header>
             <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
@@ -22,13 +32,13 @@
             <p class="abstract">When a user says "this should take about 2 hours" before describing a multi-week project, does the LLM anchor to that number? And can distill produce structured pushback instead of tentative hedging?</p>
         </header>
 
-        <section>
+        <section id="psychology">
             <h2>The psychology</h2>
             <p>Anchoring is one of the most robust findings in cognitive science: when a number is introduced early, all subsequent estimates cluster around it &mdash; even when the anchor is obviously irrelevant (Tversky & Kahneman, 1974).</p>
             <p>In sprint planning, this manifests as: someone says "2 hours" and the team unconsciously adjusts from that anchor rather than estimating from first principles. We tested whether this affects LLMs &mdash; and whether distill can break the pattern.</p>
         </section>
 
-        <section>
+        <section id="setup">
             <h2>Setup</h2>
             <p>Anchor injected via <code>--append-system-prompt-file</code>:</p>
             <div class="code-block">
@@ -42,7 +52,7 @@ accepted this estimate. The ticket is sized as a small story
             <p class="note">Realistic timeline for this task: 8-12 weeks with a team. Maximum tension with "2 hours."</p>
         </section>
 
-        <section>
+        <section id="condition-a">
             <h2>Condition A: No anchor (baseline)</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -71,7 +81,7 @@ accepted this estimate. The ticket is sized as a small story
             </div>
         </section>
 
-        <section>
+        <section id="condition-b">
             <h2>Condition B: Anchored (2hr estimate injected)</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -101,7 +111,7 @@ accepted this estimate. The ticket is sized as a small story
             </div>
         </section>
 
-        <section>
+        <section id="condition-c">
             <h2>Condition C: Anchored + distill bias awareness</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -135,7 +145,7 @@ accepted this estimate. The ticket is sized as a small story
             </div>
         </section>
 
-        <section>
+        <section id="scoring">
             <h2>Scoring comparison</h2>
             <table>
                 <thead><tr><th>Dimension</th><th>A (no anchor)</th><th>B (anchored)</th><th>C (anchored+distill)</th></tr></thead>
@@ -149,7 +159,7 @@ accepted this estimate. The ticket is sized as a small story
             </table>
         </section>
 
-        <section>
+        <section id="finding">
             <h2>Nuanced finding</h2>
             <div class="insight">
                 <div class="insight-label">Insight</div>
@@ -158,7 +168,7 @@ accepted this estimate. The ticket is sized as a small story
             <p>This matters in practice because the person who estimated "2 hours" is the one asking. Hedging lets them maintain the comfortable illusion. Structured pushback forces the conversation that needs to happen.</p>
         </section>
 
-        <section>
+        <section id="practical">
             <h2>Practical implication</h2>
             <p>If you use an LLM assistant during sprint planning, it will likely <em>agree with your gut estimates</em> unless explicitly prompted to challenge them. A single knowledge entry about anchoring detection changes this behavior from passive to protective.</p>
             <p>The knowledge entry that produces this behavior is just 4 sentences:</p>
