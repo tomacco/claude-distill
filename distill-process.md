@@ -135,7 +135,26 @@ Scan the conversation for:
 - Corrections or improvements the user made to your approach
 - Moments of surprise ("I didn't know that", "that's not how it works")
 - Patterns the user taught you during this session
+- **Positive confirmations** (see Step 1a)
 - **User model signals** (see Step 1b)
+
+### Step 1a: Confidence signals (reinforcement + surprise)
+
+Scan for POSITIVE signals that validate existing knowledge:
+- "good", "perfect", "exactly", "that's right", "nice" after a behavior
+- Implicit confirmation: principle was applied and no correction followed
+- "always do X" / "this is non-negotiable" = explicit reinforcement
+
+For each confirmation, identify WHICH principle was validated. Record it as:
+```
+CONFIRMED: [principle name] in [file path] — [what user said]
+```
+
+Also scan for CORRECTIONS on existing knowledge:
+- If the corrected principle has `confidence: validated` or higher → mark as **PARADIGM SIGNAL**
+- If the corrected principle is `provisional` or `experimental` → normal correction
+
+Paradigm signals get special treatment in Step 3 (encoding).
 
 ### Step 1b: User model signals
 
@@ -258,6 +277,42 @@ For each signal, ask "why" until you reach a universal truth. Examples across do
 The principle should be profession-agnostic — something that would be true whether you're writing code, designing interfaces, managing a team, or conducting research.
 
 ## Step 3: Encode at the right layer
+
+### 3a: Confidence metadata
+
+Every knowledge entry SHOULD include confidence metadata. Format:
+
+```markdown
+- [PRINCIPLE] Never retry permanent failures.
+  confidence: validated (5 confirmations, 0 corrections)
+  last_validated: 2026-05-15
+```
+
+**Confidence levels:**
+- `experimental` — mentioned once, never tested in practice
+- `provisional` — applied 1-2 times, seems right, no contradiction yet
+- `validated` — confirmed 3+ times, never corrected
+- `hardened` — survived at least one challenge/contradiction attempt and held
+
+**How to set initial confidence:**
+- User states a preference once → `experimental`
+- User corrects you (implies they've thought about it) → `provisional`
+- User reinforces with "always", "never", "non-negotiable" → `validated`
+- User has previously corrected a violation of this principle → `hardened`
+
+**On confirmation signals (from Step 1a):**
+- Find the principle in the knowledge file
+- Increment confirmation count
+- Update `last_validated` date
+- If crosses threshold (3+) → promote to next level
+
+**On paradigm signals (high-confidence correction):**
+- DO NOT silently update
+- Record the correction with context: what changed and why
+- Mark dependent principles as `needs_revalidation`
+- In the distillation report, flag it prominently under "Paradigm shifts"
+
+### 3b: Routing
 
 Using the knowledge map from Step 0, route each learning to the right location:
 
@@ -429,10 +484,18 @@ it, the system captured it. Here's proof.
 Memory pressure: X/10 → Y/10
 ✓ N principles encoded · M files updated
 
+**Confidence changes:**
+- [principle] promoted: provisional → validated (3rd confirmation)
+- [principle] PARADIGM ALARM: validated (7x) but corrected — [what changed]
+- [principle] reinforced: last_validated updated
+
 ───────────────────────────────────────────────
 
 **Flagged tensions:** (learnings where honesty and comfort diverge)
 - [If any — describe the tension and what was encoded vs. what might feel better]
+
+**Paradigm shifts:** (high-confidence principles that were corrected)
+- [If any — what was believed, what evidence contradicted it, what depends on it]
 
 **Bridge suggestions:** (knowledge that needs a pointer in user files to be reachable)
 - [If any — what learning, what file needs the pointer, why distill alone isn't enough]
@@ -473,8 +536,16 @@ last_updated: [date]
 staleness_threshold: [days — default 90]
 ---
 
+## [Section title]
+
+- [PRINCIPLE] Description of the principle.
+  confidence: [experimental|provisional|validated|hardened] (N confirmations, M corrections)
+  last_validated: [date]
+
 [Content — one topic per file, max 60 lines]
 ```
+
+Confidence metadata is OPTIONAL (older entries without it are treated as `provisional`). Add it when encoding new principles or when updating existing ones during a confirmation/correction.
 
 ---
 
