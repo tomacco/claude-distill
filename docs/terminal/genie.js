@@ -50,7 +50,7 @@ export function genieMinimize(element, slow, onComplete) {
             if (raw < 1) {
                 requestAnimationFrame(frame);
             } else {
-                overlay.remove();
+                (overlay._wrapper || overlay).remove();
                 element.style.visibility = '';
                 element.style.display = 'none';
                 onComplete();
@@ -62,11 +62,16 @@ export function genieMinimize(element, slow, onComplete) {
 // ── Private: Canvas setup ──
 
 function createOverlay(captured, rect, sectionRect, section) {
+    // Wrapper div clips the canvas to the terminal's rounded bounds
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `position:absolute;top:${rect.top - sectionRect.top}px;left:${rect.left - sectionRect.left}px;width:${rect.width}px;height:${rect.height}px;z-index:20;pointer-events:none;border-radius:10px;overflow:hidden;`;
     const overlay = document.createElement('canvas');
     overlay.width = captured.width;
     overlay.height = captured.height;
-    overlay.style.cssText = `position:absolute;top:${rect.top - sectionRect.top}px;left:${rect.left - sectionRect.left}px;width:${rect.width}px;height:${rect.height}px;z-index:20;pointer-events:none;`;
-    section.appendChild(overlay);
+    overlay.style.cssText = 'width:100%;height:100%;';
+    wrapper.appendChild(overlay);
+    section.appendChild(wrapper);
+    overlay._wrapper = wrapper; // for cleanup
     return overlay;
 }
 
