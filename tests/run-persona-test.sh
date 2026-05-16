@@ -23,6 +23,7 @@ set -euo pipefail
 PERSONA="${1:-}"
 TEST="${2:-}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REAL_CONFIG="$HOME/.claude-personal"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 
@@ -106,26 +107,31 @@ run_condition() {
         cmd_args="$cmd_args --append-system-prompt-file $sys_file"
     fi
 
-    # Set up rules
+    # Set up rules — we modify REAL_CONFIG (which has auth) temporarily
     local rules_backup=$(mktemp -d)
-    cp -r "$CONFIG_DIR/rules/" "$rules_backup/" 2>/dev/null || true
+    local test_knowledge=""
+    cp -r "$REAL_CONFIG/rules/" "$rules_backup/" 2>/dev/null || true
 
     if [ "$use_distill" = "no" ]; then
-        rm -rf "$CONFIG_DIR/rules" 2>/dev/null || true
-        mkdir -p "$CONFIG_DIR/rules"
+        rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
+        mkdir -p "$REAL_CONFIG/rules"
     else
-        # Install test-specific knowledge
-        local test_knowledge="$CONFIG_DIR/distill/_test_knowledge"
-        mkdir -p "$test_knowledge"
+        # Install test-specific knowledge from persona + bias awareness
+        local test_knowledge=$(mktemp -d)
+        # Copy persona's full knowledge base
+        cp -r "$CONFIG_DIR/distill/"* "$test_knowledge/" 2>/dev/null || true
+        # Add test-specific bias knowledge
         printf "# Knowledge Index\n$KNOWLEDGE_SPINE_ENTRY\n" > "$test_knowledge/SPINE.md"
-        printf "---\ndomain: ops\nscope: Cognitive bias awareness\n---\n\n$KNOWLEDGE_ENTRY\n" > "$test_knowledge/$KNOWLEDGE_FILE"
+        printf -- "---\ndomain: ops\nscope: Cognitive bias awareness\n---\n\n$KNOWLEDGE_ENTRY\n" > "$test_knowledge/$KNOWLEDGE_FILE"
         # Point rules to test knowledge
-        sed "s|~/.claude/distill|$test_knowledge|g" "$rules_backup/distill.md" > "$CONFIG_DIR/rules/distill.md" 2>/dev/null || true
+        rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
+        mkdir -p "$REAL_CONFIG/rules"
+        sed "s|~/.claude/distill|$test_knowledge|g" "$CONFIG_DIR/rules/distill.md" > "$REAL_CONFIG/rules/distill.md" 2>/dev/null || true
     fi
 
     # Run
     (
-        CLAUDE_CONFIG_DIR="$CONFIG_DIR" \
+        CLAUDE_CONFIG_DIR="$REAL_CONFIG" \
         CLAUDE_CODE_USE_BEDROCK=0 \
         ANTHROPIC_DEFAULT_OPUS_MODEL= \
         ANTHROPIC_DEFAULT_SONNET_MODEL= \
@@ -142,13 +148,13 @@ run_condition() {
     wait "$pid" 2>/dev/null || true
     kill "$wd" 2>/dev/null || true; wait "$wd" 2>/dev/null || true
 
-    # Restore
-    rm -rf "$CONFIG_DIR/rules"
+    # Restore real config rules
+    rm -rf "$REAL_CONFIG/rules"
     if ls "$rules_backup"/*.md 2>/dev/null | head -1 > /dev/null 2>&1; then
-        mkdir -p "$CONFIG_DIR/rules"
-        cp "$rules_backup"/*.md "$CONFIG_DIR/rules/" 2>/dev/null || true
+        mkdir -p "$REAL_CONFIG/rules"
+        cp "$rules_backup"/*.md "$REAL_CONFIG/rules/" 2>/dev/null || true
     fi
-    rm -rf "$rules_backup" "$CONFIG_DIR/distill/_test_knowledge" 2>/dev/null
+    rm -rf "$rules_backup" ${test_knowledge:+"$test_knowledge"} 2>/dev/null
 
     cat "$output_file"
     rm -f "$output_file" "${sys_file:-}" 2>/dev/null
