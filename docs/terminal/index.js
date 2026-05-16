@@ -27,7 +27,8 @@ function startInteractiveMode() {
 
     const claudeEgg = createClaudeEasterEgg({
         body, terminalEl, setActive,
-        ...helpers
+        ...helpers,
+        onPanicRestart: () => startInteractiveMode(),
     });
 
     const shell = createShell({
