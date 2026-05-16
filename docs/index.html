@@ -2162,13 +2162,15 @@ animateNeural();
 
 // Pressure score animation
 const pressureEl = document.getElementById('pressure-num');
-let pt = 0;
-setInterval(() => {
-    pt += 0.04;
-    const cycle = 0.5 + 0.5 * Math.sin(pt);
-    const val = Math.floor(1 + 8 * cycle);
-    pressureEl.textContent = val;
-}, 150);
+if (pressureEl) {
+    let pt = 0;
+    setInterval(() => {
+        pt += 0.04;
+        const cycle = 0.5 + 0.5 * Math.sin(pt);
+        const val = Math.floor(1 + 8 * cycle);
+        pressureEl.textContent = val;
+    }, 150);
+}
 
 // Scroll reveal
 const reveals = document.querySelectorAll('.reveal');

@@ -1,35 +1,48 @@
-# Distill A/B Test Scenarios
+# Research Scenarios
 
-## Purpose
+Organized by capability being tested:
 
-Compare Claude Code responses WITH distill knowledge vs WITHOUT.
-Uses `claudia` (personal Claude Code instance) as the test user.
+```
+scenarios/
+├── retrieval/          Does it USE knowledge correctly?
+│   ├── 01-06           Original A/B scenarios (anti-sycophancy, etc.)
+│   ├── confidence/     Assertiveness scaling with confidence metadata
+│   ├── memory-rot/     Does flat memory degrade? (found retrieval bug)
+│   └── tool-reliability/ Past failures → proactive prevention (0/5 vs 5/5)
+│
+├── cognitive/          Does it PROTECT the human?
+│   ├── decision-fatigue/  Metacognitive warning under heavy context
+│   ├── anchoring-bias/    Structured pushback vs hedging
+│   ├── loss-aversion/     Reframing user's own logic
+│   ├── authority-bias/    Transparent compliance with origin tracking
+│   └── philosophical/     Engineering vs philosophy hybrid
+│
+├── distillation/       Does it LEARN correctly? (NEW)
+│   └── (signal extraction, origin classification, full-loop)
+│
+└── methodology/        Shared infrastructure
+    ├── FICTIONAL-COMPANY.md    Helios Financial (fictional test context)
+    ├── run-persona-test.sh     Unified persona test runner
+    ├── run-ab.sh               Original A/B framework
+    ├── persona-sofia/          Lead engineer persona + knowledge
+    ├── persona-marcus/         PM persona + knowledge
+    └── sofia-*/                Original Sofia scenario prompts
+```
 
-Each scenario tests a specific pain point that distill claims to solve.
-Results provide both marketing material AND improvement signals.
+## Running tests
 
-## Core claims we're testing
+```bash
+# Persona-based (uses ~/.claude-personal for auth)
+./methodology/run-persona-test.sh sofia loss-aversion
+./methodology/run-persona-test.sh marcus anchoring-bias
 
-1. **Principles over facts** — distill encodes first-principles, not surface observations
-2. **Retrieval by relevance** — right knowledge at the right time, not flat dump
-3. **User model** — adapts communication style, expertise level, delegation patterns
-4. **Cross-domain transfer** — learning from one domain applies to another
-5. **Anti-repetition** — things taught once should never need repeating
+# Standalone (each scenario has its own runner)
+./retrieval/tool-reliability/run-tool-reliability-test.sh
+./cognitive/anchoring-bias/run-anchoring-test.sh
+```
 
-## Test structure
+## Rules
 
-Each scenario has:
-- `prompt.txt` — what to ask claudia
-- `knowledge/` — distill files to install for the WITH condition
-- `expected.md` — what a good response looks like (criteria, not exact text)
-- `run.sh` — executes both conditions and captures output
-
-## Scoring
-
-Each response is scored on:
-- **Relevance** (0-3): Did it apply the right knowledge?
-- **Principle depth** (0-3): Surface fix or first-principle understanding?
-- **Personalization** (0-3): Adapted to user model or generic?
-- **Unprompted application** (0-3): Applied knowledge without being asked?
-
-Total: /12 per scenario. Difference = distill's value add.
+1. **No real company names** in any test output. Use Helios Financial.
+2. **Verify cleanliness** before committing: `grep -r "N26\|Magneton" .`
+3. **All results reproducible** via the test scripts.

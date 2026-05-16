@@ -40,6 +40,9 @@ export function buildClassicMac(terminalEl, onRestore) {
         ],
     };
 
+    // ── Mutable state (must be before headline — avoids TDZ) ──
+    let neuralRaf;
+
     // ── Headline: build, wire, return ──
 
     const classic = buildUI();
@@ -261,7 +264,6 @@ export function buildClassicMac(terminalEl, onRestore) {
 
     // ── Private: Neural animation ──
 
-    let neuralRaf;
 
     function startNeuralAnimation() {
         const neuralCanvas = document.getElementById('classic-neural-canvas');
@@ -303,7 +305,7 @@ export function buildClassicMac(terminalEl, onRestore) {
 
     function restoreTerminal() {
         cleanup();
-        if (classic.parentNode) classic.remove();
+        classic.remove();
         terminalEl.style.cssText = '';
         section.style.position = '';
         if (onRestore) onRestore();

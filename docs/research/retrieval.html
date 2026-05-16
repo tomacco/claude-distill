@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Retrieval — claude-distill Research</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Knowledge Retrieval</h1>
+            <div class="meta">Does it USE knowledge correctly?</div>
+            <p class="abstract">The foundation: can structured knowledge files, retrieved on-demand via a SPINE index, produce measurably better responses than vanilla Claude or flat memory files?</p>
+        </header>
+
+        <section>
+            <h2>Studies in this category</h2>
+            <table>
+                <thead><tr><th>Study</th><th>Question</th><th>Key finding</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><a href="ab-testing.html" style="color:var(--accent)">A/B Testing</a></td>
+                        <td>Does structured memory beat no memory?</td>
+                        <td class="score-positive">+6.0/12 average. Anti-sycophancy is the killer feature.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="memory-rot.html" style="color:var(--accent)">Memory Rot</a></td>
+                        <td>Does flat memory degrade with size?</td>
+                        <td>Found a retrieval bug. One-sentence fix eliminated it.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="confidence.html" style="color:var(--accent)">Confidence Scoring</a></td>
+                        <td>Does assertiveness scale with evidence?</td>
+                        <td class="score-positive">3/3 behaviors verified perfectly.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="tool-reliability.html" style="color:var(--accent)">Tool Reliability</a></td>
+                        <td>Do past failures prevent future ones?</td>
+                        <td class="score-positive">0/5 vs 5/5 — strongest delta measured.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section>
+            <h2>The architecture being tested</h2>
+            <div class="code-block">
+                <pre>SPINE.md (always loaded, ~30 lines)
+  → "when doing X, read file Y"
+
+Tier 2 files (loaded on-demand)
+  → principles, procedures, constraints
+  → with confidence metadata + origin tracking
+
+rules/distill.md (18 lines)
+  → tells Claude HOW to use the SPINE
+  → "trigger on actions, not just questions"</pre>
+            </div>
+            <p>Total system cost: ~50 lines of rules + whatever knowledge you've accumulated. No database, no server, no embeddings. Just files and retrieval discipline.</p>
+        </section>
+
+        <section>
+            <h2>Meta-pattern</h2>
+            <div class="insight">
+                <div class="insight-label">Across all retrieval studies</div>
+                <p>The system works best when knowledge is <strong>principled</strong> (not surface-level), <strong>actionable</strong> (not descriptive), and <strong>triggered by relevance</strong> (not loaded in bulk). The biggest failures come from retrieval not firing — which is always fixable with better relevance hooks in the SPINE.</p>
+            </div>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/retrieval">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>

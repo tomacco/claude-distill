@@ -141,39 +141,25 @@
         </header>
 
         <div class="papers">
-            <a href="ab-testing.html" class="paper-card">
-                <div class="paper-status status-complete">Complete &middot; 5 scenarios</div>
-                <div class="paper-title">First-Principles Memory vs Flat Files</div>
-                <div class="paper-desc">Same model, same prompt, same session. The only difference: 18 lines of retrieval rules + tiered knowledge files. Does structured memory produce measurably better decisions?</div>
-                <div class="paper-finding">Finding: +6.0 average improvement on 12-point scale. Anti-sycophancy is the killer feature.</div>
-            </a>
-
-            <a href="memory-rot.html" class="paper-card">
-                <div class="paper-status status-complete">Complete &middot; 4 prompts &times; 2 conditions</div>
-                <div class="paper-title">Does memory.md Degrade Over Time?</div>
-                <div class="paper-desc">A 200-line memory file (6 months of organic growth) vs distill's tiered structure. Does flat storage rot as knowledge accumulates?</div>
-                <div class="paper-finding">Finding: memory.md WON on one test — revealed a retrieval bug that led to a one-sentence fix.</div>
-            </a>
-
-            <a href="confidence.html" class="paper-card">
-                <div class="paper-status status-complete">Complete &middot; 3 scenarios verified</div>
-                <div class="paper-title">Proportional Surprise: Confidence Scoring</div>
-                <div class="paper-desc">Should all corrections be treated equally? We tested whether assertiveness should scale with accumulated evidence, and what happens when high-confidence beliefs are contradicted.</div>
-                <div class="paper-finding">Finding: all 3 behaviors verified — hardened principles asserted, experimental suggested tentatively, paradigm alarm fired correctly.</div>
-            </a>
-
-            <a href="philosophical.html" class="paper-card">
-                <div class="paper-status status-ongoing">Ongoing &middot; 2/5 scenarios</div>
-                <div class="paper-title">Engineering Principles vs Philosophical Frameworks</div>
-                <div class="paper-desc">Three conditions: engineering-only (root-cause axioms), philosophy-only (Stoic/Pragmatist/Dialectical), and hybrid. Tested on ambiguous decisions with no clear engineering answer.</div>
-                <div class="paper-finding">Early signal: hybrid outperforms both pure approaches. Philosophy reframes; engineering acts.</div>
+            <a href="retrieval.html" class="paper-card">
+                <div class="paper-status status-complete">4 studies &middot; Core capability</div>
+                <div class="paper-title">Knowledge Retrieval</div>
+                <div class="paper-desc">Does it USE knowledge correctly? A/B testing, memory degradation, confidence scaling, and operational tool reliability.</div>
+                <div class="paper-finding">Headline: tool reliability test shows 0/5 vs 5/5 — strongest delta. Past failures become proactive prevention.</div>
             </a>
 
             <a href="cognitive-biases.html" class="paper-card">
-                <div class="paper-status status-ongoing">Ongoing &middot; 4/8 dimensions complete</div>
-                <div class="paper-title">Cognitive Bias Detection in LLM Interactions</div>
-                <div class="paper-desc">Can structured memory help an LLM detect and surface human cognitive biases — anchoring, loss aversion, decision fatigue, authority — without being paternalistic?</div>
-                <div class="paper-finding">Finding: distill's value varies by bias type. Strong on anchoring/fatigue (+9), subtle on loss aversion (reframing), unique on authority (transparent compliance).</div>
+                <div class="paper-status status-ongoing">4/8 dimensions &middot; Cognitive protection</div>
+                <div class="paper-title">Cognitive Bias Detection</div>
+                <div class="paper-desc">Does it PROTECT the human? Testing anchoring, decision fatigue, loss aversion, and authority bias across engineer and PM personas.</div>
+                <div class="paper-finding">Headline: persona biases compound with cognitive biases. Fatigue erodes deliberation, not quality.</div>
+            </a>
+
+            <a href="philosophical.html" class="paper-card">
+                <div class="paper-status status-ongoing">2/5 scenarios &middot; Knowledge composition</div>
+                <div class="paper-title">Engineering vs Philosophical Frameworks</div>
+                <div class="paper-desc">Can philosophical principles (Stoic/Pragmatist/Dialectical) complement engineering axioms? Tested on ambiguous decisions with no clear engineering answer.</div>
+                <div class="paper-finding">Early signal: hybrid outperforms both pure approaches. Philosophy reframes; engineering acts.</div>
             </a>
         </div>
 

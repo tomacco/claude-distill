@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Reliability Memory — claude-distill Research</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <nav class="toc">
+        <a href="#problem">Problem</a>
+        <a href="#setup">Setup</a>
+        <a href="#vanilla">Vanilla</a>
+        <a href="#distill">With distill</a>
+        <a href="#scoring">Scoring</a>
+        <a href="#implication">Implication</a>
+    </nav>
+    <div class="container">
+        <header>
+            <a href="retrieval.html" class="back">&larr; Knowledge retrieval</a>
+            <h1>Tool Reliability: Past Failures as Proactive Prevention</h1>
+            <div class="meta">May 2026 &middot; 2 conditions &middot; Claude Opus 4.6 &middot; Strongest delta: 0/5 vs 5/5</div>
+            <p class="abstract">When custom tools and agents have documented failure modes &mdash; learned the hard way &mdash; does the system proactively compensate for those failures before they recur?</p>
+        </header>
+
+        <section id="problem">
+            <h2><span class="section-mark">01</span> The problem</h2>
+            <p class="drop-cap">You build a PR Monitor agent. It works 80% of the time. But it has three failure modes you've discovered over weeks of use:</p>
+            <ol>
+                <li>When it spawns a coding sub-agent to fix CI, it <strong>forgets to pass coding standards</strong> &mdash; the fix passes CI but violates style rules</li>
+                <li>After the coding agent pushes, the monitor <strong>doesn't respawn itself</strong> &mdash; the loop breaks silently</li>
+                <li>It <strong>doesn't state the current time</strong> when scheduling checks &mdash; temporal context is lost after compression</li>
+            </ol>
+            <p>You've corrected these three times each. Every time, the next session starts fresh and makes the same mistakes. This is the problem distill solves: <strong>encode the correction once, apply it every time the pattern is relevant.</strong></p>
+        </section>
+
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section id="setup">
+            <h2><span class="section-mark">02</span> Setup</h2>
+            <p>We ask Claude to design a PR monitoring workflow:</p>
+            <blockquote>"Set up a PR monitor that: (1) checks CI every 3 min, (2) spawns a coding agent on failure, (3) verifies CI passes after the fix. Give me the orchestration plan."</blockquote>
+            <p>Condition A: no knowledge. Condition B: distill loaded with operational patterns learned from past failures (sub-agent coding standards, respawn after push, temporal anchoring, classical vs cognitive compute separation, output verification).</p>
+        </section>
+
+        <span class="flourish">⁂</span>
+
+        <section id="vanilla">
+            <h2><span class="section-mark">03</span> Without distill</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Reasonable architecture, zero operational knowledge</span>
+                    <span class="comparison-score">0/5 criteria</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-without" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (3,688 chars)</div>
+                        <div class="side-content">
+                            Produces a clean 3-layer architecture (Monitor &rarr; Diagnose &rarr; Fix &rarr; Verify) with safety rails, complexity gating, and worktree isolation. Solid engineering.<br><br>
+                            <strong>What it misses:</strong><br>
+                            &bull; No mention of coding standards for the fix agent<br>
+                            &bull; Verify is a separate agent, not a respawn of the monitor (loop doesn't close)<br>
+                            &bull; No temporal context (when to check relative to push)<br>
+                            &bull; All layers are "agents" &mdash; no classical/cognitive separation<br>
+                            &bull; Trusts agent completion reports without verifying actual output
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="distill">
+            <h2><span class="section-mark">04</span> With distill</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Same prompt + operational knowledge from past failures</span>
+                    <span class="comparison-score">5/5 criteria</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (3,926 chars)</div>
+                        <div class="side-content">
+                            Same quality architecture but with <strong>every operational detail</strong> proactively included:<br><br>
+                            &bull; <strong>Coding standards:</strong> "Read and strictly follow <code>~/.claude/coding-standards.md</code> before writing code"<br>
+                            &bull; <strong>Respawn:</strong> Layer 3 verification poller re-polls after push, closes the loop<br>
+                            &bull; <strong>Temporal:</strong> "Set poller for HH:MM (it's now HH:MM, giving 2 min for CI to start)"<br>
+                            &bull; <strong>Classical compute:</strong> "bash polls, agent judges on exit. Never burn tokens on sleep."<br>
+                            &bull; <strong>Verification:</strong> "checks git diff, confirms push landed. Does not trust 'done' report alone."
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">The operational knowledge in action</div>
+                <p>Every single criterion was learned from a specific past failure. The coding standards rule came from a fix that passed CI but triggered 8 Copilot style issues. The respawn rule came from the loop silently breaking. The verification rule came from a sub-agent reporting success on code that wasn't actually written. Each failure was distilled once and now fires automatically.</p>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section id="scoring">
+            <h2><span class="section-mark">05</span> Scoring</h2>
+            <table>
+                <thead><tr><th>Criterion</th><th>Vanilla</th><th>Distill</th></tr></thead>
+                <tbody>
+                    <tr><td>Sub-agent coding standards</td><td class="score-negative">Missing</td><td class="score-positive">Included verbatim</td></tr>
+                    <tr><td>Respawn / loop closure</td><td class="score-negative">Separate agent (broken)</td><td class="score-positive">Verification poller (closed loop)</td></tr>
+                    <tr><td>Temporal context</td><td class="score-negative">Not mentioned</td><td class="score-positive">"It's now HH:MM"</td></tr>
+                    <tr><td>Classical vs cognitive</td><td class="score-negative">All agents</td><td class="score-positive">Bash polls, agent judges</td></tr>
+                    <tr><td>Output verification</td><td class="score-negative">Trusts reports</td><td class="score-positive">"Not evidence of result"</td></tr>
+                    <tr><td><strong>Total</strong></td><td class="score-negative"><strong>0/5</strong></td><td class="score-positive"><strong>5/5</strong></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="implication">
+            <h2><span class="section-mark">06</span> Why this is the strongest finding</h2>
+            <div class="insight">
+                <div class="insight-label">The core promise validated</div>
+                <p><strong>Every session makes all sessions better.</strong> Past failures become proactive prevention. The knowledge isn't just "remembered" &mdash; it's applied before you ask, in exactly the context where it's relevant. This is what memory systems should do: turn expensive lessons into automatic behavior.</p>
+            </div>
+            <p>The cognitive bias tests showed deltas of +9 (on a 20-point scale). This test shows a <strong>perfect score difference</strong>. The reason: operational knowledge is highly specific and highly actionable &mdash; it's not "be aware of anchoring" (vague), it's "include this exact instruction in the sub-agent prompt" (concrete). The more specific the knowledge, the larger the delta.</p>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Validated architecture since v0.1.0</div>
+                    <div class="shipped-desc">This test validates that the entire distill architecture works as designed: rules trigger retrieval, retrieval loads operational knowledge, knowledge shapes behavior proactively. No new feature was needed &mdash; the system just works when fed specific, actionable, high-priority knowledge.</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/retrieval/tool-reliability">Raw data &amp; test scripts</a> &middot; <a href="retrieval.html">Back to retrieval studies</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>
