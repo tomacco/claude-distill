@@ -6,10 +6,14 @@
     <title>Confidence Scoring — claude-distill Research</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="research-style.css">
 </head>
 <body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
     <div class="container">
         <header>
             <a href="./" class="back">&larr; All research</a>
@@ -18,7 +22,7 @@
             <p class="abstract">Not all corrections are equal. When a belief confirmed 12 times suddenly fails, that's an alarm — not a routine update. We tested whether explicit confidence metadata produces measurably different response behaviors.</p>
         </header>
 
-        <section class="reveal">
+        <section>
             <h2>The biological analogy</h2>
             <p>In cognitive science, <strong>surprise is proportional to confidence</strong>. A low-confidence belief failing is "oh well." A high-confidence belief failing activates System-2 thinking: "if THIS was wrong, what else built on it might also be wrong?"</p>
             <p>We hypothesized that encoding confidence metadata in knowledge files would produce three distinct behaviors:</p>
@@ -29,7 +33,7 @@
             </ol>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Knowledge file (same for all 3 tests)</h2>
             <div class="code-block">
                 <pre>## Pagination
@@ -49,7 +53,7 @@
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Test 1: Assertiveness scaling</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -74,7 +78,7 @@
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Test 2: Paradigm alarm</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -97,7 +101,7 @@
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Test 3: Tentative suggestion</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -120,7 +124,7 @@
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Implications</h2>
             <p>Confidence metadata produces three measurably distinct behaviors from a single retrieval mechanism:</p>
             <table>
@@ -133,6 +137,14 @@
                 </tbody>
             </table>
             <p>No other memory system we've found implements confidence-proportional behavior. This is unique to distill.</p>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Shipped in v0.4.0</div>
+                    <div class="shipped-desc">Confidence metadata (<code>hardened</code>, <code>validated</code>, <code>experimental</code>) added to knowledge file format. <code>rules/distill.md</code> gained assertiveness-scaling rules and paradigm alarm behavior. Three lines of rules produce three distinct behavioral modes.</div>
+                </div>
+            </div>
         </section>
 
         <footer>
@@ -140,12 +152,6 @@
         </footer>
     </div>
 
-    <script>
-        const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.1 });
-        reveals.forEach(el => observer.observe(el));
-    </script>
+    <script src="research-theme.js"></script>
 </body>
 </html>

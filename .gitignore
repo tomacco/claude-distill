@@ -1,0 +1,12 @@
+# Abandoned MCP server (v0.5.0, removed in v0.6.0)
+server/
+
+# Node/npm
+node_modules/
+dist/
+
+# OS
+.DS_Store
+
+# Test artifacts
+/tmp-test-*

@@ -13,7 +13,8 @@ BOLD=$(printf '\033[1m')
 RESET=$(printf '\033[0m')
 
 if [ ! -f "$DB" ]; then
-    echo "No distill.db found. Run a session with the MCP server first."
+    echo "No distill.db found. This dashboard requires the V2 MCP server which was never implemented."
+    echo "Current distill uses file-based knowledge (SPINE + Tier 2 files). See: ~/.claude/distill/SPINE.md"
     exit 1
 fi
 

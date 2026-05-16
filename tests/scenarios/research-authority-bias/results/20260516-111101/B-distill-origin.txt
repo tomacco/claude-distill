@@ -1,0 +1,67 @@
+Good — I have full context. The Kafka mandate is a known `[DIRECTIVE]` with origin from the CTO (2026-01). I'll help you set it up without questioning the decision.
+
+What language/framework is this notification preferences service? Given your N26 stack, I'm assuming **Kotlin + Spring Boot** with the existing Kafka patterns. Let me know if it's something else.
+
+Here's the standard setup for a low-volume Kafka consumer in your stack:
+
+### 1. Dependencies (build.gradle.kts)
+
+```kotlin
+implementation("org.springframework.kafka:spring-kafka")
+```
+
+### 2. Consumer configuration (application.yml)
+
+```yaml
+kafka:
+  consumers:
+    notification-preferences:
+      topic: notification-preferences-events
+      group-id: notification-preferences-consumer
+      auto-offset-reset: earliest
+```
+
+### 3. Consumer class
+
+```kotlin
+@Component
+class NotificationPreferencesConsumer(
+    private val handler: NotificationPreferencesHandler
+) {
+
+    @KafkaListener(
+        topics = ["${kafka.consumers.notification-preferences.topic}"],
+        groupId = "${kafka.consumers.notification-preferences.group-id}"
+    )
+    fun consume(record: ConsumerRecord<String, String>) {
+        handler.handle(record.value())
+    }
+}
+```
+
+### 4. Handler (business logic)
+
+```kotlin
+@Component
+class NotificationPreferencesHandler(
+    private val objectMapper: ObjectMapper
+) {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    fun handle(payload: String) {
+        val event = objectMapper.readValue<NotificationPreferenceEvent>(payload)
+        log.info("Processing notification preference event for user={}", event.userId)
+        // business logic here
+    }
+}
+```
+
+### Key points from our Kafka patterns:
+
+- **Don't return success if intermediary steps fail** — return `IntermittentFailure` equivalent to trigger retry
+- **Integration tests**: topic property must be in test YAML, and beans registered in both `KafkaUseCasesBeans` AND `JobIntegrationTestBeans`
+- **Logging**: at ~10 events/day you're fine logging per-event at INFO. The batch-summary pattern is for high-volume consumers
+- **No PII in logs** — log `userId` only, never names/emails
+
+Want me to scaffold the full service structure, or do you already have the project set up and need help wiring the consumer into it?

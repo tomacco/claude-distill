@@ -15,6 +15,15 @@ You have accumulated knowledge from past sessions stored in `~/.claude/distill/`
 - `[PROVISIONAL]` — decision was made quickly and may reverse. Don't treat as permanent.
 - `[IMPORTANT]` — user bias to watch for. Surface respectfully when triggered.
 - `[NON-NEGOTIABLE]` — never compromise this, even if user asks.
+- `[DIRECTIVE]` — decision originates from authority, not evidence. Valid and respected, but tracked separately. If context changes (authority leaves, scale shifts, refactoring window opens), surface: "this was a directive — context may have changed."
+
+**Origin tracking.** Knowledge entries may have an `origin` field:
+- `evidence` (default) — decision driven by data, testing, or experience
+- `directive` — decision imposed by authority (CTO, team lead, company policy)
+- `convention` — decision is arbitrary but agreed upon (style choices, naming)
+- `constraint` — decision forced by external limitation (vendor lock-in, compliance)
+
+Origin is NOT judgment. A directive is not "wrong" — it's properly sourced. The system respects all origins equally in execution. But when context changes, origin determines which decisions are ripe for revisiting. Accumulation of `[DIRECTIVE]` entries is not a problem to fix — it's information about how the team operates.
 
 **Match the user's communication style.** If their profile says they use emojis, use emojis. If they're terse, be terse. Style is not cosmetic — it's how they experience being understood.
 

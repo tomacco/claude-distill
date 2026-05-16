@@ -61,7 +61,18 @@ Scan the entire conversation above and collect:
 - Emotional signals (frustration, excitement, impatience — and what preceded each)
 - Decision-making style (did they reason from principles or examples? data or intuition?)
 
-**D) Session metadata**
+**D) Decision origins**
+- For every decision or principle that emerged: WHY was it made?
+- Classify the origin:
+  - `evidence` — data, testing, profiling, or experience drove it
+  - `directive` — authority imposed it ("CTO said", "team lead decided", "company policy")
+  - `convention` — arbitrary but agreed upon ("we just do it this way")
+  - `constraint` — external force required it (compliance, vendor, budget)
+- When origin is `directive`: record WHO imposed it and WHEN
+- When evidence contradicts a directive: record BOTH honestly (the directive is what we do; the evidence is what data says)
+- This is NOT judgment. A directive is valid. But it's properly sourced so the system can surface it for revisiting when context changes.
+
+**E) Session metadata**
 - What was the session about? (high-level goal)
 - How long / how complex was it?
 - What domain(s) did it cover?

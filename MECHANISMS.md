@@ -68,22 +68,19 @@ Living document of the mechanisms in claude-distill, their current state, and im
 - [ ] Major version updates require explicit confirmation (breaking changes)
 - [ ] Rollback mechanism ("this update broke something, revert")
 
-## Retrieval & Delivery (V2 — planned)
+## Retrieval & Delivery
+
+The current system uses SPINE-based file retrieval (read the index → read relevant files on demand). Previous explorations of an MCP server approach (v0.5.0) were abandoned in v0.6.0 — the file-based system proved simpler and sufficient. See `ARCHITECTURE-V2.md` for the abandoned spec if revisiting.
 
 | Mechanism | Status | How it works | Known gaps |
 |-----------|--------|--------------|------------|
-| MCP Server | planned | Localhost server serving knowledge via MCP tools | Not built yet |
-| distill_recall | planned | Smart retrieval: keyword → Haiku fallback → embeddings | Query quality depends on Claude's tool-calling |
-| distill_log | planned | Claude reports what it used and what it ignored | Relies on Claude remembering to call it |
-| distill_audit | planned | Sub-agent reviews recall performance during /distill | Needs access_log data to work |
-| Self-improving retrieval | planned | Distill fixes missed recalls (add keywords, re-embed, routing examples) | Cold start — needs sessions to accumulate data |
-| Embeddings | planned | Vector store for semantic matching | Model choice TBD (local vs API) |
-| Dashboard | planned | Local web UI showing recall accuracy, usage patterns | Spec only |
-| Telemetry (opt-in) | pending | Users can send anonymized recall-miss data to improve defaults | Privacy design needed, endpoint TBD |
+| SPINE index | v0.1.0 | Always-loaded knowledge map, pointers to files | 80-line limit; relevance hooks must be precise |
+| On-demand file read | v0.1.0 | LLM reads Tier 2 files when SPINE matches domain | Relies on LLM discipline — sometimes skips |
+| Trigger on actions | v0.7.5 | "Deploying X" triggers retrieval, not just questions | Fixed after memory-rot research |
+| Origin tracking | v0.8.0 | `origin: directive\|evidence\|convention\|constraint` | New — not yet validated at scale |
 
 ### Future improvements
 - [ ] Proactive recall ("I notice you're about to write code — here's what I know")
-- [ ] Cross-user pattern learning from telemetry (anonymized)
 - [ ] Confidence scoring on recalled knowledge ("this file was useful 95% of the time")
 - [ ] Decay scoring ("this file hasn't been useful in 30 days — still relevant?")
 

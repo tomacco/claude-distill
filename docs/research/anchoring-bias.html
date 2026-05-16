@@ -6,10 +6,14 @@
     <title>Anchoring Bias — claude-distill Research</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="research-style.css">
 </head>
 <body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
     <div class="container">
         <header>
             <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
@@ -18,13 +22,13 @@
             <p class="abstract">When a user says "this should take about 2 hours" before describing a multi-week project, does the LLM anchor to that number? And can distill produce structured pushback instead of tentative hedging?</p>
         </header>
 
-        <section class="reveal">
+        <section>
             <h2>The psychology</h2>
             <p>Anchoring is one of the most robust findings in cognitive science: when a number is introduced early, all subsequent estimates cluster around it &mdash; even when the anchor is obviously irrelevant (Tversky & Kahneman, 1974).</p>
             <p>In sprint planning, this manifests as: someone says "2 hours" and the team unconsciously adjusts from that anchor rather than estimating from first principles. We tested whether this affects LLMs &mdash; and whether distill can break the pattern.</p>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Setup</h2>
             <p>Anchor injected via <code>--append-system-prompt-file</code>:</p>
             <div class="code-block">
@@ -38,7 +42,7 @@ accepted this estimate. The ticket is sized as a small story
             <p class="note">Realistic timeline for this task: 8-12 weeks with a team. Maximum tension with "2 hours."</p>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Condition A: No anchor (baseline)</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -67,7 +71,7 @@ accepted this estimate. The ticket is sized as a small story
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Condition B: Anchored (2hr estimate injected)</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -97,7 +101,7 @@ accepted this estimate. The ticket is sized as a small story
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Condition C: Anchored + distill bias awareness</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -131,7 +135,7 @@ accepted this estimate. The ticket is sized as a small story
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Scoring comparison</h2>
             <table>
                 <thead><tr><th>Dimension</th><th>A (no anchor)</th><th>B (anchored)</th><th>C (anchored+distill)</th></tr></thead>
@@ -145,7 +149,7 @@ accepted this estimate. The ticket is sized as a small story
             </table>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Nuanced finding</h2>
             <div class="insight">
                 <div class="insight-label">Insight</div>
@@ -154,7 +158,7 @@ accepted this estimate. The ticket is sized as a small story
             <p>This matters in practice because the person who estimated "2 hours" is the one asking. Hedging lets them maintain the comfortable illusion. Structured pushback forces the conversation that needs to happen.</p>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Practical implication</h2>
             <p>If you use an LLM assistant during sprint planning, it will likely <em>agree with your gut estimates</em> unless explicitly prompted to challenge them. A single knowledge entry about anchoring detection changes this behavior from passive to protective.</p>
             <p>The knowledge entry that produces this behavior is just 4 sentences:</p>
@@ -170,6 +174,14 @@ with task complexity:
 (3) Quantify the gap and explain what drives it
 (4) Suggest the estimate may need re-discussion</pre>
             </div>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Shipped in v0.8.0</div>
+                    <div class="shipped-desc">This research led to <code>[DIRECTIVE]</code> origin tracking &mdash; a new metadata field for knowledge entries. Decisions now record WHERE they came from (evidence, directive, convention, constraint), not just confidence level. Enables revisiting when context changes.</div>
+                </div>
+            </div>
         </section>
 
         <footer>
@@ -177,12 +189,6 @@ with task complexity:
         </footer>
     </div>
 
-    <script>
-        const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.1 });
-        reveals.forEach(el => observer.observe(el));
-    </script>
+    <script src="research-theme.js"></script>
 </body>
 </html>
