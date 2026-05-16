@@ -2,7 +2,7 @@
 // Typing "claude" in the shell launches a fake Claude Code session.
 // Any input triggers a comedic context overflow leading to a kernel panic screen.
 
-export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, removeFooter, footerType, footerCursor, terminalEl, setActive }) {
+export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, removeFooter, footerType, footerCursor, terminalEl, setActive, onPanicRestart }) {
     let inClaude = false, claudeReady = false;
 
     return { startClaude, handleClaudeInput, isInClaude: () => inClaude, isReady: () => claudeReady };
@@ -101,7 +101,7 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
         const lines = panicLines();
         let i = 0;
         (function go() {
-            if (i >= lines.length) return;
+            if (i >= lines.length) { showRestartPrompt(); return; }
             const l = document.createElement('div');
             l.className = 'term-line visible';
             l.innerHTML = lines[i] || '&nbsp;';
@@ -111,6 +111,31 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
             i++;
             setTimeout(go, i < 3 ? 100 : 40);
         })();
+    }
+
+    function showRestartPrompt() {
+        const el = document.createElement('div');
+        el.className = 'term-line visible';
+        el.style.fontSize = '0.68rem';
+        el.style.lineHeight = '1.6';
+        el.style.marginTop = '1rem';
+        el.innerHTML = '<span style="color:#565f89">Press any key to restart...</span><span class="term-cursor"></span>';
+        body.appendChild(el);
+        body.scrollTop = body.scrollHeight;
+
+        function onKey(e) {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            e.preventDefault();
+            document.removeEventListener('keydown', onKey);
+            body.style.background = '';
+            body.style.padding = '';
+            body.style.overflow = '';
+            body.innerHTML = '';
+            inClaude = false;
+            claudeReady = false;
+            if (onPanicRestart) onPanicRestart();
+        }
+        document.addEventListener('keydown', onKey);
     }
 
     function panicLines() {
