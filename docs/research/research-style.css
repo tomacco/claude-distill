@@ -363,6 +363,49 @@ blockquote {
 
 .insight p { color: var(--bright); font-size: 0.93rem; margin: 0; }
 
+/* ═══ SHIPPED FIX CALLOUT ═══ */
+.shipped {
+    padding: 1.2rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 2rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+.shipped-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.shipped-body {
+    flex: 1;
+}
+
+.shipped-version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--positive);
+    margin-bottom: 0.3rem;
+}
+
+.shipped-desc {
+    font-size: 0.84rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.shipped-desc code {
+    font-size: 0.78em;
+}
+
 /* ═══ TABLES ═══ */
 table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
 
