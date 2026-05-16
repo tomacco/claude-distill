@@ -66,17 +66,19 @@ function wireWindowButtons() {
         active = false;
         const section = terminalEl.closest('.terminal-section');
         section.style.position = 'relative';
-        classicInstance = buildClassicMac(terminalEl, () => { active = true; classicInstance = null; });
+        // Lock terminal width before switching to absolute to prevent size jump
+        const termRect = terminalEl.getBoundingClientRect();
+        terminalEl.style.width = termRect.width + 'px';
         terminalEl.style.position = 'absolute';
         terminalEl.style.top = '0';
-        terminalEl.style.left = '0';
-        terminalEl.style.right = '0';
+        terminalEl.style.left = (termRect.left - section.getBoundingClientRect().left) + 'px';
         terminalEl.style.zIndex = '10';
+        classicInstance = buildClassicMac(terminalEl, () => { active = true; classicInstance = null; });
         genieMinimize(terminalEl, altHeld, () => {
             terminalEl.style.position = '';
             terminalEl.style.top = '';
             terminalEl.style.left = '';
-            terminalEl.style.right = '';
+            terminalEl.style.width = '';
             terminalEl.style.zIndex = '';
         });
     });
