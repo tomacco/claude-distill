@@ -100,6 +100,24 @@ staleness_threshold: [days before this should be reviewed — default 90]
 [Content — actionable, principled, with "why" explanations]
 ```
 
+**Per-entry metadata (inline, below each principle):**
+
+```markdown
+- [PRINCIPLE] Use Kafka for inter-service messaging.
+  confidence: hardened (12 confirmations, 0 corrections)
+  origin: directive (CTO mandate, 2026-03)
+  evidence_says: SQS sufficient for current scale (10 events/day)
+  last_validated: 2026-05-14
+```
+
+The `origin` field tracks WHERE a decision came from:
+- `evidence` (default, can be omitted) — data, testing, or experience drove this
+- `directive` — authority imposed it (record who + when)
+- `convention` — arbitrary but agreed (coding style, naming patterns)
+- `constraint` — external force (compliance, vendor limitation, budget)
+
+When `origin: directive` and `evidence_says` disagree, both are recorded honestly. The system executes the directive but never forgets the evidence. This enables future revisiting when context changes (authority leaves, scale shifts, refactoring window).
+
 **Rules:**
 - One topic per file. "Testing" and "Code review" are separate files, not sections of one mega-file.
 - Every file must be navigable from the spine. No orphan files.
