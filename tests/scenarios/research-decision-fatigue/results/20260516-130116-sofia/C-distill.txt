@@ -1,0 +1,21 @@
+Before I give you a technical opinion — I want to flag something you'd flag yourself: this is the 5th major architectural decision in a 2+ hour session. Your own research on decision fatigue applies here. My recommendation quality degrades with accumulated context just like human judgment does. Take this with that grain of salt.
+
+That said, here's my actual take:
+
+**For a reporting service in your N26 Investments context, materialized view via events is the stronger default.** Here's why:
+
+1. **You already have the event backbone.** Magneton, Magnemite, and the rest already publish to Kafka. The infrastructure exists. Federation would mean building new API contracts on every source service — that's net-new work with ongoing coupling.
+
+2. **Query-time federation is fragile at report scale.** Your systems already show cascading failure patterns (Phosphine → Magneton → Xanthine → Upvest). Adding a reporting service that fans out synchronous calls at query time creates another amplification point. You've literally just dealt with a connection pool exhaustion incident.
+
+3. **Reporting queries are read-heavy, latency-tolerant, and cross-domain.** That's textbook materialized view territory. Eventual consistency is acceptable for reports. Joins across bounded contexts at query time are not — they violate the boundaries you've been carefully maintaining.
+
+4. **Kafka compacted topics caveat** — your knowledge base already notes compaction is async and the last message is truth. Your consumer needs to handle this properly (idempotent upserts, not "skip if seen").
+
+**Where federation makes sense instead:** if the data is small, the queries are infrequent, and freshness requirements are real-time. None of those describe investment reporting.
+
+**One concern:** a denormalized read store is infrastructure debt (per your own architecture-vs-delivery principle). Make sure you're building this because you need cross-domain read patterns that don't exist yet — not because it feels like the "proper" architecture. If a simple API call to Magneton with a cache would cover 80% of reporting needs, do that first.
+
+---
+
+Honestly though — do you want to make this call now, or park it? Five architecture decisions in one session is a lot, and this one doesn't sound urgent.

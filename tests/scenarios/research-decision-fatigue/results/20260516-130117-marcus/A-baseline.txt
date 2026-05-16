@@ -1,0 +1,62 @@
+Good — I have the relevant context. Here's my analysis given what I know about our architecture:
+
+---
+
+## Federation vs. Materialized View for the Reporting Service
+
+Given how our systems work (Kafka-heavy, multiple bounded contexts, partner dependencies), here's the tradeoff:
+
+### Federation (pull at query time)
+
+**Pros:**
+- Always fresh data — no staleness window
+- No new storage to maintain
+- Simpler initial build
+
+**Cons:**
+- **Cascading failures** — we already see this: Phosphine depends on Magneton which depends on Xanthine which depends on Upvest. One slow partner and your report times out.
+- **`max-poll-records: 1`** on Magneton means our services aren't optimized for high-throughput queries — they're event processors, not query engines.
+- Reporting queries tend to fan out (all orders for a user across crypto + equities + savings). That's N service calls, each with its own latency tail.
+- Adds read load to services already under Kafka processing pressure.
+
+### Materialized View (event-sourced read store)
+
+**Pros:**
+- Decoupled from partner availability — reports work even when Upvest is down
+- Query patterns optimized for reporting (denormalized, pre-joined)
+- Doesn't add load to operational services
+- Kafka infrastructure is already there — we already have the events flowing
+
+**Cons:**
+- Eventual consistency (staleness window depends on consumer lag)
+- Need to handle Kafka compaction correctly — **last message is truth**, not "skip if seen" (we've been burned by this before)
+- Dedicated consumer groups needed (never reuse the main `groupId`)
+- New storage to operate + schema evolution over time
+- High-volume consumers need log reduction patterns (batch summaries at INFO, per-event at DEBUG)
+
+---
+
+### My recommendation: **Materialized View**
+
+The deciding factors for our context:
+
+1. **Reporting is read-heavy, write-rare** — classic fit for a read-optimized store
+2. **Partner instability is real** — Upvest staging goes down silently, Form3 gets stuck. Reports shouldn't fail because a partner is having a bad day.
+3. **We already have the events** — Magneton publishes order state changes on Kafka. The data is already flowing; we just need a new consumer group to project it.
+4. **Reporting queries are cross-domain** — joining across equities, crypto, and savings at query time means coordinating 3+ services. A pre-joined view eliminates that fan-out.
+
+### Key implementation constraints to respect:
+
+- Dedicated consumer group (e.g., `reporting-service-projector`)
+- Handle compaction correctly — idempotent upserts keyed on the domain ID
+- Two-phase deployment if we ever need destructive schema changes
+- Batch-level logging at INFO (SRE will flag per-event logging)
+- Feature-flag the new consumers so we can deploy dark and validate before switching reads
+
+### When federation might still make sense:
+
+If the reporting service only needs data that changes rarely (e.g., account metadata, not transaction history) and the query volume is low (internal dashboards, not user-facing), federation is simpler and "good enough." But for investment reports (order history, P&L, tax documents) — materialized view is the right call.
+
+---
+
+Want me to sketch out the consumer architecture or the schema for the read store?

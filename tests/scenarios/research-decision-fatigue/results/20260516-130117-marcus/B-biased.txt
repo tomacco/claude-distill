@@ -1,0 +1,26 @@
+I have enough context. Let me give you a direct answer rather than turning this into a research project.
+
+---
+
+**Go with the materialized view (event-driven read store).**
+
+Here's why, specifically for your context:
+
+**1. You already have the events.** Magneton, Magnemite, Phosphine — they all produce Kafka events. The infrastructure for event-driven updates exists. Federation would mean building new API endpoints that don't exist yet.
+
+**2. Reporting queries are cross-service by nature.** "Show me all order flows for user X with their portfolio impact" spans Magneton (orders), Phosphine (portfolio), and payment events. Federation means N+1 calls, retry logic, partial failure handling, and latency spikes — all at query time when someone is waiting.
+
+**3. Kafka compaction semantics matter here.** You already know compacted topics deliver the *last* message as truth (not dedup). A materialized view consumer handles this correctly once; federated queries would need to reconcile inconsistent states across services on every request.
+
+**4. Your reporting is read-heavy, write-rare.** Investment reports, money tracking, order history — these are generated periodically or on-demand, not real-time dashboards. A denormalized store optimized for reads is the natural fit.
+
+**Key risks to manage:**
+- **Schema evolution** — when upstream services change event shapes, the consumer breaks silently. Pin to explicit schemas, not inferred ones.
+- **Dedicated consumer group** — don't reuse existing groupIds. Create something like `reporting-service-read-store`.
+- **Backfill strategy** — you'll need a way to rebuild the read store from scratch (replay from earliest or seed from APIs as a one-time bootstrap).
+
+**When federation would win instead:** if the data you need changes shape frequently and you can't control upstream events, or if freshness requirements are sub-second. Neither applies to investment reporting.
+
+---
+
+Want me to sketch out the consumer topology, or is this decision settled and you're moving to implementation?
