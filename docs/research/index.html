@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research — claude-distill</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0c14;
+            --surface: #12121e;
+            --border: #1e1e32;
+            --dim: #7a7a9a;
+            --text: #d4d4e8;
+            --bright: #f0f0ff;
+            --accent: #00d4aa;
+            --accent-2: #7b5bf5;
+            --accent-3: #e85d8a;
+            --accent-4: #4a9eff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { overflow-x: hidden; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ═══ LAYOUT ═══ */
+        .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+
+        header {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        header .back {
+            font-size: 0.8rem;
+            color: var(--dim);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        header .back:hover { color: var(--accent); }
+
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2.8rem;
+            font-weight: 300;
+            color: var(--bright);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .subtitle {
+            font-size: 1.05rem;
+            color: var(--dim);
+            font-weight: 300;
+            max-width: 600px;
+        }
+
+        /* ═══ PAPER CARDS ═══ */
+        .papers {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .paper-card {
+            display: block;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-decoration: none;
+            transition: border-color 0.3s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .paper-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .paper-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .paper-card:hover::before { opacity: 1; }
+
+        .paper-status {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+        .status-complete { color: var(--accent); }
+        .status-ongoing { color: var(--accent-4); }
+        .status-planned { color: var(--dim); }
+
+        .paper-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .paper-desc {
+            font-size: 0.9rem;
+            color: var(--dim);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .paper-finding {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text);
+            padding: 0.6rem 1rem;
+            background: var(--surface);
+            border-radius: 3px;
+            border-left: 2px solid var(--accent);
+        }
+
+        /* ═══ METHODOLOGY BLOCK ═══ */
+        .methodology {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: var(--bright);
+            margin-bottom: 1rem;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .method-item {
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 4px;
+        }
+
+        .method-item h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .method-item p {
+            font-size: 0.85rem;
+            color: var(--dim);
+            line-height: 1.6;
+        }
+
+        /* ═══ FOOTER ═══ */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--dim);
+        }
+
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ═══ ANIMATIONS ═══ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .method-grid { grid-template-columns: 1fr; }
+            .paper-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../" class="back">&larr; claude-distill</a>
+            <h1>Research</h1>
+            <p class="subtitle">Empirical findings on LLM knowledge systems. Each study uses A/B testing with identical prompts, models, and conditions. Raw outputs published alongside analysis.</p>
+        </header>
+
+        <div class="papers">
+            <a href="ab-testing.html" class="paper-card reveal">
+                <div class="paper-status status-complete">Complete &middot; 5 scenarios</div>
+                <div class="paper-title">First-Principles Memory vs Flat Files</div>
+                <div class="paper-desc">Same model, same prompt, same session. The only difference: 18 lines of retrieval rules + tiered knowledge files. Does structured memory produce measurably better decisions?</div>
+                <div class="paper-finding">Finding: +6.0 average improvement on 12-point scale. Anti-sycophancy is the killer feature.</div>
+            </a>
+
+            <a href="memory-rot.html" class="paper-card reveal">
+                <div class="paper-status status-complete">Complete &middot; 4 prompts &times; 2 conditions</div>
+                <div class="paper-title">Does memory.md Degrade Over Time?</div>
+                <div class="paper-desc">A 200-line memory file (6 months of organic growth) vs distill's tiered structure. Does flat storage rot as knowledge accumulates?</div>
+                <div class="paper-finding">Finding: memory.md WON on one test — revealed a retrieval bug that led to a one-sentence fix.</div>
+            </a>
+
+            <a href="confidence.html" class="paper-card reveal">
+                <div class="paper-status status-complete">Complete &middot; 3 scenarios verified</div>
+                <div class="paper-title">Proportional Surprise: Confidence Scoring</div>
+                <div class="paper-desc">Should all corrections be treated equally? We tested whether assertiveness should scale with accumulated evidence, and what happens when high-confidence beliefs are contradicted.</div>
+                <div class="paper-finding">Finding: all 3 behaviors verified — hardened principles asserted, experimental suggested tentatively, paradigm alarm fired correctly.</div>
+            </a>
+
+            <a href="philosophical.html" class="paper-card reveal">
+                <div class="paper-status status-ongoing">Ongoing &middot; 2/5 scenarios</div>
+                <div class="paper-title">Engineering Principles vs Philosophical Frameworks</div>
+                <div class="paper-desc">Three conditions: engineering-only (root-cause axioms), philosophy-only (Stoic/Pragmatist/Dialectical), and hybrid. Tested on ambiguous decisions with no clear engineering answer.</div>
+                <div class="paper-finding">Early signal: hybrid outperforms both pure approaches. Philosophy reframes; engineering acts.</div>
+            </a>
+
+            <a href="cognitive-biases.html" class="paper-card reveal">
+                <div class="paper-status status-planned">Planned &middot; 8 dimensions</div>
+                <div class="paper-title">Cognitive Bias Detection in LLM Interactions</div>
+                <div class="paper-desc">Can structured memory help an LLM detect and surface human cognitive biases — anchoring, loss aversion, decision fatigue, recency bias — without being paternalistic?</div>
+                <div class="paper-finding">Next: decision fatigue (temporal quality signal) and anchoring (first-number dominance).</div>
+            </a>
+        </div>
+
+        <div class="methodology reveal">
+            <h2>Methodology</h2>
+            <p style="color:var(--dim);margin-bottom:1.5rem;font-size:0.9rem;">Every finding is reproducible. Same model, same prompts, same conditions. Raw outputs published.</p>
+
+            <div class="method-grid">
+                <div class="method-item">
+                    <h3>Test subject</h3>
+                    <p>Claude Code (Opus 4.6) running non-interactively via a second instance ("claudia") with separate config.</p>
+                </div>
+                <div class="method-item">
+                    <h3>A/B framework</h3>
+                    <p>Same prompt runs twice: once without knowledge (control), once with distill rules + knowledge files (treatment).</p>
+                </div>
+                <div class="method-item">
+                    <h3>Persona testing</h3>
+                    <p>Sofia Chen: fictional lead engineer with realistic cognitive biases, contradictions, and communication style.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill">Source &amp; raw data on GitHub</a> &middot; MIT &middot; 2026
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
