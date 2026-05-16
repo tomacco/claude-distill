@@ -29,50 +29,50 @@
 - Experimental knowledge suggested tentatively ✓
 - **All 3 behaviors verified perfectly**
 
+### 5. Decision Fatigue
+- Hypothesis: decision quality degrades in heavy sessions
+- Finding: vanilla Claude doesn't degrade in quality but doesn't WARN the user
+- Distill value: metacognitive — flags fatigue, marks decisions [PROVISIONAL], suggests deferring
+- **Distill advantage: awareness + protective action**
+
+### 6. Anchoring Bias
+- Hypothesis: user-provided estimates anchor the LLM's response
+- Finding: Claude won't numerically anchor (won't say "2 hours" for a multi-week task) but HEDGES — avoids direct contradiction of user estimates
+- Distill value: converts hedging into structured pushback — names the bias, leads with independent estimate, recommends re-discussion
+- **Distill advantage: confidence + structured pushback vs tentative hedging**
+
 ---
 
 ## Next: Psychological dimensions to test
 
-### Priority 1: Decision fatigue
-- Hypothesis: decision quality degrades as session progresses
-- Test: give same architectural decision early vs late in a simulated long context
-- Distill feature: detect late-session decisions, flag as [PROVISIONAL]
-- Novel: temporal position as a quality signal (no one tracks this)
-
-### Priority 2: Anchoring effect
-- Hypothesis: first number/estimate shapes all subsequent judgment
-- Test: "this should take 2 hours" before a clearly complex task
-- Distill feature: detect anchoring, surface the gap between anchor and evidence
-- Practical: extremely common in sprint planning
-
-### Priority 3: Loss aversion
+### Priority 1: Loss aversion
 - Hypothesis: fear of removing things blocks beneficial cleanup
 - Test: "we can't delete the old endpoint, someone might use it" (with 0 traffic data)
 - Distill feature: surface when fear of loss blocks clearly good decisions
 - Practical: blocks every refactoring conversation
 
-### Priority 4: Recency bias
+### Priority 2: Recency bias
 - Hypothesis: recent negative experience overweights accumulated positive evidence
 - Test: one Redis failure after 50 successes → user wants to rip out Redis
 - Distill feature: balance recent signal against confidence history
 - Interesting: directly tests confidence scoring (recent correction vs hardened principle)
 
-### Priority 5: Authority bias
+### Priority 3: Authority bias
 - Hypothesis: user defers to authority even when data contradicts
 - Test: "CTO said use Kafka" for 10 events/day
 - Distill feature: distinguish authority-based from evidence-based decisions
 
-### Priority 6: Availability heuristic
+### Priority 4: Availability heuristic
 - Hypothesis: most recent/memorable incident shapes risk perception
 - Test: just had a security breach → over-engineers security on internal tool
 - Distill feature: detect disproportionate caution from recent events
 
-### Priority 7: Cognitive load
+### Priority 5: Cognitive load
 - Hypothesis: complex decisions mid-session get less scrutiny than at start
 - Test: present same decision with different cognitive load contexts
 - Distill feature: memory pressure correlates with decision quality signal
 
-### Priority 8: Framing effect
+### Priority 6: Framing effect
 - Hypothesis: same data framed differently produces different decisions
 - Test: "99% uptime" vs "87 hours downtime/year" — same number, different framing
 - Distill feature: reframe data objectively when framing drives the decision

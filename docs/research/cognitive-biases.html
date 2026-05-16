@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Bias Detection — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+    <style>
+        .bias-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+        .bias-card { padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; transition: border-color 0.3s; text-decoration: none; display: block; }
+        .bias-card:hover { border-color: var(--accent); }
+        .bias-card.complete { border-left: 3px solid var(--accent); }
+        .bias-card.planned { border-left: 3px solid var(--border); }
+        .bias-name { font-family: 'Crimson Pro', serif; font-size: 1.2rem; color: var(--bright); margin-bottom: 0.5rem; }
+        .bias-status { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .bias-status.done { color: var(--accent); }
+        .bias-status.next { color: var(--accent-4); }
+        .bias-status.queued { color: var(--dim); }
+        .bias-desc { font-size: 0.82rem; color: var(--dim); line-height: 1.6; margin-bottom: 0.75rem; }
+        .bias-finding { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--text); }
+        .summary-table { margin: 2rem 0; }
+        @media (max-width: 600px) { .bias-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Cognitive Bias Detection in LLM Interactions</h1>
+            <div class="meta">May 2026 &middot; 2/8 dimensions complete &middot; Claude Opus 4.6</div>
+            <p class="abstract">Can structured memory help an LLM detect and surface human cognitive biases without being paternalistic? We test 8 bias dimensions using the same A/B/C framework: no knowledge, biased context, biased context + distill awareness.</p>
+        </header>
+
+        <section class="reveal">
+            <h2>The thesis</h2>
+            <p>Cognitive biases aren't bugs in human reasoning &mdash; they're energy-saving heuristics that occasionally misfire. An LLM assistant that blindly agrees with biased framing is complicit. One that lectures about bias is paternalistic.</p>
+            <p>The sweet spot: <strong>name the pattern, present the evidence, let the human decide.</strong> Distill's knowledge files can encode bias-awareness rules that fire only when specific patterns are detected. We test whether this produces meaningfully different behavior.</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Completed dimensions</h2>
+            <div class="bias-grid">
+                <a href="decision-fatigue.html" class="bias-card complete">
+                    <div class="bias-status done">Complete &middot; 3 conditions &times; 2 runs</div>
+                    <div class="bias-name">Decision Fatigue</div>
+                    <div class="bias-desc">Does decision quality degrade in heavy sessions? Can distill detect late-session decisions and flag them as provisional?</div>
+                    <div class="bias-finding">Distill marks decisions [PROVISIONAL], suggests deferring. Vanilla answers without warning.</div>
+                </a>
+                <a href="anchoring-bias.html" class="bias-card complete">
+                    <div class="bias-status done">Complete &middot; 3 conditions &times; 2 runs</div>
+                    <div class="bias-name">Anchoring Effect</div>
+                    <div class="bias-desc">Does a user-provided time estimate ("2 hours") shape the LLM's response when the task clearly requires weeks?</div>
+                    <div class="bias-finding">Distill names the bias, leads with independent estimate. Vanilla hedges.</div>
+                </a>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Queued dimensions</h2>
+            <div class="bias-grid">
+                <div class="bias-card planned">
+                    <div class="bias-status next">Next</div>
+                    <div class="bias-name">Loss Aversion</div>
+                    <div class="bias-desc">"We can't delete the old endpoint, someone might use it" &mdash; with 0 traffic data for 6 months.</div>
+                    <div class="bias-finding">Test: does distill surface usage data vs accepting the fear?</div>
+                </div>
+                <div class="bias-card planned">
+                    <div class="bias-status queued">Queued</div>
+                    <div class="bias-name">Recency Bias</div>
+                    <div class="bias-desc">One Redis failure after 50 successes &rarr; user wants to rip out Redis entirely.</div>
+                    <div class="bias-finding">Tests confidence scoring: does hardened (50x) survive a single contradiction?</div>
+                </div>
+                <div class="bias-card planned">
+                    <div class="bias-status queued">Queued</div>
+                    <div class="bias-name">Authority Bias</div>
+                    <div class="bias-desc">"CTO said use Kafka" for 10 events/day. Evidence says SQS. Does it defer to authority?</div>
+                    <div class="bias-finding">Test: evidence-based vs authority-based reasoning.</div>
+                </div>
+                <div class="bias-card planned">
+                    <div class="bias-status queued">Queued</div>
+                    <div class="bias-name">Availability Heuristic</div>
+                    <div class="bias-desc">Just had a security breach &rarr; over-engineers security on an internal CLI tool.</div>
+                    <div class="bias-finding">Test: proportionate caution vs panic-driven design.</div>
+                </div>
+                <div class="bias-card planned">
+                    <div class="bias-status queued">Queued</div>
+                    <div class="bias-name">Cognitive Load</div>
+                    <div class="bias-desc">Same decision with high vs low prior cognitive load. Does scrutiny vary?</div>
+                    <div class="bias-finding">Related to decision fatigue but focuses on complexity, not time.</div>
+                </div>
+                <div class="bias-card planned">
+                    <div class="bias-status queued">Queued</div>
+                    <div class="bias-name">Framing Effect</div>
+                    <div class="bias-desc">"99% uptime" vs "87 hours downtime/year" &mdash; same number, different decisions.</div>
+                    <div class="bias-finding">Test: does distill reframe data objectively?</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Method</h2>
+            <p>Each dimension uses three conditions tested with <code>--append-system-prompt-file</code>:</p>
+            <table>
+                <thead><tr><th>Condition</th><th>Configuration</th><th>What it tests</th></tr></thead>
+                <tbody>
+                    <tr><td>A &mdash; Baseline</td><td>No bias context, no distill</td><td>What does a fresh session produce?</td></tr>
+                    <tr><td>B &mdash; Biased</td><td>Bias-inducing context injected</td><td>Does the LLM notice/resist the bias?</td></tr>
+                    <tr><td>C &mdash; Biased + Distill</td><td>Same bias context + distill rules + knowledge</td><td>Does explicit bias awareness change behavior?</td></tr>
+                </tbody>
+            </table>
+            <p class="note">All runs use Claude Opus 4.6 via Claude Code in non-interactive mode. Same model, same temperature, same session. Only the system prompt varies.</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Meta-finding</h2>
+            <div class="insight">
+                <div class="insight-label">Pattern across completed dimensions</div>
+                <p>Vanilla Claude is <em>not</em> easily fooled &mdash; it won't say "2 hours" for a 10-week task, and it won't produce garbage analysis under simulated fatigue. But it <strong>hedges rather than pushes back</strong>. It notices mismatches and frames them as questions rather than statements. Distill's value is converting awareness into structured, confident, actionable pushback.</p>
+            </div>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

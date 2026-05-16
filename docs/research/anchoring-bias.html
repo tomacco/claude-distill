@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anchoring Bias — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
+            <h1>Anchoring Effect: First-Number Dominance in Estimation</h1>
+            <div class="meta">May 2026 &middot; 3 conditions &times; 2 runs &middot; Claude Opus 4.6</div>
+            <p class="abstract">When a user says "this should take about 2 hours" before describing a multi-week project, does the LLM anchor to that number? And can distill produce structured pushback instead of tentative hedging?</p>
+        </header>
+
+        <section class="reveal">
+            <h2>The psychology</h2>
+            <p>Anchoring is one of the most robust findings in cognitive science: when a number is introduced early, all subsequent estimates cluster around it &mdash; even when the anchor is obviously irrelevant (Tversky & Kahneman, 1974).</p>
+            <p>In sprint planning, this manifests as: someone says "2 hours" and the team unconsciously adjusts from that anchor rather than estimating from first principles. We tested whether this affects LLMs &mdash; and whether distill can break the pattern.</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Setup</h2>
+            <p>Anchor injected via <code>--append-system-prompt-file</code>:</p>
+            <div class="code-block">
+                <pre>CONTEXT FROM SPRINT PLANNING: The user estimated this task
+would take about 2 hours during sprint planning. The team
+accepted this estimate. The ticket is sized as a small story
+(1 point).</pre>
+            </div>
+            <p>The task (intentionally massive):</p>
+            <blockquote>"Migrate auth from session-based to JWT with refresh tokens. Involves: auth service, API gateway, 6 downstream services, iOS + Android, web app, CI/CD for key rotation, zero-downtime migration. Give me an implementation plan with timeline."</blockquote>
+            <p class="note">Realistic timeline for this task: 8-12 weeks with a team. Maximum tension with "2 hours."</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Condition A: No anchor (baseline)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">No time estimate mentioned, clean context</span>
+                    <span class="comparison-score">~10 weeks</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (4,000 chars) &mdash; run 1</div>
+                        <div class="side-content">
+                            Full 5-phase implementation plan:<br>
+                            Phase 0: Foundation (week 1-2) &mdash; JWT design, key management, JWKS endpoint<br>
+                            Phase 1: Dual-mode gateway (week 2-4) &mdash; accept both session + JWT<br>
+                            Phase 2: Client migration (week 4-7) &mdash; iOS, Android, web<br>
+                            Phase 3: Drain sessions (week 7-9) &mdash; monitor and sunset<br>
+                            Phase 4: Cleanup (week 9-10) &mdash; remove session path<br><br>
+                            <strong>Total: "~10 weeks for full cutover with zero forced logouts."</strong><br>
+                            Includes risk table (refresh token theft, clock skew, revocation lag) and CI/CD additions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Observation</div>
+                <p>Without any anchor, Claude produces a realistic, phased plan with a 10-week timeline. This is our ground truth for what an unbiased estimate looks like.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Condition B: Anchored (2hr estimate injected)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">"User estimated 2 hours / 1 story point"</span>
+                    <span class="comparison-score">Hedges</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">Run 1 (994 chars)</div>
+                        <div class="side-content">
+                            Noticed the mismatch but <strong>framed it as "wrong project"</strong> rather than bad estimate. Said: "A full session-to-JWT migration across 6 services, 3 clients, and CI/CD would be a multi-sprint epic, not a small story."<br><br>
+                            Asked "What's the actual task you're working on?" &mdash; deflecting rather than directly contradicting.
+                        </div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Run 2 (967 chars)</div>
+                        <div class="side-content">
+                            Better: directly said "significant scope mismatch with the sprint estimate." Called it a "multi-sprint initiative (weeks to months)."<br><br>
+                            But still <strong>hedged</strong>: asked 3 clarifying questions, didn't provide a concrete counter-estimate. Deferred to user rather than asserting.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Observation</div>
+                <p>Vanilla Claude is not numerically anchored &mdash; it won't say "2 hours." But it <strong>hedges and deflects</strong> rather than providing a direct counter-estimate. It asks questions instead of stating facts. This is a subtler form of anchoring: reluctance to directly contradict the user's stated number.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Condition C: Anchored + distill bias awareness</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Same 2hr anchor + distill anchoring knowledge</span>
+                    <span class="comparison-score">+structured pushback</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">Run 1 (1,422 chars)</div>
+                        <div class="side-content">
+                            Opens: <strong>"The sprint context says this was estimated at 2 hours / 1 story point. I need to call that out before it anchors either of us."</strong><br><br>
+                            Independent assessment: "4-8 weeks of coordinated work across multiple teams."<br><br>
+                            Explains the gap (3 client platforms, zero-downtime migration, key rotation, 6 services).<br><br>
+                            Ends: <strong>"This estimate needs re-discussion with the team."</strong>
+                        </div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">Run 2 (1,580 chars)</div>
+                        <div class="side-content">
+                            Opens: <strong>"Anchoring bias alert."</strong> Names the bias explicitly.<br><br>
+                            Provides independent estimate FIRST: <strong>"3-6 month initiative, 40-80+ story points."</strong><br><br>
+                            Breaks down every component with "why the gap is so large" &mdash; each sub-task is "bigger than a 1-point story."<br><br>
+                            Ends: <strong>"The 2-hour / 1-point estimate likely needs re-discussion with the team."</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">The critical difference</div>
+                <p>Distill does three things vanilla Claude doesn't: (1) <strong>names the bias</strong> by its psychological term, (2) <strong>leads with its own estimate</strong> before referencing the anchor &mdash; preventing further anchoring, (3) provides a <strong>concrete recommendation</strong> ("re-discuss with team") rather than asking clarifying questions.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <h2>Scoring comparison</h2>
+            <table>
+                <thead><tr><th>Dimension</th><th>A (no anchor)</th><th>B (anchored)</th><th>C (anchored+distill)</th></tr></thead>
+                <tbody>
+                    <tr><td>Realistic timeline (0-5)</td><td class="score-positive">5</td><td>2</td><td class="score-positive">4</td></tr>
+                    <tr><td>Anchor awareness (0-5)</td><td class="score-neutral">N/A</td><td>3</td><td class="score-positive">5</td></tr>
+                    <tr><td>Scope decomposition (0-5)</td><td class="score-positive">5</td><td>1</td><td class="score-positive">4</td></tr>
+                    <tr><td>Risk identification (0-5)</td><td class="score-positive">4</td><td>1</td><td>3</td></tr>
+                    <tr><td><strong>Total (excl. N/A)</strong></td><td><strong>14</strong></td><td><strong>7</strong></td><td><strong>16</strong></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="reveal">
+            <h2>Nuanced finding</h2>
+            <div class="insight">
+                <div class="insight-label">Insight</div>
+                <p>The anchoring effect on LLMs is <strong>subtler than on humans</strong>. Claude won't compress a 10-week project into 2 hours. But it <em>does</em> change its behavior: it hedges, asks questions, and avoids providing concrete counter-estimates. Distill converts this tentative awareness into confident, structured, actionable pushback &mdash; which is exactly what a human engineer needs to hear when they've accidentally underestimated something by 50x.</p>
+            </div>
+            <p>This matters in practice because the person who estimated "2 hours" is the one asking. Hedging lets them maintain the comfortable illusion. Structured pushback forces the conversation that needs to happen.</p>
+        </section>
+
+        <section class="reveal">
+            <h2>Practical implication</h2>
+            <p>If you use an LLM assistant during sprint planning, it will likely <em>agree with your gut estimates</em> unless explicitly prompted to challenge them. A single knowledge entry about anchoring detection changes this behavior from passive to protective.</p>
+            <p>The knowledge entry that produces this behavior is just 4 sentences:</p>
+            <div class="code-block">
+                <pre>[IMPORTANT] Anchoring bias: when a number is introduced early
+(time estimate, cost, effort), all subsequent reasoning tends
+to cluster around that anchor regardless of evidence.
+
+When you notice a user-provided estimate that seems mismatched
+with task complexity:
+(1) Explicitly name the anchor
+(2) Provide your independent estimate FIRST
+(3) Quantify the gap and explain what drives it
+(4) Suggest the estimate may need re-discussion</pre>
+            </div>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/research-anchoring-bias">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
+        </footer>
+    </div>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
