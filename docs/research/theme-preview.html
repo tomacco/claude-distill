@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Preview — claude-distill Research</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Newsreader:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Literata:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══ THEME SWITCHER ═══ */
+        .theme-switcher {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .theme-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn.active {
+            transform: scale(1.05);
+        }
+
+        /* ═══ THEME A: ACADEMIC PAPER ═══ */
+        [data-theme="academic"] {
+            --bg: #FAFAF9;
+            --surface: #FFFFFF;
+            --border: #E8E5E0;
+            --text: #1A1A1A;
+            --dim: #6B6B6B;
+            --bright: #0F0F0F;
+            --accent: #2563EB;
+            --accent-2: #7C3AED;
+            --accent-3: #DC2626;
+            --accent-4: #2563EB;
+            --positive: #16A34A;
+            --negative: #DC2626;
+            --without-bg: rgba(220, 38, 38, 0.04);
+            --with-bg: rgba(37, 99, 235, 0.04);
+            --code-bg: #F4F4F5;
+            --heading-font: 'Newsreader', serif;
+            --body-font: 'Inter', sans-serif;
+            --mono-font: 'IBM Plex Mono', monospace;
+            --switcher-bg: rgba(250, 250, 249, 0.9);
+            --switcher-border: #E8E5E0;
+        }
+
+        [data-theme="academic"] .theme-btn {
+            background: #FFFFFF;
+            border-color: #E8E5E0;
+            color: #6B6B6B;
+        }
+        [data-theme="academic"] .theme-btn.active {
+            background: #2563EB;
+            border-color: #2563EB;
+            color: #FFFFFF;
+        }
+
+        /* ═══ THEME B: INK ON CREAM ═══ */
+        [data-theme="cream"] {
+            --bg: #F5F1EB;
+            --surface: #FFFDF8;
+            --border: #D4CFC6;
+            --text: #2D2A26;
+            --dim: #7A756D;
+            --bright: #1A1714;
+            --accent: #8B5E3C;
+            --accent-2: #4A6741;
+            --accent-3: #9B4D3A;
+            --accent-4: #5B6E8A;
+            --positive: #4A6741;
+            --negative: #9B4D3A;
+            --without-bg: rgba(155, 77, 58, 0.05);
+            --with-bg: rgba(74, 103, 65, 0.05);
+            --code-bg: #EDE9E2;
+            --heading-font: 'Literata', serif;
+            --body-font: 'Literata', serif;
+            --mono-font: 'JetBrains Mono', monospace;
+            --switcher-bg: rgba(245, 241, 235, 0.9);
+            --switcher-border: #D4CFC6;
+        }
+
+        [data-theme="cream"] .theme-btn {
+            background: #FFFDF8;
+            border-color: #D4CFC6;
+            color: #7A756D;
+        }
+        [data-theme="cream"] .theme-btn.active {
+            background: #8B5E3C;
+            border-color: #8B5E3C;
+            color: #FFFDF8;
+        }
+
+        /* ═══ THEME C: SCANDINAVIAN LAB ═══ */
+        [data-theme="lab"] {
+            --bg: #111111;
+            --surface: #1A1A1A;
+            --border: #2A2A2A;
+            --text: #E0E0E0;
+            --dim: #808080;
+            --bright: #F5F5F5;
+            --accent: #E8E8E8;
+            --accent-2: #A0A0A0;
+            --accent-3: #F87171;
+            --accent-4: #E8E8E8;
+            --positive: #4ADE80;
+            --negative: #F87171;
+            --without-bg: rgba(248, 113, 113, 0.06);
+            --with-bg: rgba(74, 222, 128, 0.06);
+            --code-bg: #1F1F1F;
+            --heading-font: 'Inter', sans-serif;
+            --body-font: 'Inter', sans-serif;
+            --mono-font: 'JetBrains Mono', monospace;
+            --switcher-bg: rgba(17, 17, 17, 0.9);
+            --switcher-border: #2A2A2A;
+        }
+
+        [data-theme="lab"] .theme-btn {
+            background: #1A1A1A;
+            border-color: #2A2A2A;
+            color: #808080;
+        }
+        [data-theme="lab"] .theme-btn.active {
+            background: #E8E8E8;
+            border-color: #E8E8E8;
+            color: #111111;
+        }
+
+        /* ═══ BASE STYLES ═══ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { overflow-x: hidden; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--body-font);
+            font-size: 16px;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.4s ease, color 0.3s ease;
+        }
+
+        .theme-switcher {
+            background: var(--switcher-bg);
+            border: 1px solid var(--switcher-border);
+        }
+
+        .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+
+        header {
+            padding: 4rem 0 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .back {
+            font-size: 0.8rem;
+            color: var(--dim);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .back:hover { color: var(--accent); }
+
+        h1 {
+            font-family: var(--heading-font);
+            font-size: 2.4rem;
+            font-weight: 300;
+            color: var(--bright);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        h2 {
+            font-family: var(--heading-font);
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: var(--bright);
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .meta {
+            font-family: var(--mono-font);
+            font-size: 0.75rem;
+            color: var(--dim);
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .abstract {
+            font-size: 1rem;
+            color: var(--dim);
+            font-weight: 300;
+            max-width: 650px;
+            font-style: italic;
+            transition: color 0.3s ease;
+        }
+
+        section { margin-bottom: 3.5rem; }
+        p { margin-bottom: 1rem; font-size: 0.92rem; }
+        ol, ul { margin: 0.5rem 0 1.5rem 1.5rem; font-size: 0.92rem; }
+        li { margin-bottom: 0.4rem; }
+
+        code {
+            font-family: var(--mono-font);
+            font-size: 0.85em;
+            color: var(--accent);
+            background: var(--code-bg);
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        blockquote {
+            border-left: 2px solid var(--accent);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: var(--text);
+            font-size: 0.88rem;
+            transition: border-color 0.3s ease;
+        }
+
+        /* ═══ COMPARISONS ═══ */
+        .comparison {
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .comparison-header {
+            padding: 1rem 1.5rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .comparison-scenario {
+            font-family: var(--mono-font);
+            font-size: 0.82rem;
+            color: var(--bright);
+        }
+
+        .comparison-score {
+            font-family: var(--mono-font);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            background: var(--with-bg);
+            color: var(--positive);
+        }
+
+        .comparison-prompt {
+            padding: 1rem 1.5rem;
+            font-family: var(--mono-font);
+            font-size: 0.78rem;
+            color: var(--dim);
+            border-bottom: 1px solid var(--border);
+            font-style: italic;
+            transition: border-color 0.3s ease;
+        }
+
+        .comparison-sides { display: grid; grid-template-columns: 1fr 1fr; }
+
+        .side { padding: 1.5rem; transition: background 0.3s ease; }
+        .side-without { background: var(--without-bg); border-right: 1px solid var(--border); }
+        .side-with { background: var(--with-bg); }
+
+        .side-label {
+            font-family: var(--mono-font);
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+        .side-without .side-label { color: var(--negative); }
+        .side-with .side-label { color: var(--positive); }
+
+        .side-content { font-size: 0.82rem; line-height: 1.7; color: var(--text); }
+        .side-without .side-content { color: var(--dim); }
+
+        /* ═══ INSIGHTS ═══ */
+        .insight {
+            padding: 1.5rem 2rem;
+            background: var(--surface);
+            border-left: 3px solid var(--accent-2);
+            border-radius: 0 4px 4px 0;
+            margin: 2rem 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .insight-label {
+            font-family: var(--mono-font);
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+            margin-bottom: 0.5rem;
+        }
+
+        .insight p { color: var(--bright); font-size: 0.92rem; margin: 0; }
+
+        /* ═══ TABLE ═══ */
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+
+        th {
+            font-family: var(--mono-font);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid var(--border);
+            color: var(--dim);
+            transition: border-color 0.3s ease;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: border-color 0.3s ease;
+        }
+        tr:last-child td { border-bottom: none; }
+        .score-positive { color: var(--positive); font-weight: 500; }
+        .score-negative { color: var(--negative); font-weight: 500; }
+
+        /* ═══ CODE BLOCKS ═══ */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .code-block pre {
+            font-family: var(--mono-font);
+            font-size: 0.78rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        /* ═══ FOOTER ═══ */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--dim);
+            transition: border-color 0.3s ease;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .comparison-sides { grid-template-columns: 1fr; }
+            .side-without { border-right: none; border-bottom: 1px solid var(--border); }
+            .theme-switcher { top: auto; bottom: 1rem; right: 1rem; }
+        }
+    </style>
+</head>
+<body data-theme="academic">
+
+    <div class="theme-switcher">
+        <button class="theme-btn active" onclick="setTheme('academic')">A: Academic</button>
+        <button class="theme-btn" onclick="setTheme('cream')">B: Ink on Cream</button>
+        <button class="theme-btn" onclick="setTheme('lab')">C: Scandinavian Lab</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Cognitive Bias Detection in LLM Sessions</h1>
+            <div class="meta">May 2026 &middot; 3 conditions &times; 2 runs &middot; Claude Opus 4.6</div>
+            <p class="abstract">When a user provides contextual framing that triggers a known cognitive bias, does the LLM notice? And can structured knowledge convert passive awareness into confident, actionable pushback?</p>
+        </header>
+
+        <section>
+            <h2>The hypothesis</h2>
+            <p>Cognitive biases are energy-saving heuristics that occasionally misfire. An LLM assistant that blindly agrees with biased framing is complicit. One that lectures about bias is paternalistic. The sweet spot: <strong>name the pattern, present the evidence, let the human decide.</strong></p>
+            <p>We tested whether explicit bias-awareness rules in distill's knowledge files produce measurably different behavior compared to vanilla Claude encountering the same biased context.</p>
+        </section>
+
+        <section>
+            <h2>Method</h2>
+            <p>Each dimension uses three conditions tested with <code>--append-system-prompt-file</code>:</p>
+            <div class="code-block">
+                <pre>Condition A: No bias context, no distill (baseline)
+Condition B: Bias-inducing context injected (control)
+Condition C: Same bias context + distill rules + knowledge (treatment)</pre>
+            </div>
+            <blockquote>"Should the new reporting service use federation or materialized views? Both are valid. Help me think through this."</blockquote>
+        </section>
+
+        <section>
+            <h2>Result comparison</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Anchoring: "2 hours" estimate for a 10-week task</span>
+                    <span class="comparison-score">+9 distill</span>
+                </div>
+                <div class="comparison-prompt">"Migrate auth from sessions to JWT with refresh tokens. Involves 6 services, 3 clients, CI/CD for key rotation, zero-downtime migration. Plan with timeline."</div>
+                <div class="comparison-sides">
+                    <div class="side side-without">
+                        <div class="side-label">Without distill</div>
+                        <div class="side-content">Notices mismatch but <strong>hedges</strong> — asks clarifying questions, avoids providing concrete counter-estimate. Frames it as "scope mismatch" rather than naming the cognitive bias.</div>
+                    </div>
+                    <div class="side side-with">
+                        <div class="side-label">With distill</div>
+                        <div class="side-content">Opens with <strong>"Anchoring bias alert."</strong> Provides independent estimate (3-6 months) BEFORE referencing the anchor. Breaks down each component. Recommends team re-discussion.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Key finding</div>
+                <p>Vanilla Claude notices gross mismatches but hedges. Distill converts awareness into structured, confident pushback that names the bias and leads with evidence.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Scoring across dimensions</h2>
+            <table>
+                <thead>
+                    <tr><th>Bias dimension</th><th>Vanilla</th><th>Distill</th><th>Delta</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Decision fatigue</td><td>10</td><td class="score-positive">19</td><td class="score-positive">+9</td></tr>
+                    <tr><td>Anchoring effect</td><td>7</td><td class="score-positive">16</td><td class="score-positive">+9</td></tr>
+                    <tr><td>Authority/Directive</td><td>Mild note</td><td class="score-positive">Proper categorization</td><td class="score-positive">Qualitative</td></tr>
+                    <tr><td>Loss aversion</td><td colspan="3" style="color: var(--dim); font-style: italic;">Queued</td></tr>
+                    <tr><td>Recency bias</td><td colspan="3" style="color: var(--dim); font-style: italic;">Queued</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>The meta-pattern</h2>
+            <div class="insight">
+                <div class="insight-label">Observation across all tests</div>
+                <p>Vanilla Claude is smarter than expected — it won't numerically anchor, won't produce garbage under fatigue, won't blindly accept absurd estimates. But it consistently <strong>hedges rather than pushes back</strong>. It asks questions instead of stating facts. Distill's value is converting awareness into confident action.</p>
+            </div>
+            <p>This matters because the person asking is usually the one with the bias. Hedging lets them maintain comfortable illusions. Structured pushback forces the conversation that needs to happen — respectfully, with evidence, always leaving the final decision to the human.</p>
+        </section>
+
+        <footer>
+            <a href="#">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
+        </footer>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            localStorage.setItem('distill-theme', theme);
+        }
+
+        // Restore saved theme
+        const saved = localStorage.getItem('distill-theme');
+        if (saved) {
+            document.body.setAttribute('data-theme', saved);
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(saved === 'academic' ? 'academic' : saved === 'cream' ? 'cream' : 'lab'));
+            });
+        }
+    </script>
+</body>
+</html>
