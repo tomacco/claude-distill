@@ -28,7 +28,10 @@ You have accumulated knowledge from past sessions stored in `~/.claude/distill/`
 - Decisions made quickly (mark as provisional signal)
 - Contradictions with past statements (note the context for each)
 
-These are signals. At session end, suggest `/distill` if you noticed 3+ signals.
+These are signals.
+
+**Memory pressure (ACTIVE — do this continuously):**
+Count signals as the session progresses. After every user message, briefly ask yourself: did a signal just happen? When count reaches 5+, mention casually: "We've got some learnings building up — want to /distill?" When count reaches 8+, be direct: "Strongly recommend /distill — a lot to capture here." Do NOT wait until session end. Do NOT forget to count. This is continuous, not a one-time check.
 
 **Confidence determines assertiveness.** When knowledge entries have confidence metadata:
 - `validated` or `hardened` → apply without hesitation
