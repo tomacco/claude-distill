@@ -6,10 +6,14 @@
     <title>Decision Fatigue — claude-distill Research</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="research-style.css">
 </head>
 <body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
     <div class="container">
         <header>
             <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
@@ -18,13 +22,13 @@
             <p class="abstract">Does decision quality degrade when the context is "heavy" &mdash; filled with prior decisions, tool outputs, and accumulated conversation? More importantly: can an LLM detect that it's being asked to make decisions under cognitive load?</p>
         </header>
 
-        <section class="reveal">
+        <section>
             <h2>Hypothesis</h2>
             <p>The same architectural question asked at the <strong>start</strong> of a session vs after simulated heavy work produces measurably different response quality. Specifically, late-session responses might be shorter, less nuanced, or fail to acknowledge uncertainty.</p>
             <p>Distill feature under test: a knowledge entry that says <em>"late-session decisions after 3+ major decisions are often lower quality &mdash; flag as provisional and suggest sleeping on it."</em></p>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Setup</h2>
             <p>We simulate a heavy session by injecting this context via <code>--append-system-prompt-file</code>:</p>
             <div class="code-block">
@@ -43,7 +47,7 @@ There have been 147 messages in this conversation.</pre>
             <blockquote>"Should the new reporting service pull data from each service's API at query time (federation), or should we build a denormalized read store updated via events (materialized view)?"</blockquote>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Condition A: Fresh session</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -62,7 +66,7 @@ There have been 147 messages in this conversation.</pre>
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Condition B: Heavy session (no distill)</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -82,7 +86,7 @@ There have been 147 messages in this conversation.</pre>
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Condition C: Heavy session + distill</h2>
             <div class="comparison">
                 <div class="comparison-header">
@@ -107,7 +111,7 @@ There have been 147 messages in this conversation.</pre>
             </div>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Scoring</h2>
             <table>
                 <thead><tr><th>Dimension</th><th>A (fresh)</th><th>B (heavy)</th><th>C (heavy+distill)</th></tr></thead>
@@ -121,7 +125,7 @@ There have been 147 messages in this conversation.</pre>
             </table>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Key finding</h2>
             <div class="insight">
                 <div class="insight-label">Insight</div>
@@ -130,7 +134,7 @@ There have been 147 messages in this conversation.</pre>
             <p>This is analogous to a colleague who gives you the same good advice regardless of whether it's 9am or midnight &mdash; but at midnight, they also say "hey, let's sleep on this one."</p>
         </section>
 
-        <section class="reveal">
+        <section>
             <h2>Side effect: active pressure tracking</h2>
             <p>This research also led to a fix in distill's core behavior. The original rules said "at session end, suggest /distill if you noticed 3+ signals." This is passive and easily forgotten by the model.</p>
             <p>The fix makes signal counting <strong>active and continuous</strong>:</p>
@@ -149,12 +153,6 @@ Do NOT wait until session end.</pre>
         </footer>
     </div>
 
-    <script>
-        const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.1 });
-        reveals.forEach(el => observer.observe(el));
-    </script>
+    <script src="research-theme.js"></script>
 </body>
 </html>

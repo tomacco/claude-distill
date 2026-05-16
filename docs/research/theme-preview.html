@@ -6,75 +6,10 @@
     <title>Theme Preview — claude-distill Research</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Newsreader:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Literata:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        /* ═══ THEME SWITCHER ═══ */
-        .theme-switcher {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 1000;
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 8px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .theme-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 500;
-            letter-spacing: 0.03em;
-            transition: all 0.3s ease;
-        }
-
-        .theme-btn.active {
-            transform: scale(1.05);
-        }
-
-        /* ═══ THEME A: ACADEMIC PAPER ═══ */
-        [data-theme="academic"] {
-            --bg: #FAFAF9;
-            --surface: #FFFFFF;
-            --border: #E8E5E0;
-            --text: #1A1A1A;
-            --dim: #6B6B6B;
-            --bright: #0F0F0F;
-            --accent: #2563EB;
-            --accent-2: #7C3AED;
-            --accent-3: #DC2626;
-            --accent-4: #2563EB;
-            --positive: #16A34A;
-            --negative: #DC2626;
-            --without-bg: rgba(220, 38, 38, 0.04);
-            --with-bg: rgba(37, 99, 235, 0.04);
-            --code-bg: #F4F4F5;
-            --heading-font: 'Newsreader', serif;
-            --body-font: 'Inter', sans-serif;
-            --mono-font: 'IBM Plex Mono', monospace;
-            --switcher-bg: rgba(250, 250, 249, 0.9);
-            --switcher-border: #E8E5E0;
-        }
-
-        [data-theme="academic"] .theme-btn {
-            background: #FFFFFF;
-            border-color: #E8E5E0;
-            color: #6B6B6B;
-        }
-        [data-theme="academic"] .theme-btn.active {
-            background: #2563EB;
-            border-color: #2563EB;
-            color: #FFFFFF;
-        }
-
-        /* ═══ THEME B: INK ON CREAM ═══ */
-        [data-theme="cream"] {
+        /* ═══ LIGHT MODE (Ink on Cream) ═══ */
+        :root {
             --bg: #F5F1EB;
             --surface: #FFFDF8;
             --border: #D4CFC6;
@@ -90,157 +25,237 @@
             --without-bg: rgba(155, 77, 58, 0.05);
             --with-bg: rgba(74, 103, 65, 0.05);
             --code-bg: #EDE9E2;
-            --heading-font: 'Literata', serif;
-            --body-font: 'Literata', serif;
-            --mono-font: 'JetBrains Mono', monospace;
-            --switcher-bg: rgba(245, 241, 235, 0.9);
-            --switcher-border: #D4CFC6;
+            --ornament: #C4B9A8;
+            --ornament-dim: #DDD7CC;
         }
 
-        [data-theme="cream"] .theme-btn {
-            background: #FFFDF8;
-            border-color: #D4CFC6;
-            color: #7A756D;
-        }
-        [data-theme="cream"] .theme-btn.active {
-            background: #8B5E3C;
-            border-color: #8B5E3C;
-            color: #FFFDF8;
-        }
-
-        /* ═══ THEME C: SCANDINAVIAN LAB ═══ */
-        [data-theme="lab"] {
+        /* ═══ DARK MODE (Scandinavian Lab) ═══ */
+        [data-theme="dark"] {
             --bg: #111111;
             --surface: #1A1A1A;
             --border: #2A2A2A;
-            --text: #E0E0E0;
+            --text: #D4D0CA;
             --dim: #808080;
-            --bright: #F5F5F5;
-            --accent: #E8E8E8;
-            --accent-2: #A0A0A0;
-            --accent-3: #F87171;
-            --accent-4: #E8E8E8;
-            --positive: #4ADE80;
-            --negative: #F87171;
-            --without-bg: rgba(248, 113, 113, 0.06);
-            --with-bg: rgba(74, 222, 128, 0.06);
+            --bright: #F0EDE8;
+            --accent: #C49A6C;
+            --accent-2: #7DAF72;
+            --accent-3: #D4796A;
+            --accent-4: #8AACCC;
+            --positive: #7DAF72;
+            --negative: #D4796A;
+            --without-bg: rgba(212, 121, 106, 0.06);
+            --with-bg: rgba(125, 175, 114, 0.06);
             --code-bg: #1F1F1F;
-            --heading-font: 'Inter', sans-serif;
-            --body-font: 'Inter', sans-serif;
-            --mono-font: 'JetBrains Mono', monospace;
-            --switcher-bg: rgba(17, 17, 17, 0.9);
-            --switcher-border: #2A2A2A;
+            --ornament: #3A3A3A;
+            --ornament-dim: #252525;
         }
 
-        [data-theme="lab"] .theme-btn {
-            background: #1A1A1A;
-            border-color: #2A2A2A;
-            color: #808080;
+        /* ═══ MODE TOGGLE ═══ */
+        .mode-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        [data-theme="lab"] .theme-btn.active {
-            background: #E8E8E8;
-            border-color: #E8E8E8;
-            color: #111111;
+        .mode-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
         }
+        .mode-toggle .icon-sun,
+        .mode-toggle .icon-moon { transition: opacity 0.3s ease; }
+        .mode-toggle .icon-moon { display: none; }
+        [data-theme="dark"] .mode-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .mode-toggle .icon-moon { display: inline; color: #D4D0CA; }
 
-        /* ═══ BASE STYLES ═══ */
+        /* ═══ BASE ═══ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { overflow-x: hidden; }
+        html { overflow-x: hidden; scroll-behavior: smooth; }
 
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: var(--body-font);
+            font-family: 'Literata', serif;
             font-size: 16px;
-            line-height: 1.7;
+            line-height: 1.75;
             -webkit-font-smoothing: antialiased;
-            transition: background 0.4s ease, color 0.3s ease;
+            transition: background 0.5s ease, color 0.4s ease;
         }
 
-        .theme-switcher {
-            background: var(--switcher-bg);
-            border: 1px solid var(--switcher-border);
+        .container { max-width: 820px; margin: 0 auto; padding: 0 2.5rem; }
+
+        /* ═══ ORNAMENTAL ELEMENTS ═══ */
+        .ornament {
+            text-align: center;
+            color: var(--ornament);
+            font-size: 1.2rem;
+            letter-spacing: 0.5em;
+            margin: 2.5rem 0;
+            user-select: none;
+            transition: color 0.4s ease;
         }
 
-        .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+        .ornament-line {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 3rem 0;
+        }
+        .ornament-line::before,
+        .ornament-line::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--ornament-dim);
+            transition: background 0.4s ease;
+        }
+        .ornament-line span {
+            color: var(--ornament);
+            font-size: 0.9rem;
+            transition: color 0.4s ease;
+        }
 
+        .section-mark {
+            display: inline-block;
+            color: var(--ornament);
+            font-size: 0.7rem;
+            vertical-align: super;
+            margin-right: 0.3rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: color 0.4s ease;
+        }
+
+        .drop-cap::first-letter {
+            float: left;
+            font-size: 3.2rem;
+            line-height: 0.85;
+            padding-right: 0.5rem;
+            padding-top: 0.15rem;
+            color: var(--accent);
+            font-weight: 300;
+            font-family: 'Literata', serif;
+        }
+
+        .flourish {
+            display: block;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--ornament);
+            font-size: 1.5rem;
+            opacity: 0.6;
+            transition: color 0.4s ease;
+        }
+
+        /* ═══ HEADER ═══ */
         header {
-            padding: 4rem 0 2rem;
+            padding: 5rem 0 2.5rem;
             border-bottom: 1px solid var(--border);
             margin-bottom: 3rem;
-            transition: border-color 0.3s ease;
+            position: relative;
+            transition: border-color 0.4s ease;
+        }
+
+        header::after {
+            content: '◆';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg);
+            padding: 0 1rem;
+            color: var(--ornament);
+            font-size: 0.7rem;
+            transition: background 0.5s ease, color 0.4s ease;
         }
 
         .back {
-            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
             color: var(--dim);
             text-decoration: none;
             display: inline-block;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            letter-spacing: 0.02em;
             transition: color 0.2s;
         }
         .back:hover { color: var(--accent); }
 
         h1 {
-            font-family: var(--heading-font);
-            font-size: 2.4rem;
+            font-family: 'Literata', serif;
+            font-size: 2.2rem;
             font-weight: 300;
             color: var(--bright);
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
             margin-bottom: 0.75rem;
-            transition: color 0.3s ease;
+            line-height: 1.3;
+            transition: color 0.4s ease;
         }
 
         h2 {
-            font-family: var(--heading-font);
-            font-size: 1.6rem;
+            font-family: 'Literata', serif;
+            font-size: 1.4rem;
             font-weight: 400;
             color: var(--bright);
             margin-bottom: 1rem;
-            padding-top: 1rem;
-            transition: color 0.3s ease;
+            padding-top: 0.5rem;
+            transition: color 0.4s ease;
         }
 
         .meta {
-            font-family: var(--mono-font);
-            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
             color: var(--dim);
-            margin-bottom: 1rem;
-            transition: color 0.3s ease;
+            margin-bottom: 1.2rem;
+            letter-spacing: 0.03em;
+            transition: color 0.4s ease;
         }
 
         .abstract {
-            font-size: 1rem;
+            font-size: 1.05rem;
             color: var(--dim);
             font-weight: 300;
-            max-width: 650px;
+            max-width: 620px;
             font-style: italic;
-            transition: color 0.3s ease;
+            line-height: 1.8;
+            transition: color 0.4s ease;
         }
 
-        section { margin-bottom: 3.5rem; }
-        p { margin-bottom: 1rem; font-size: 0.92rem; }
-        ol, ul { margin: 0.5rem 0 1.5rem 1.5rem; font-size: 0.92rem; }
-        li { margin-bottom: 0.4rem; }
+        /* ═══ CONTENT ═══ */
+        section { margin-bottom: 3rem; }
+        p { margin-bottom: 1.1rem; font-size: 0.93rem; }
+        ol, ul { margin: 0.5rem 0 1.5rem 1.5rem; font-size: 0.93rem; }
+        li { margin-bottom: 0.5rem; }
+        strong { color: var(--bright); font-weight: 600; }
 
         code {
-            font-family: var(--mono-font);
-            font-size: 0.85em;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82em;
             color: var(--accent);
             background: var(--code-bg);
-            padding: 0.1rem 0.4rem;
+            padding: 0.15rem 0.45rem;
             border-radius: 3px;
-            transition: background 0.3s ease, color 0.3s ease;
+            transition: background 0.4s ease, color 0.4s ease;
         }
 
         blockquote {
             border-left: 2px solid var(--accent);
-            padding-left: 1rem;
-            margin: 1rem 0;
+            padding-left: 1.2rem;
+            margin: 1.5rem 0;
             font-style: italic;
-            color: var(--text);
-            font-size: 0.88rem;
-            transition: border-color 0.3s ease;
+            color: var(--dim);
+            font-size: 0.9rem;
+            transition: border-color 0.4s ease, color 0.4s ease;
         }
 
         /* ═══ COMPARISONS ═══ */
@@ -249,7 +264,7 @@
             border: 1px solid var(--border);
             border-radius: 4px;
             overflow: hidden;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.4s ease;
         }
 
         .comparison-header {
@@ -259,51 +274,52 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.4s ease, border-color 0.4s ease;
         }
 
         .comparison-scenario {
-            font-family: var(--mono-font);
-            font-size: 0.82rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
             color: var(--bright);
         }
 
         .comparison-score {
-            font-family: var(--mono-font);
-            font-size: 0.72rem;
-            padding: 0.2rem 0.6rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.65rem;
             border-radius: 3px;
             background: var(--with-bg);
             color: var(--positive);
+            border: 1px solid var(--positive);
+            opacity: 0.8;
         }
 
         .comparison-prompt {
             padding: 1rem 1.5rem;
-            font-family: var(--mono-font);
-            font-size: 0.78rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
             color: var(--dim);
             border-bottom: 1px solid var(--border);
             font-style: italic;
-            transition: border-color 0.3s ease;
+            line-height: 1.7;
+            transition: border-color 0.4s ease;
         }
 
         .comparison-sides { display: grid; grid-template-columns: 1fr 1fr; }
-
-        .side { padding: 1.5rem; transition: background 0.3s ease; }
+        .side { padding: 1.5rem; transition: background 0.4s ease; }
         .side-without { background: var(--without-bg); border-right: 1px solid var(--border); }
         .side-with { background: var(--with-bg); }
 
         .side-label {
-            font-family: var(--mono-font);
-            font-size: 0.68rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             margin-bottom: 0.75rem;
         }
         .side-without .side-label { color: var(--negative); }
         .side-with .side-label { color: var(--positive); }
-
-        .side-content { font-size: 0.82rem; line-height: 1.7; color: var(--text); }
+        .side-content { font-size: 0.84rem; line-height: 1.75; color: var(--text); }
         .side-without .side-content { color: var(--dim); }
 
         /* ═══ INSIGHTS ═══ */
@@ -313,39 +329,52 @@
             border-left: 3px solid var(--accent-2);
             border-radius: 0 4px 4px 0;
             margin: 2rem 0;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        .insight::before {
+            content: '✦';
+            position: absolute;
+            top: -0.5rem;
+            left: -0.65rem;
+            background: var(--bg);
+            color: var(--accent-2);
+            font-size: 0.75rem;
+            padding: 0.1rem;
+            transition: background 0.5s ease, color 0.4s ease;
         }
 
         .insight-label {
-            font-family: var(--mono-font);
-            font-size: 0.68rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
             color: var(--accent-2);
             margin-bottom: 0.5rem;
         }
 
-        .insight p { color: var(--bright); font-size: 0.92rem; margin: 0; }
+        .insight p { color: var(--bright); font-size: 0.93rem; margin: 0; }
 
         /* ═══ TABLE ═══ */
         table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
 
         th {
-            font-family: var(--mono-font);
-            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             text-align: left;
             padding: 0.75rem 1rem;
             border-bottom: 2px solid var(--border);
             color: var(--dim);
-            transition: border-color 0.3s ease;
+            transition: border-color 0.4s ease;
         }
 
         td {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border);
-            transition: border-color 0.3s ease;
+            transition: border-color 0.4s ease;
         }
         tr:last-child td { border-bottom: none; }
         .score-positive { color: var(--positive); font-weight: 500; }
@@ -359,13 +388,23 @@
             padding: 1.5rem;
             margin: 1.5rem 0;
             overflow-x: auto;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        .code-block::before {
+            content: '—';
+            position: absolute;
+            top: 0.6rem;
+            right: 1rem;
+            color: var(--ornament);
+            font-size: 0.7rem;
         }
 
         .code-block pre {
-            font-family: var(--mono-font);
-            font-size: 0.78rem;
-            line-height: 1.8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            line-height: 1.85;
             color: var(--text);
             margin: 0;
             white-space: pre-wrap;
@@ -373,32 +412,93 @@
 
         /* ═══ FOOTER ═══ */
         footer {
-            padding: 2rem 0;
+            padding: 2.5rem 0;
             border-top: 1px solid var(--border);
             text-align: center;
-            font-size: 0.78rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.76rem;
             color: var(--dim);
-            transition: border-color 0.3s ease;
+            position: relative;
+            transition: border-color 0.4s ease;
         }
+
+        footer::before {
+            content: '◇';
+            position: absolute;
+            top: -0.45rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg);
+            padding: 0 0.8rem;
+            color: var(--ornament);
+            font-size: 0.6rem;
+            transition: background 0.5s ease, color 0.4s ease;
+        }
+
         footer a { color: var(--accent); text-decoration: none; }
         footer a:hover { text-decoration: underline; }
 
         /* ═══ RESPONSIVE ═══ */
         @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
+            h1 { font-size: 1.7rem; }
             .comparison-sides { grid-template-columns: 1fr; }
             .side-without { border-right: none; border-bottom: 1px solid var(--border); }
-            .theme-switcher { top: auto; bottom: 1rem; right: 1rem; }
+            .container { padding: 0 1.5rem; }
+            .mode-toggle { top: 1rem; right: 1rem; width: 38px; height: 38px; }
+        }
+
+        /* ═══ WIDE VIEWPORT: SIDE NAV ═══ */
+        @media (min-width: 1100px) {
+            .toc {
+                position: fixed;
+                left: 2rem;
+                top: 50%;
+                transform: translateY(-50%);
+                display: flex;
+                flex-direction: column;
+                gap: 0.6rem;
+                max-width: 160px;
+            }
+
+            .toc a {
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.65rem;
+                color: var(--dim);
+                text-decoration: none;
+                padding: 0.3rem 0;
+                border-left: 2px solid transparent;
+                padding-left: 0.8rem;
+                transition: all 0.3s ease;
+                letter-spacing: 0.02em;
+            }
+
+            .toc a:hover,
+            .toc a.active {
+                color: var(--accent);
+                border-left-color: var(--accent);
+            }
+        }
+
+        @media (max-width: 1099px) {
+            .toc { display: none; }
         }
     </style>
 </head>
-<body data-theme="academic">
+<body>
 
-    <div class="theme-switcher">
-        <button class="theme-btn active" onclick="setTheme('academic')">A: Academic</button>
-        <button class="theme-btn" onclick="setTheme('cream')">B: Ink on Cream</button>
-        <button class="theme-btn" onclick="setTheme('lab')">C: Scandinavian Lab</button>
-    </div>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+
+    <nav class="toc">
+        <a href="#hypothesis">Hypothesis</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#scoring">Scoring</a>
+        <a href="#pattern">Meta-pattern</a>
+        <a href="#origin">Origin tracking</a>
+    </nav>
 
     <div class="container">
         <header>
@@ -408,35 +508,39 @@
             <p class="abstract">When a user provides contextual framing that triggers a known cognitive bias, does the LLM notice? And can structured knowledge convert passive awareness into confident, actionable pushback?</p>
         </header>
 
-        <section>
-            <h2>The hypothesis</h2>
-            <p>Cognitive biases are energy-saving heuristics that occasionally misfire. An LLM assistant that blindly agrees with biased framing is complicit. One that lectures about bias is paternalistic. The sweet spot: <strong>name the pattern, present the evidence, let the human decide.</strong></p>
+        <section id="hypothesis">
+            <h2><span class="section-mark">01</span> The hypothesis</h2>
+            <p class="drop-cap">Cognitive biases are energy-saving heuristics that occasionally misfire. An LLM assistant that blindly agrees with biased framing is complicit. One that lectures about bias is paternalistic. The sweet spot: <strong>name the pattern, present the evidence, let the human decide.</strong></p>
             <p>We tested whether explicit bias-awareness rules in distill's knowledge files produce measurably different behavior compared to vanilla Claude encountering the same biased context.</p>
         </section>
 
-        <section>
-            <h2>Method</h2>
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section id="method">
+            <h2><span class="section-mark">02</span> Method</h2>
             <p>Each dimension uses three conditions tested with <code>--append-system-prompt-file</code>:</p>
             <div class="code-block">
-                <pre>Condition A: No bias context, no distill (baseline)
-Condition B: Bias-inducing context injected (control)
-Condition C: Same bias context + distill rules + knowledge (treatment)</pre>
+                <pre>Condition A — No bias context, no distill (baseline)
+Condition B — Bias-inducing context injected (control)
+Condition C — Same bias context + distill rules + knowledge (treatment)</pre>
             </div>
             <blockquote>"Should the new reporting service use federation or materialized views? Both are valid. Help me think through this."</blockquote>
         </section>
 
-        <section>
-            <h2>Result comparison</h2>
+        <span class="flourish">⁂</span>
+
+        <section id="results">
+            <h2><span class="section-mark">03</span> Result comparison</h2>
             <div class="comparison">
                 <div class="comparison-header">
-                    <span class="comparison-scenario">Anchoring: "2 hours" estimate for a 10-week task</span>
+                    <span class="comparison-scenario">Anchoring: "2 hours" for a 10-week task</span>
                     <span class="comparison-score">+9 distill</span>
                 </div>
                 <div class="comparison-prompt">"Migrate auth from sessions to JWT with refresh tokens. Involves 6 services, 3 clients, CI/CD for key rotation, zero-downtime migration. Plan with timeline."</div>
                 <div class="comparison-sides">
                     <div class="side side-without">
                         <div class="side-label">Without distill</div>
-                        <div class="side-content">Notices mismatch but <strong>hedges</strong> — asks clarifying questions, avoids providing concrete counter-estimate. Frames it as "scope mismatch" rather than naming the cognitive bias.</div>
+                        <div class="side-content">Notices mismatch but <strong>hedges</strong> — asks clarifying questions, avoids providing concrete counter-estimate. Frames as "scope mismatch" rather than naming the cognitive bias.</div>
                     </div>
                     <div class="side side-with">
                         <div class="side-label">With distill</div>
@@ -450,24 +554,28 @@ Condition C: Same bias context + distill rules + knowledge (treatment)</pre>
             </div>
         </section>
 
-        <section>
-            <h2>Scoring across dimensions</h2>
+        <div class="ornament">· · ·</div>
+
+        <section id="scoring">
+            <h2><span class="section-mark">04</span> Scoring across dimensions</h2>
             <table>
                 <thead>
                     <tr><th>Bias dimension</th><th>Vanilla</th><th>Distill</th><th>Delta</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Decision fatigue</td><td>10</td><td class="score-positive">19</td><td class="score-positive">+9</td></tr>
-                    <tr><td>Anchoring effect</td><td>7</td><td class="score-positive">16</td><td class="score-positive">+9</td></tr>
-                    <tr><td>Authority/Directive</td><td>Mild note</td><td class="score-positive">Proper categorization</td><td class="score-positive">Qualitative</td></tr>
+                    <tr><td>Decision fatigue</td><td>10/20</td><td class="score-positive">19/20</td><td class="score-positive">+9</td></tr>
+                    <tr><td>Anchoring effect</td><td>7/20</td><td class="score-positive">16/20</td><td class="score-positive">+9</td></tr>
+                    <tr><td>Authority/Directive</td><td>Mild note</td><td class="score-positive">Categorized</td><td class="score-positive">Qualitative</td></tr>
                     <tr><td>Loss aversion</td><td colspan="3" style="color: var(--dim); font-style: italic;">Queued</td></tr>
                     <tr><td>Recency bias</td><td colspan="3" style="color: var(--dim); font-style: italic;">Queued</td></tr>
                 </tbody>
             </table>
         </section>
 
-        <section>
-            <h2>The meta-pattern</h2>
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section id="pattern">
+            <h2><span class="section-mark">05</span> The meta-pattern</h2>
             <div class="insight">
                 <div class="insight-label">Observation across all tests</div>
                 <p>Vanilla Claude is smarter than expected — it won't numerically anchor, won't produce garbage under fatigue, won't blindly accept absurd estimates. But it consistently <strong>hedges rather than pushes back</strong>. It asks questions instead of stating facts. Distill's value is converting awareness into confident action.</p>
@@ -475,27 +583,79 @@ Condition C: Same bias context + distill rules + knowledge (treatment)</pre>
             <p>This matters because the person asking is usually the one with the bias. Hedging lets them maintain comfortable illusions. Structured pushback forces the conversation that needs to happen — respectfully, with evidence, always leaving the final decision to the human.</p>
         </section>
 
+        <span class="flourish">※</span>
+
+        <section id="origin">
+            <h2><span class="section-mark">06</span> Origin tracking: beyond bias</h2>
+            <p class="drop-cap">Not every "biased" decision is wrong. A CTO who mandates Kafka for standardization is making a valid trade-off — simplicity of the individual service against operational consistency of the fleet. The system's job is not to override, but to <strong>categorize honestly</strong>.</p>
+            <div class="code-block">
+                <pre>- [DIRECTIVE] Use Kafka for inter-service messaging.
+  confidence: validated (team uses it)
+  origin: directive (CTO mandate, 2026-01)
+  evidence_says: SQS sufficient for 10 events/day</pre>
+            </div>
+            <p>The knowledge is valid. The system uses Kafka. But it's properly sourced — and if context changes (new CTO, scale increases, refactoring window opens), distill can surface: <em>"this was a directive, not an evidence-based choice. Context may have changed."</em></p>
+            <div class="insight">
+                <div class="insight-label">Design principle</div>
+                <p>We push people to be better, but it is always up to them to decide how to proceed. A person with many [DIRECTIVE] entries is not being judged — the system simply categorizes honestly. It is a mirror, not a judge.</p>
+            </div>
+        </section>
+
+        <div class="ornament">⊹ ⊹ ⊹</div>
+
         <footer>
             <a href="#">Raw data &amp; test scripts</a> &middot; <a href="./">Back to research index</a>
         </footer>
     </div>
 
     <script>
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            localStorage.setItem('distill-theme', theme);
+        function toggleMode() {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('distill-mode', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('distill-mode', 'dark');
+            }
         }
 
-        // Restore saved theme
-        const saved = localStorage.getItem('distill-theme');
-        if (saved) {
-            document.body.setAttribute('data-theme', saved);
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(saved === 'academic' ? 'academic' : saved === 'cream' ? 'cream' : 'lab'));
-            });
+        // Restore saved mode, or read system preference
+        const saved = localStorage.getItem('distill-mode');
+        if (saved === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        } else if (saved === 'light') {
+            document.body.removeAttribute('data-theme');
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.setAttribute('data-theme', 'dark');
         }
+
+        // Listen for system changes (if no manual override)
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('distill-mode')) {
+                if (e.matches) {
+                    document.body.setAttribute('data-theme', 'dark');
+                } else {
+                    document.body.removeAttribute('data-theme');
+                }
+            }
+        });
+
+        // TOC scroll highlighting
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc a');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    tocLinks.forEach(link => link.classList.remove('active'));
+                    const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-30% 0px -60% 0px' });
+
+        sections.forEach(section => observer.observe(section));
     </script>
 </body>
 </html>

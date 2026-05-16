@@ -6,244 +6,15 @@
     <title>A/B Testing: First-Principles Memory vs Flat Files — claude-distill</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0c0c14;
-            --surface: #12121e;
-            --border: #1e1e32;
-            --dim: #7a7a9a;
-            --text: #d4d4e8;
-            --bright: #f0f0ff;
-            --accent: #00d4aa;
-            --accent-2: #7b5bf5;
-            --accent-3: #e85d8a;
-            --accent-4: #4a9eff;
-            --without: rgba(232, 93, 138, 0.08);
-            --with: rgba(0, 212, 170, 0.08);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { overflow-x: hidden; }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
-
-        header {
-            padding: 4rem 0 2rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 3rem;
-        }
-
-        .back {
-            font-size: 0.8rem;
-            color: var(--dim);
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 1.5rem;
-            transition: color 0.2s;
-        }
-        .back:hover { color: var(--accent); }
-
-        h1 {
-            font-family: 'Crimson Pro', serif;
-            font-size: 2.4rem;
-            font-weight: 300;
-            color: var(--bright);
-            letter-spacing: -0.02em;
-            margin-bottom: 0.75rem;
-        }
-
-        .meta {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.75rem;
-            color: var(--dim);
-            margin-bottom: 1rem;
-        }
-
-        .abstract {
-            font-size: 1rem;
-            color: var(--dim);
-            font-weight: 300;
-            max-width: 650px;
-            font-style: italic;
-        }
-
-        /* ═══ SECTIONS ═══ */
-        section { margin-bottom: 3.5rem; }
-
-        h2 {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.6rem;
-            font-weight: 400;
-            color: var(--bright);
-            margin-bottom: 1rem;
-            padding-top: 1rem;
-        }
-
-        p { margin-bottom: 1rem; font-size: 0.92rem; }
-        p.note { font-size: 0.82rem; color: var(--dim); font-style: italic; }
-
-        /* ═══ COMPARISON BLOCKS ═══ */
-        .comparison {
-            margin: 2rem 0;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .comparison-header {
-            padding: 1rem 1.5rem;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .comparison-scenario {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.82rem;
-            color: var(--bright);
-        }
-
-        .comparison-score {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.72rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 3px;
-            background: rgba(0, 212, 170, 0.12);
-            color: var(--accent);
-        }
-
-        .comparison-prompt {
-            padding: 1rem 1.5rem;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.78rem;
-            color: var(--dim);
-            border-bottom: 1px solid var(--border);
-            font-style: italic;
-        }
-
-        .comparison-sides {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .side {
-            padding: 1.5rem;
-        }
-
-        .side-without { background: var(--without); border-right: 1px solid var(--border); }
-        .side-with { background: var(--with); }
-
-        .side-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-bottom: 0.75rem;
-        }
-
-        .side-without .side-label { color: var(--accent-3); }
-        .side-with .side-label { color: var(--accent); }
-
-        .side-content {
-            font-size: 0.82rem;
-            line-height: 1.7;
-            color: var(--text);
-        }
-
-        .side-without .side-content { color: var(--dim); }
-
-        blockquote {
-            border-left: 2px solid var(--accent);
-            padding-left: 1rem;
-            margin: 1rem 0;
-            font-style: italic;
-            color: var(--text);
-            font-size: 0.88rem;
-        }
-
-        /* ═══ SCORE TABLE ═══ */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-            font-size: 0.85rem;
-        }
-
-        th {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.72rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            text-align: left;
-            padding: 0.75rem 1rem;
-            border-bottom: 2px solid var(--border);
-            color: var(--dim);
-        }
-
-        td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tr:last-child td { border-bottom: none; }
-
-        .score-positive { color: var(--accent); font-weight: 500; }
-        .score-neutral { color: var(--dim); }
-
-        /* ═══ KEY INSIGHT ═══ */
-        .insight {
-            padding: 1.5rem 2rem;
-            background: var(--surface);
-            border-left: 3px solid var(--accent-2);
-            border-radius: 0 4px 4px 0;
-            margin: 2rem 0;
-        }
-
-        .insight-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            color: var(--accent-2);
-            margin-bottom: 0.5rem;
-        }
-
-        .insight p { color: var(--bright); font-size: 0.92rem; margin: 0; }
-
-        /* ═══ FOOTER ═══ */
-        footer {
-            padding: 2rem 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            font-size: 0.78rem;
-            color: var(--dim);
-        }
-        footer a { color: var(--accent); text-decoration: none; }
-
-        /* ═══ ANIMATIONS ═══ */
-        .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .comparison-sides { grid-template-columns: 1fr; }
-            .side-without { border-right: none; border-bottom: 1px solid var(--border); }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
 </head>
 <body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+
     <div class="container">
         <header>
             <a href="./" class="back">&larr; All research</a>
@@ -252,16 +23,18 @@
             <p class="abstract">We tested the same prompts with and without distill knowledge. Same model, same session, same temperature. The only variable: 18 lines of retrieval rules + structured knowledge files.</p>
         </header>
 
-        <section class="reveal">
-            <h2>Setup</h2>
-            <p>Each scenario runs twice through a separate Claude Code instance ("claudia") with its own config directory:</p>
+        <section>
+            <h2><span class="section-mark">01</span> Setup</h2>
+            <p class="drop-cap">Each scenario runs twice through a separate Claude Code instance ("claudia") with its own config directory:</p>
             <p><strong>Control (WITHOUT):</strong> Clean config. No rules, no knowledge files. Vanilla Claude Code.</p>
             <p><strong>Treatment (WITH):</strong> <code>rules/distill.md</code> loaded at session start + scenario-specific knowledge files in <code>~/.claude/distill/</code> structure.</p>
             <p class="note">Both conditions use the same Anthropic API key, same model (Opus 4.6), same non-interactive mode. Differences are purely in what knowledge is available.</p>
         </section>
 
-        <section class="reveal">
-            <h2>Results</h2>
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section>
+            <h2><span class="section-mark">02</span> Results</h2>
 
             <div class="comparison">
                 <div class="comparison-header">
@@ -318,8 +91,10 @@
             </div>
         </section>
 
-        <section class="reveal">
-            <h2>Scoring</h2>
+        <span class="flourish">⁂</span>
+
+        <section>
+            <h2><span class="section-mark">03</span> Scoring</h2>
             <table>
                 <thead>
                     <tr>
@@ -370,8 +145,10 @@
             </table>
         </section>
 
-        <section class="reveal">
-            <h2>Key findings</h2>
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section>
+            <h2><span class="section-mark">04</span> Key findings</h2>
 
             <div class="insight">
                 <div class="insight-label">Finding 1</div>
@@ -394,8 +171,10 @@
             </div>
         </section>
 
-        <section class="reveal">
-            <h2>Limitations</h2>
+        <div class="ornament">· · ·</div>
+
+        <section>
+            <h2><span class="section-mark">05</span> Limitations</h2>
             <p>Single-prompt testing (no multi-turn). Knowledge files crafted for scenarios (real knowledge is messier). Results from one model version (Opus 4.6). Each scenario run once per condition — exploratory, not confirmatory. The model already has some of this knowledge implicitly (the improvement measures what EXPLICIT encoding adds).</p>
         </section>
 
@@ -404,12 +183,6 @@
         </footer>
     </div>
 
-    <script>
-        const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.1 });
-        reveals.forEach(el => observer.observe(el));
-    </script>
+    <script src="research-theme.js"></script>
 </body>
 </html>
