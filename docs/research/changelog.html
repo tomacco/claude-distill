@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — claude-distill</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+    <style>
+        .version-block { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+        .version-block:last-of-type { border-bottom: none; }
+        .version-tag { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--accent); font-weight: 500; margin-bottom: 0.3rem; }
+        .version-date { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--dim); margin-bottom: 1rem; }
+        .version-block h3 { font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--bright); margin: 1.2rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .change-list { list-style: none; margin: 0 0 1rem 0; padding: 0; }
+        .change-list li { font-size: 0.88rem; padding: 0.3rem 0 0.3rem 1.5rem; position: relative; }
+        .change-list li::before { content: ''; position: absolute; left: 0.4rem; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; }
+        .change-list .feat::before { background: var(--positive); }
+        .change-list .fix::before { background: var(--accent); }
+        .change-list .research::before { background: var(--accent-4); }
+        .change-list .breaking::before { background: var(--negative); }
+        .metric-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 3px; margin-left: 0.5rem; background: var(--with-bg); color: var(--positive); border: 1px solid var(--positive); }
+    </style>
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <div class="container">
+        <header>
+            <a href="./" class="back">&larr; All research</a>
+            <h1>Changelog</h1>
+            <p class="abstract">Every version improvement backed by research data. We ship what we can prove works.</p>
+        </header>
+
+        <div class="version-block">
+            <div class="version-tag">v0.9.0</div>
+            <div class="version-date">May 16, 2026</div>
+            <h3>Features</h3>
+            <ul class="change-list">
+                <li class="feat"><code>[DIRECTIVE]</code> origin tracking &mdash; decisions now record WHERE they came from (evidence, directive, convention, constraint)</li>
+                <li class="feat">Strategic friction awareness &mdash; system detects when it's hitting a wall and flags structural limits</li>
+                <li class="feat">Active pressure tracking &mdash; counts signals continuously, recommends /distill at 5+ and 8+</li>
+                <li class="feat">Regression test suite &mdash; 7 tests must pass before any release <span class="metric-badge">7/7 PASS</span></li>
+            </ul>
+            <h3>Research findings</h3>
+            <ul class="change-list">
+                <li class="research">Solution anchoring: memory system can become the source of bias (reproduced + solved via full-loop)</li>
+                <li class="research">Specificity beats abstraction in prompt competition (generic principles fail, specific corrections succeed)</li>
+                <li class="research">Persona biases compound with cognitive biases (PM misses anchoring that engineer catches)</li>
+                <li class="research">Fatigue erodes deliberation, not quality (model gets more confident, less exploratory)</li>
+                <li class="research">Tool reliability: 0/5 vs 5/5 &mdash; strongest delta measured (past failures become proactive prevention)</li>
+            </ul>
+            <h3>Fixes</h3>
+            <ul class="change-list">
+                <li class="fix">Removed all stale MCP references from active documentation</li>
+                <li class="fix">Test isolation hardened (CLAUDE.md blanked + rules cleared + distill hidden)</li>
+                <li class="fix">Fictional company (Helios Financial) for all test scenarios</li>
+            </ul>
+        </div>
+
+        <div class="version-block">
+            <div class="version-tag">v0.8.0</div>
+            <div class="version-date">May 16, 2026</div>
+            <h3>Features</h3>
+            <ul class="change-list">
+                <li class="feat">Confidence scoring &mdash; assertiveness scales with evidence (hardened/validated/experimental)</li>
+                <li class="feat">Paradigm alarm &mdash; contradicting high-confidence knowledge triggers explicit check</li>
+                <li class="feat">Action triggers &mdash; "I'm deploying X" fires retrieval, not just questions <span class="metric-badge">fixed retrieval bug</span></li>
+            </ul>
+            <h3>Research findings</h3>
+            <ul class="change-list">
+                <li class="research">Confidence scoring: 3/3 behaviors verified perfectly</li>
+                <li class="research">Memory rot: found retrieval bug, one-sentence fix eliminated it</li>
+                <li class="research">A/B testing: +6.0/12 average improvement, anti-sycophancy is the killer feature</li>
+            </ul>
+        </div>
+
+        <div class="version-block">
+            <div class="version-tag">v0.6.0</div>
+            <div class="version-date">May 2026</div>
+            <h3>Breaking changes</h3>
+            <ul class="change-list">
+                <li class="breaking">MCP server removed &mdash; replaced by rules-based retrieval (simpler, sufficient)</li>
+            </ul>
+            <h3>Features</h3>
+            <ul class="change-list">
+                <li class="feat">Rules-based retrieval via <code>rules/distill.md</code> (auto-loaded every session)</li>
+                <li class="feat">SPINE index for on-demand file reads</li>
+                <li class="feat">Knowledge markers: [UPDATED], [PROVISIONAL], [IMPORTANT], [NON-NEGOTIABLE]</li>
+            </ul>
+        </div>
+
+        <div class="version-block">
+            <div class="version-tag">v0.5.0</div>
+            <div class="version-date">April 2026</div>
+            <h3>Features</h3>
+            <ul class="change-list">
+                <li class="feat">Knowledge ownership &mdash; distill owns all persistent knowledge (disables auto-memory)</li>
+                <li class="feat">Mandatory pre-action retrieval gate</li>
+                <li class="feat">MCP server (experimental, later removed)</li>
+            </ul>
+        </div>
+
+        <div class="version-block">
+            <div class="version-tag">v0.1.0</div>
+            <div class="version-date">April 2026</div>
+            <h3>Initial release</h3>
+            <ul class="change-list">
+                <li class="feat">Sub-agent distillation architecture (/distill as spawned agent)</li>
+                <li class="feat">Three-tier knowledge storage (SPINE, active, archive)</li>
+                <li class="feat">Anti-sycophancy integrity principles</li>
+                <li class="feat">Memory pressure tracking</li>
+                <li class="feat">Version checking and auto-update</li>
+            </ul>
+        </div>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill">Source on GitHub</a> &middot; <a href="./">Back to research</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>

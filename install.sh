@@ -4,7 +4,11 @@
 
 set -e
 
-VERSION="0.7.33"
+
+
+
+VERSION="0.9.0"
+
 BUILD="20260516-01"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
 CMD_DIR="$HOME/.claude/commands"
@@ -235,4 +239,8 @@ printf "  ${DIM}Uninstall (keeps your learnings):${RESET}\n"
 printf "    ${DIM}rm -rf ~/.claude/distill ~/.claude/commands/distill.md ~/.claude/rules/distill.md${RESET}\n"
 echo ""
 printf "  ${PURPLE}say what matters. it's listening.${RESET}\n"
+echo ""
+printf "  ${DIM}Research:${RESET} https://tomacco.github.io/claude-distill/research/\n"
+printf "  ${DIM}@tomacco is super happy to share this research with you.${RESET}\n"
+printf "  ${DIM}Every finding is reproducible. Raw outputs published.${RESET}\n"
 echo ""
