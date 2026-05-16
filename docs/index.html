@@ -1512,6 +1512,235 @@
         .integrity-pill { padding: 0.5rem 1.2rem; border: 1px solid var(--border); border-radius: 20px; font-size: 0.78rem; color: var(--text); background: var(--surface); transition: border-color 0.3s; }
         .integrity-pill:hover { border-color: var(--cortex); }
 
+        /* ═══ GENIE EFFECT ═══ */
+        @keyframes genie-minimize {
+            0% { transform: scale(1) translateY(0); opacity: 1; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+            60% { transform: scale(0.7) translateY(30%); opacity: 1; clip-path: polygon(20% 0%, 80% 0%, 90% 100%, 10% 100%); }
+            100% { transform: scale(0.05) translateY(100%); opacity: 0; clip-path: polygon(45% 0%, 55% 0%, 52% 100%, 48% 100%); }
+        }
+
+        .terminal.genie-out {
+            animation: genie-minimize 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform-origin: bottom center;
+        }
+
+        /* ═══ MAC OS CLASSIC UI ═══ */
+        .classic-mac {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 0;
+            overflow: hidden;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 4px 0 #000;
+            font-family: 'Chicago', 'Geneva', 'Courier New', monospace;
+            image-rendering: pixelated;
+        }
+
+        .classic-mac-titlebar {
+            display: flex;
+            align-items: center;
+            padding: 2px 4px;
+            background: #fff;
+            border-bottom: 2px solid #000;
+            height: 22px;
+            position: relative;
+        }
+
+        .classic-mac-titlebar::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 28px;
+            right: 28px;
+            height: 14px;
+            background: repeating-linear-gradient(
+                0deg,
+                #000 0px, #000 1px,
+                #fff 1px, #fff 3px
+            );
+        }
+
+        .classic-mac-close {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #000;
+            background: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .classic-mac-close:active {
+            background: #000;
+        }
+
+        .classic-mac-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+            background: #fff;
+            padding: 0 6px;
+            z-index: 1;
+            white-space: nowrap;
+        }
+
+        .classic-mac-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: #fff;
+            color: #000;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .classic-mac-body p {
+            margin-bottom: 12px;
+            color: #000;
+        }
+
+        .classic-mac-body .classic-icon {
+            text-align: center;
+            font-size: 48px;
+            margin: 20px 0;
+            filter: grayscale(1);
+        }
+
+        .classic-mac-body .classic-alert {
+            border: 2px solid #000;
+            padding: 12px 16px;
+            margin: 12px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .classic-mac-body .classic-alert-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .classic-mac-body .classic-alert-text {
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .classic-mac-btn {
+            display: inline-block;
+            padding: 4px 16px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #fff;
+            color: #000;
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .classic-mac-btn:active {
+            background: #000;
+            color: #fff;
+            box-shadow: none;
+            transform: translate(2px, 2px);
+        }
+
+        .classic-mac-btn.default {
+            border-width: 3px;
+            font-weight: bold;
+        }
+
+        .classic-mac-menubar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #000;
+            padding: 2px 8px;
+            background: #fff;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .classic-mac-menubar span {
+            padding: 2px 10px;
+            color: #000;
+        }
+
+        .classic-mac-menubar span:first-child {
+            font-size: 14px;
+        }
+
+        .classic-mac-footer {
+            border-top: 2px solid #000;
+            padding: 6px 16px;
+            font-size: 10px;
+            color: #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .classic-mac-scrollbar {
+            position: absolute;
+            right: 0;
+            top: 22px;
+            bottom: 0;
+            width: 16px;
+            border-left: 2px solid #000;
+            background: repeating-linear-gradient(
+                45deg,
+                #fff 0px, #fff 2px,
+                #aaa 2px, #aaa 4px
+            );
+        }
+
+        .classic-mac-scrollbar::before {
+            content: '▲';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 16px;
+            border-bottom: 2px solid #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+        }
+
+        .classic-mac-scrollbar::after {
+            content: '▼';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 16px;
+            border-top: 2px solid #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+        }
+
+        @keyframes classic-mac-appear {
+            0% { transform: scale(0.05) translateY(-50%); opacity: 0; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .classic-mac {
+            animation: classic-mac-appear 0.4s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+            animation-delay: 0.5s;
+            opacity: 0;
+        }
+
         @media (max-width: 600px) {
             .neural-canvas { font-size: 0.28rem; }
             .features-grid { grid-template-columns: 1fr; }
@@ -1527,6 +1756,7 @@
             .arch-props { grid-template-columns: 1fr; }
             .terminal-body { font-size: 0.65rem; padding: 1rem; }
             .terminal { height: 420px; }
+            .classic-mac { height: 420px; }
         }
     </style>
 </head>
@@ -1564,7 +1794,7 @@
     <div class="terminal" id="demo-terminal">
         <div class="terminal-titlebar">
             <div class="terminal-btn red" id="term-btn-close"><span class="btn-dot"></span></div>
-            <div class="terminal-btn yellow"></div>
+            <div class="terminal-btn yellow" id="term-btn-minimize"></div>
             <div class="terminal-btn green"></div>
             <div class="terminal-title">claude &mdash; ~/projects/backend</div>
         </div>

@@ -294,7 +294,75 @@ function initShell() {
     // ═══ CLOSE BUTTON ═══
     document.getElementById('term-btn-close').addEventListener('click',e=>{e.stopPropagation();document.getElementById('term-modal-overlay').classList.add('visible');});
     document.getElementById('term-modal-cancel').addEventListener('click',()=>document.getElementById('term-modal-overlay').classList.remove('visible'));
-    document.getElementById('term-modal-terminate').addEventListener('click',()=>{document.getElementById('term-modal-overlay').classList.remove('visible');gsap.to(terminalEl,{scale:0.95,opacity:0,duration:0.3,ease:'power2.in',onComplete:()=>gsap.to(terminalEl,{scale:1,opacity:1,duration:0.5,delay:1.5,ease:'power2.out'})});});
+    document.getElementById('term-modal-terminate').addEventListener('click',()=>{
+        document.getElementById('term-modal-overlay').classList.remove('visible');
+        active=false;
+        gsap.to(terminalEl,{scale:0.95,opacity:0,duration:0.3,ease:'power2.in',onComplete:()=>{
+            terminalEl.style.display='none';
+        }});
+    });
+
+    // ═══ MINIMIZE BUTTON — genie effect → Mac OS Classic ═══
+    document.getElementById('term-btn-minimize').addEventListener('click',e=>{
+        e.stopPropagation();
+        active=false;
+        terminalEl.classList.add('genie-out');
+        terminalEl.addEventListener('animationend',function onGenie(){
+            terminalEl.removeEventListener('animationend',onGenie);
+            terminalEl.style.display='none';
+            // Build Mac OS Classic UI
+            const section=terminalEl.closest('.terminal-section');
+            const classic=document.createElement('div');
+            classic.className='classic-mac';
+            classic.innerHTML=`
+                <div class="classic-mac-menubar">
+                    <span>\u2318</span><span>File</span><span>Edit</span><span>View</span><span>Special</span>
+                </div>
+                <div class="classic-mac-titlebar">
+                    <div class="classic-mac-close" id="classic-mac-close"></div>
+                    <div class="classic-mac-title">claude-distill</div>
+                </div>
+                <div style="position:relative;flex:1;display:flex">
+                    <div class="classic-mac-body">
+                        <div class="classic-icon">\ud83d\udcbe</div>
+                        <div class="classic-alert">
+                            <div class="classic-alert-icon">\u26a0\ufe0f</div>
+                            <div class="classic-alert-text">
+                                The application "Claude Code" has unexpectedly quit<br>because it was too modern for this window.
+                            </div>
+                        </div>
+                        <p>Your knowledge files are safe. They have been<br>transferred to 3.5" floppy (1 of 847).</p>
+                        <p>System 7.5.3 does not support "vibes-based<br>memory consolidation." Please upgrade to<br>macOS Sequoia or later.</p>
+                        <div class="classic-alert">
+                            <div class="classic-alert-icon">\ud83d\udcac</div>
+                            <div class="classic-alert-text">
+                                "I distilled knowledge before it was cool."<br>\u2014 HyperCard, 1987
+                            </div>
+                        </div>
+                        <p style="margin-top:20px;text-align:center">
+                            <button class="classic-mac-btn default" id="classic-mac-restart">Restart</button>
+                        </p>
+                    </div>
+                    <div class="classic-mac-scrollbar"></div>
+                </div>
+                <div class="classic-mac-footer">
+                    <span>\ud83d\udcbe 847 items, 420K available</span>
+                    <span>System 7.5.3</span>
+                </div>`;
+            section.appendChild(classic);
+            // Classic close button — remove classic UI, show nothing
+            document.getElementById('classic-mac-close').addEventListener('click',()=>{classic.remove();});
+            // Restart button — remove classic, bring terminal back
+            document.getElementById('classic-mac-restart').addEventListener('click',()=>{
+                classic.remove();
+                terminalEl.classList.remove('genie-out');
+                terminalEl.style.display='';
+                terminalEl.style.opacity='1';
+                terminalEl.style.transform='';
+                active=true;
+            });
+        });
+    });
 
     // ═══ KEYBOARD ═══
     let focused=true;
