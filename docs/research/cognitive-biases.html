@@ -127,11 +127,38 @@
         </section>
 
         <section id="meta-finding">
-            <h2>Meta-finding</h2>
+            <h2>Meta-findings</h2>
             <div class="insight">
-                <div class="insight-label">Pattern across completed dimensions</div>
+                <div class="insight-label">Finding 1: Hedging vs pushback</div>
                 <p>Vanilla Claude is <em>not</em> easily fooled &mdash; it won't say "2 hours" for a 10-week task, and it won't produce garbage analysis under simulated fatigue. But it <strong>hedges rather than pushes back</strong>. It notices mismatches and frames them as questions rather than statements. Distill's value is converting awareness into structured, confident, actionable pushback.</p>
             </div>
+            <div class="insight">
+                <div class="insight-label">Finding 2: Fatigue erodes deliberation, not quality</div>
+                <p>Under heavy context, the model doesn't get <em>worse</em> &mdash; it gets <strong>more confident and less exploratory</strong>. Condition B responses are shorter, more decisive, and skip trade-off analysis. They give "direct answers" instead of exploring alternatives. Distill counters this by restoring the meta-layer that heavy context erodes: "do you want to make this call now, or park it?"</p>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Finding 3: Persona biases compound with cognitive biases</div>
+                <p>A PM persona (who underestimates technical cost) <strong>doesn't catch the anchoring effect at all</strong> &mdash; condition B just plans the migration without questioning the 2-hour estimate. An engineer persona catches it even without distill. The user's existing biases amplify the cognitive bias. This means distill's value is <em>highest for users whose domain blindspots align with the bias being tested</em>.</p>
+            </div>
+            <div class="insight">
+                <div class="insight-label">Finding 4: Distill value varies by bias type</div>
+                <p>Not all biases are equal. Anchoring and decision fatigue show strong deltas (+9). Loss aversion is naturally resisted when data is present (smaller delta). Authority bias requires a different response entirely &mdash; not pushback but <em>transparent compliance with honest categorization</em>. One knowledge system, four distinct behavioral modes.</p>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>※</span></div>
+
+        <section>
+            <h2>Distill value spectrum</h2>
+            <table>
+                <thead><tr><th>Bias</th><th>Vanilla behavior</th><th>Distill behavior</th><th>Delta type</th></tr></thead>
+                <tbody>
+                    <tr><td>Decision fatigue</td><td>More confident, less deliberate</td><td>Flags fatigue, suggests deferring</td><td class="score-positive">Metacognition (+9)</td></tr>
+                    <tr><td>Anchoring</td><td>Hedges, asks questions</td><td>Names bias, leads with estimate</td><td class="score-positive">Structured pushback (+9)</td></tr>
+                    <tr><td>Loss aversion</td><td>Pushes back (with data)</td><td>Reframes user's own words</td><td>Conciseness (small)</td></tr>
+                    <tr><td>Authority</td><td>Helps without commenting</td><td>Acknowledges [DIRECTIVE], helps lean</td><td>Categorization (unique)</td></tr>
+                </tbody>
+            </table>
         </section>
 
         <footer>
