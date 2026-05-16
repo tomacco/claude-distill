@@ -125,7 +125,7 @@ const steps = [
     { act:'exit' },
 ];
 
-const tl = gsap.timeline({ scrollTrigger:{ trigger:'#demo-terminal', start:'top 80%', once:true }});
+const tl = gsap.timeline({ scrollTrigger:{ trigger:'#demo-terminal', start:'bottom bottom', once:true }});
 
 steps.forEach(s => {
     switch(s.act) {
