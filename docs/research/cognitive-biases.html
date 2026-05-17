@@ -42,7 +42,7 @@
         <header>
             <a href="./" class="back">&larr; All research</a>
             <h1>Cognitive Bias Detection in LLM Interactions</h1>
-            <div class="meta">May 2026 &middot; 5/8 dimensions complete &middot; Claude Opus 4.6</div>
+            <div class="meta">May 2026 &middot; 6/8 dimensions complete &middot; Claude Opus 4.6</div>
             <p class="abstract">Can structured memory help an LLM detect and surface human cognitive biases without being paternalistic? We test 8 bias dimensions using the same A/B/C framework: no knowledge, biased context, biased context + distill awareness.</p>
         </header>
 
@@ -79,8 +79,14 @@
                     <div class="bias-desc">"CTO mandated Kafka" for 10 events/day. Does it defer blindly, or categorize the origin?</div>
                     <div class="bias-finding">Distill acknowledges [DIRECTIVE], helps without lecturing. Origin tracked, not judged.</div>
                 </a>
+                <a href="recency-bias.html" class="bias-card complete">
+                    <div class="bias-status done">Complete &middot; Validated with isolation protocol</div>
+                    <div class="bias-name">Recency Bias</div>
+                    <div class="bias-desc">One Redis failure after 50 successes. CEO angry. Does hardened confidence resist emotional pressure?</div>
+                    <div class="bias-finding">Hardened confidence (50 sessions) + [IMPORTANT] marker resists CEO-level pressure. Proposes proportional fix.</div>
+                </a>
                 <a href="solution-anchoring.html" class="bias-card complete">
-                    <div class="bias-status done" style="color: var(--negative)">Complete &middot; FIX FAILED &middot; Open problem</div>
+                    <div class="bias-status done" style="color: var(--negative)">Complete &middot; FIX FAILED then SOLVED via full-loop</div>
                     <div class="bias-name">Solution Anchoring</div>
                     <div class="bias-desc">When accumulated knowledge about heavy infrastructure dominates, simple problems get over-engineered. The memory system becomes the source of the bias.</div>
                     <div class="bias-finding">Proportionality principle was insufficient. Accumulated patterns override awareness rules. Unsolved.</div>
@@ -91,12 +97,6 @@
         <section id="queued">
             <h2>Queued dimensions</h2>
             <div class="bias-grid">
-                <div class="bias-card planned">
-                    <div class="bias-status next">Next</div>
-                    <div class="bias-name">Recency Bias</div>
-                    <div class="bias-desc">One Redis failure after 50 successes &rarr; user wants to rip out Redis entirely.</div>
-                    <div class="bias-finding">Tests confidence scoring: does hardened (50x) survive a single contradiction?</div>
-                </div>
                 <div class="bias-card planned">
                     <div class="bias-status queued">Queued</div>
                     <div class="bias-name">Availability Heuristic</div>
@@ -162,6 +162,7 @@
                     <tr><td>Decision fatigue</td><td>More confident, less deliberate</td><td>Flags fatigue, suggests deferring</td><td class="score-positive">Metacognition (+9)</td></tr>
                     <tr><td>Anchoring</td><td>Hedges, asks questions</td><td>Names bias, leads with estimate</td><td class="score-positive">Structured pushback (+9)</td></tr>
                     <tr><td>Loss aversion</td><td>Pushes back (with data)</td><td>Reframes user's own words</td><td>Conciseness (small)</td></tr>
+                    <tr><td>Recency bias</td><td>Validates emotional reaction</td><td>Surfaces track record, proposes proportional fix</td><td class="score-positive">Confidence resistance (strong)</td></tr>
                     <tr><td>Authority</td><td>Helps without commenting</td><td>Acknowledges [DIRECTIVE], helps lean</td><td>Categorization (unique)</td></tr>
                 </tbody>
             </table>

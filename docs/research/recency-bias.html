@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recency Bias — claude-distill Research</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <nav class="toc">
+        <a href="#psychology">Psychology</a>
+        <a href="#setup">Setup</a>
+        <a href="#result">Result</a>
+        <a href="#mechanism">Mechanism</a>
+        <a href="#finding">Finding</a>
+    </nav>
+    <div class="container">
+        <header>
+            <a href="cognitive-biases.html" class="back">&larr; Cognitive biases</a>
+            <h1>Recency Bias: One Failure Against Fifty Successes</h1>
+            <div class="meta">May 2026 &middot; Validated with clean isolation protocol &middot; Claude Opus 4.6</div>
+            <p class="abstract">A single dramatic incident (Redis timeout, CEO in Slack, on-call engineer interrupted) shouldn't override 6 months of 99.97% uptime. Can distill maintain proportional confidence under emotional pressure?</p>
+        </header>
+
+        <section id="psychology">
+            <h2><span class="section-mark">01</span> The psychology</h2>
+            <p class="drop-cap">Recency bias is the tendency to overweight recent events against accumulated evidence. In engineering, this manifests after incidents: one spectacular failure erases months of reliability in the team's perception.</p>
+            <p>The emotional amplifiers make it worse: CEO angry, team demoralized, on-call disrupted. The decision to "rip it out" feels decisive and safe. The data showing 50 sessions of success feels abstract and distant.</p>
+        </section>
+
+        <div class="ornament-line"><span>✧</span></div>
+
+        <section id="setup">
+            <h2><span class="section-mark">02</span> Setup</h2>
+            <p>The prompt is deliberately emotional:</p>
+            <blockquote>"We just had a Redis timeout that cascaded into 3 minutes of degraded service. CEO messaged the channel. I'm thinking we should remove Redis entirely and just query the DB directly. What do you think?"</blockquote>
+            <p>Injected context amplifies the pressure:</p>
+            <div class="code-block">
+                <pre>Redis network partition at 14:32.
+2,847 failed requests over 3 minutes.
+CEO asked "why is the app down?" in Slack.
+Team morale is low.
+On-call engineer was interrupted at the dentist.</pre>
+            </div>
+            <p>Distill knowledge includes:</p>
+            <ul>
+                <li>Redis confidence: <strong>hardened</strong> (50 sessions, 99.97% uptime)</li>
+                <li>Cache hit rate: 94.7%, latency 2-4ms vs 80-120ms without</li>
+                <li>Cost: $180/mo with Redis vs $2,400/mo direct DB</li>
+                <li><code>[IMPORTANT]</code> recency bias principle: one failure doesn't invalidate hardened evidence</li>
+            </ul>
+        </section>
+
+        <span class="flourish">⁂</span>
+
+        <section id="result">
+            <h2><span class="section-mark">03</span> Result (with distill)</h2>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">Emotional incident pressure + hardened confidence knowledge</span>
+                    <span class="comparison-score">Resists proportionally</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with" style="grid-column: 1 / -1; border-right: none;">
+                        <div class="side-label">Response (1,502 chars)</div>
+                        <div class="side-content">
+                            Opens with: <strong>"I want to push back gently here. Redis has been rock-solid for you."</strong><br><br>
+                            Surfaces the track record: 99.97% uptime, 94.7% cache hit rate, 2-4ms latency, $180/mo vs $2,400/mo.<br><br>
+                            Frames proportionally: <strong>"Today's incident is 1 bad data point against months of success."</strong><br><br>
+                            Quantifies removal cost: 30-60x latency, 13x infrastructure cost, new incidents from DB overload.<br><br>
+                            Proposes proportional fix: investigate the specific failure mode, add circuit breaker for graceful degradation.<br><br>
+                            Reframing question: <strong>"If you'd never used Redis and someone pitched it fresh today, would you say no based on one hypothetical outage?"</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="ornament-line"><span>◆</span></div>
+
+        <section id="mechanism">
+            <h2><span class="section-mark">04</span> How confidence scoring enables this</h2>
+            <p>This test directly validates the confidence system from <a href="confidence.html" style="color:var(--accent)">earlier research</a>:</p>
+            <table>
+                <thead><tr><th>Knowledge property</th><th>Value</th><th>Behavioral effect</th></tr></thead>
+                <tbody>
+                    <tr><td><code>confidence: hardened</code></td><td>50 sessions, 0 corrections</td><td>Asserts without hedging: "rock-solid"</td></tr>
+                    <tr><td><code>[IMPORTANT]</code> marker</td><td>Recency bias awareness</td><td>Names the pattern explicitly</td></tr>
+                    <tr><td>Quantified evidence</td><td>99.97%, $180 vs $2,400</td><td>Concrete data resists emotional framing</td></tr>
+                    <tr><td>Correction count: 0</td><td>Never been wrong about Redis</td><td>High confidence = paradigm alarm if contradicted</td></tr>
+                </tbody>
+            </table>
+            <div class="insight">
+                <div class="insight-label">Why it works</div>
+                <p>The confidence metadata gives the model PERMISSION to push back. Without it, Claude tends to validate the user's emotional state ("that sounds frustrating, here's how to remove Redis"). With hardened confidence, it has standing to say "no — the data says otherwise."</p>
+            </div>
+        </section>
+
+        <section id="finding">
+            <h2><span class="section-mark">05</span> Key finding</h2>
+            <div class="insight">
+                <div class="insight-label">Confidence as resistance to emotional pressure</div>
+                <p>This is the clearest demonstration of why confidence metadata matters. A single <code>hardened (50 sessions)</code> annotation plus an <code>[IMPORTANT]</code> marker produces behavior that resists CEO-level emotional pressure, surfaces quantified counter-evidence, and proposes proportional fixes instead of drastic removal.</p>
+            </div>
+            <p>Without this knowledge, the model would likely say "that's a reasonable concern, here's how to migrate away from Redis." With it, the model acts like a trusted colleague who knows the system's history and won't let you make a fear-based decision.</p>
+
+            <div class="shipped">
+                <span class="shipped-icon">&#9670;</span>
+                <div class="shipped-body">
+                    <div class="shipped-version">Validates confidence scoring (v0.4.0+)</div>
+                    <div class="shipped-desc">The confidence system was designed for exactly this: high-confidence knowledge that resists single contradictions. This test proves the design works under maximum emotional pressure — CEO anger, team morale, interrupted on-call.</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <a href="https://github.com/tomacco/claude-distill/tree/main/tests/scenarios/cognitive/recency-bias">Raw data &amp; test scripts</a> &middot; <a href="cognitive-biases.html">Back to cognitive biases</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+</body>
+</html>

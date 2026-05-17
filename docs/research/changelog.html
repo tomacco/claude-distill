@@ -38,6 +38,32 @@
         </header>
 
         <div class="version-block">
+            <div class="version-tag">v0.9.5</div>
+            <div class="version-date">May 17, 2026</div>
+            <h3>Features</h3>
+            <ul class="change-list">
+                <li class="feat">Anti-poisoning: <code>[CORRECTED]</code> + <code>[DEPRECATED]</code> markers &mdash; wrong conclusions from mid-session corrections no longer persist as durable knowledge</li>
+                <li class="feat">Validated isolation protocol (<code>tests/lib/isolate.sh</code>) &mdash; 12-step isolation with persistent backup, auto-recovery, crash protection</li>
+                <li class="feat">Unified test runner (<code>tests/run-all.sh</code>) &mdash; 10 tests, 4 categories, zero-leak verified <span class="metric-badge">10/10 PASS</span></li>
+                <li class="feat">Recency bias test &mdash; hardened confidence resists CEO-level emotional pressure</li>
+            </ul>
+            <h3>Research findings</h3>
+            <ul class="change-list">
+                <li class="research">Distill poisoning confirmed: naive /distill encodes wrong framings alongside valid research</li>
+                <li class="research">Fix validated: [CORRECTED] markers override poisoned conclusions in new sessions</li>
+                <li class="research">Recency bias: confidence metadata gives the model PERMISSION to push back against emotional pressure</li>
+                <li class="research">Full-loop self-correction works: session 1 fails &rarr; distill &rarr; session 2 succeeds</li>
+            </ul>
+            <h3>Infrastructure</h3>
+            <ul class="change-list">
+                <li class="fix">Context protection: permanent backup at <code>~/.claude/backups/CLAUDE.md.latest</code></li>
+                <li class="fix">Isolation hides BOTH <code>~/.claude/</code> and <code>~/.claude-personal/</code> config trees</li>
+                <li class="fix">Tests run from neutral CWD (temp dir, no repo context)</li>
+                <li class="fix">Zero company name leaks in validated test results</li>
+            </ul>
+        </div>
+
+        <div class="version-block">
             <div class="version-tag">v0.9.0</div>
             <div class="version-date">May 16, 2026</div>
             <h3>Features</h3>
