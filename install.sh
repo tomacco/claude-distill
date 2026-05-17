@@ -7,7 +7,7 @@ set -e
 
 
 
-VERSION="1.0.2"
+VERSION="1.0.3"
 
 BUILD="20260516-01"
 REPO="https://raw.githubusercontent.com/tomacco/aura-distill/main"
@@ -195,7 +195,7 @@ info_msg "Installing to: ${PROFILE_DIR}"
 echo ""
 
 # Detect existing installation
-EXISTING_VERSION="1.0.2"
+EXISTING_VERSION="1.0.3"
 if [ -f "$DISTILL_DIR/.version" ]; then
     EXISTING_VERSION=$(cat "$DISTILL_DIR/.version")
     info_msg "Existing installation: v${EXISTING_VERSION} → v${VERSION}"
