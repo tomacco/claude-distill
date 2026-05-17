@@ -224,7 +224,41 @@ The principle: **repeated frustration about the same thing means the system fail
 
 **Core human need:** People need to feel heard. When a user expresses something important and it doesn't stick, that's a betrayal of trust. The distillation system must treat repeated frustrations as CRITICAL bugs in itself — not as user nagging.
 
-## Step 1c: Knowledge markers
+## Step 1c: Signal classification (anti-poisoning)
+
+Every signal involving a CONCLUSION or APPROACH must be classified:
+
+- **`explored`** — factual investigation happened (e.g., "we looked at Kafka config, here's how topics work"). KEEP. This is useful regardless of whether the approach was ultimately correct.
+- **`concluded`** — a decision or approach was adopted (e.g., "we'll use the data pipeline for this"). Mark as potentially wrong.
+- **`corrected`** — user explicitly said the approach was wrong (e.g., "wait, this doesn't need a pipeline at all"). STRONG signal.
+
+**The anti-poisoning rule:**
+
+When a `corrected` signal exists for a `concluded` signal in the same session:
+1. The EXPLORATION facts get encoded normally (factual, useful)
+2. The CONCLUSION gets marked `[DEPRECATED]` — it was wrong for this case
+3. The CORRECTION gets encoded as `[CORRECTED]` with the criteria for when each approach applies
+
+This prevents naive distillation from encoding wrong framings as durable patterns. The investigation is valuable. The wrong conclusion is not.
+
+Example:
+```
+## Analytics infrastructure (explored — factual)
+- Comet handles ETL ingestion
+- StarFlow provides Kafka streaming
+- Nebula maintains schema contracts
+
+## [DEPRECATED] "All analytics go through the pipeline"
+Was wrong for client-side interaction tracking.
+Corrected mid-session: UI events don't need infrastructure.
+
+## [CORRECTED] When to use pipeline vs client events
+- Client events: data exists at moment of interaction (taps, views)
+- Pipeline: cross-service aggregation, batch processing, backend data
+  origin: evidence (direct correction)
+```
+
+## Step 1d: Knowledge markers
 
 When encoding knowledge, use these markers to capture nuance:
 
@@ -258,12 +292,28 @@ When encoding knowledge, use these markers to capture nuance:
 - [NON-NEGOTIABLE] One service, one database. No shared databases.
 ```
 
+**`[CORRECTED]`** — A conclusion that replaced a wrong one. Includes criteria for both:
+```
+- [CORRECTED] Client-side events for UI interaction tracking, NOT pipeline.
+  Previous wrong assumption: all analytics need Comet/StarFlow.
+  Criteria: if data exists at point of user action → client events.
+```
+
+**`[DEPRECATED]`** — A conclusion that was proven wrong. Do NOT apply this:
+```
+- [DEPRECATED] "All analytics requests go through the pipeline."
+  Wrong for: client-side interaction tracking (button clicks, screen views).
+  Replaced by: [CORRECTED] entry above.
+```
+
 These markers are READ by the rules/distill.md retrieval system. They trigger specific behaviors:
 - `[CONTEXT]` → disambiguate which variant applies before acting
 - `[UPDATED]` → flag if user follows old procedure
 - `[PROVISIONAL]` → don't build on this as if it's settled
 - `[IMPORTANT]` → surface the bias when you detect it in user's request
 - `[NON-NEGOTIABLE]` → push back if user asks to violate it
+- `[CORRECTED]` → apply the corrected version, reference what was wrong
+- `[DEPRECATED]` → do NOT apply this conclusion, it was proven wrong
 
 ## Step 2: Trace to first principles
 

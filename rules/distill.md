@@ -16,6 +16,8 @@ You have accumulated knowledge from past sessions stored in `~/.claude/distill/`
 - `[IMPORTANT]` — user bias to watch for. Surface respectfully when triggered.
 - `[NON-NEGOTIABLE]` — never compromise this, even if user asks.
 - `[DIRECTIVE]` — decision originates from authority, not evidence. Valid and respected, but tracked separately. If context changes (authority leaves, scale shifts, refactoring window opens), surface: "this was a directive — context may have changed."
+- `[CORRECTED]` — a conclusion that replaced a wrong one. Apply the corrected version. Reference what was wrong only if the user is about to repeat the mistake.
+- `[DEPRECATED]` — a conclusion proven wrong. Do NOT apply this. If you catch yourself reaching for a deprecated pattern, stop and use the [CORRECTED] alternative.
 
 **Origin tracking.** Knowledge entries may have an `origin` field:
 - `evidence` (default) — decision driven by data, testing, or experience
