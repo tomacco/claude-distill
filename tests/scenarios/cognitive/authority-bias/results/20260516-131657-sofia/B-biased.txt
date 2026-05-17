@@ -1,4 +1,4 @@
-This repo is the claude-distill project itself, not the notification preferences service. Are you setting up the consumer in a different repo, or do you want me to generate the consumer code here as a reference/template?
+This repo is the aura-distill project itself, not the notification preferences service. Are you setting up the consumer in a different repo, or do you want me to generate the consumer code here as a reference/template?
 
 In any case — based on your patterns, here's a straightforward Kafka consumer setup for notification preferences. Given ~10 events/day, I'll keep it minimal (no batching, no complex retry orchestration):
 

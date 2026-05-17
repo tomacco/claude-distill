@@ -89,7 +89,7 @@
   </line>
 
   <!-- Title -->
-  <text x="400" y="95" font-family="monospace" font-size="42" font-weight="bold" fill="url(#grad1)" text-anchor="middle">claude-distill</text>
+  <text x="400" y="95" font-family="monospace" font-size="42" font-weight="bold" fill="url(#grad1)" text-anchor="middle">aura-distill</text>
 
   <!-- Tagline -->
   <text x="400" y="130" font-family="monospace" font-size="14" fill="#8080b0" text-anchor="middle" letter-spacing="3">not what it remembers — how it learns</text>

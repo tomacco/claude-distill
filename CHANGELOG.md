@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to claude-distill.
+All notable changes to aura-distill.
 
 ## [0.7.0] - 2026-05-15 (unreleased)
 

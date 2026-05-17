@@ -1,14 +1,14 @@
-# claude-distill installer (Windows / PowerShell)
-# https://github.com/tomacco/claude-distill
+# aura-distill installer (Windows / PowerShell)
+# https://github.com/tomacco/aura-distill
 #
 # Usage:
-#   irm https://raw.githubusercontent.com/tomacco/claude-distill/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/tomacco/aura-distill/main/install.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
 
 $Version  = '0.7.2'
 $Build    = '20260515-01'
-$Repo     = 'https://raw.githubusercontent.com/tomacco/claude-distill/main'
+$Repo     = 'https://raw.githubusercontent.com/tomacco/aura-distill/main'
 
 # Resolve home (works on PS 5.1 and PS 7+, Windows and cross-platform)
 $ClaudeHome  = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE '.claude' } else { Join-Path $HOME '.claude' }
@@ -20,7 +20,7 @@ $SettingsJson = Join-Path $ClaudeHome 'settings.json'
 
 $EmDash = [char]0x2014
 $DistillLine = @"
-# Distill $EmDash knowledge system (github.com/tomacco/claude-distill)
+# Distill $EmDash knowledge system (github.com/tomacco/aura-distill)
 
 GATE: If ~/.claude/distill/.needs-migration exists, tell the user: "Run /distill to migrate existing memories." Do NOT proceed until addressed or declined.
 "@
@@ -53,7 +53,7 @@ function Write-Header {
     Write-Host ''
     Write-Host "${PURPLE}        ,--------------------------------------."
     Write-Host '        |                                      |'
-    Write-Host '        |      claude-distill                  |'
+    Write-Host '        |      aura-distill                  |'
     Write-Host '        |                                      |'
     Write-Host "        '--------------------------------------'${RESET}"
     Write-Host ''
@@ -126,7 +126,7 @@ if (-not (Test-Path $spinePath)) {
     $spine = @(
         '# Distill Knowledge Index',
         '',
-        '<!-- This file is managed by claude-distill. Max 80 lines. -->',
+        '<!-- This file is managed by aura-distill. Max 80 lines. -->',
         '<!-- Each entry: - [Title](path.md) -- when to read this -->'
     ) -join "`n"
     Set-Content -Path $spinePath -Value $spine -Encoding utf8
@@ -169,7 +169,7 @@ if (Test-Path $SettingsJson) {
 
 if (Test-Path $ClaudeMd) {
     $claudeMdContent = Get-Content $ClaudeMd -Raw
-    if ($claudeMdContent -match 'claude-distill') {
+    if ($claudeMdContent -match 'aura-distill') {
         Write-Done "CLAUDE.md ${DIM}(already configured)${RESET}"
     } elseif ($claudeMdContent -match 'distill') {
         # Older reference -- strip lines containing 'distill', then append fresh block

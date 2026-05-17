@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
-# Test Isolation Protocol for claude-distill research
+# Test Isolation Protocol for aura-distill research
 #
 # Source this file, then call:
 #   isolate_begin    — strip all personal context (backup everything)

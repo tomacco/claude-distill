@@ -1,6 +1,6 @@
 # Knowledge Architecture
 
-How `claude-distill` organizes knowledge to stay useful without bloating LLM context.
+How `aura-distill` organizes knowledge to stay useful without bloating LLM context.
 
 ## The Problem
 

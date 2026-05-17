@@ -1,19 +1,19 @@
 #!/bin/bash
-# claude-distill installer
-# https://github.com/tomacco/claude-distill
+# aura-distill installer
+# https://github.com/tomacco/aura-distill
 
 set -e
 
 
 
 
-VERSION="0.9.16"
+VERSION="1.0.0"
 
 BUILD="20260516-01"
-REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
+REPO="https://raw.githubusercontent.com/tomacco/aura-distill/main"
 # Profile paths are set dynamically after profile detection (see below)
 PROFILE_DIR=""
-DISTILL_LINE='# Distill — knowledge system (github.com/tomacco/claude-distill)
+DISTILL_LINE='# Distill — knowledge system (github.com/tomacco/aura-distill)
 
 GATE: If ~/.claude/distill/.needs-migration exists, tell the user: "Run /distill to migrate existing memories." Do NOT proceed until addressed or declined.'
 
@@ -75,9 +75,9 @@ show_header() {
   printf "${PURPLE}"
   echo "        ╭──────────────────────────────────────╮"
   echo "        │                                      │"
-  echo "        │      ░█▀▀░█░░░█▀█░█░█░█▀▄░█▀▀        │"
-  echo "        │      ░█░░░█░░░█▀█░█░█░█░█░█▀▀        │"
-  echo "        │      ░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀░░▀▀▀        │"
+  echo "        │        ░█▀█░█░█░█▀▄░█▀█              │"
+  echo "        │        ░█▀█░█░█░█▀▄░█▀█              │"
+  echo "        │        ░▀░▀░▀▀▀░▀░▀░▀░▀              │"
   echo "        │                                      │"
   echo "        │      ░█▀▄░▀█▀░█▀▀░▀█▀░▀█▀░█░░░█░░    │"
   echo "        │      ░█░█░░█░░▀▀█░░█░░░█░░█░░░█░░    │"
@@ -195,7 +195,7 @@ info_msg "Installing to: ${PROFILE_DIR}"
 echo ""
 
 # Detect existing installation
-EXISTING_VERSION=""
+EXISTING_VERSION="1.0.0"
 if [ -f "$DISTILL_DIR/.version" ]; then
     EXISTING_VERSION=$(cat "$DISTILL_DIR/.version")
     info_msg "Existing installation: v${EXISTING_VERSION} → v${VERSION}"
@@ -229,7 +229,7 @@ echo "$VERSION" > "$DISTILL_DIR/.version"
 if [ ! -f "$DISTILL_DIR/SPINE.md" ]; then
     echo "# Distill Knowledge Index" > "$DISTILL_DIR/SPINE.md"
     echo "" >> "$DISTILL_DIR/SPINE.md"
-    echo "<!-- This file is managed by claude-distill. Max 80 lines. -->" >> "$DISTILL_DIR/SPINE.md"
+    echo "<!-- This file is managed by aura-distill. Max 80 lines. -->" >> "$DISTILL_DIR/SPINE.md"
     echo "<!-- Each entry: - [Title](path.md) — when to read this -->" >> "$DISTILL_DIR/SPINE.md"
     done_msg "SPINE.md ${DIM}(knowledge index)${RESET}"
 else
@@ -265,7 +265,7 @@ else
 fi
 
 if [ -f "$CLAUDE_MD" ]; then
-    if grep -q "claude-distill" "$CLAUDE_MD" 2>/dev/null; then
+    if grep -q "aura-distill" "$CLAUDE_MD" 2>/dev/null; then
         done_msg "CLAUDE.md ${DIM}(already configured)${RESET}"
     elif grep -q "distill" "$CLAUDE_MD" 2>/dev/null; then
         # Older version reference — replace it
@@ -328,7 +328,7 @@ printf "    ${DIM}rm -rf ~/.claude/distill ~/.claude/commands/distill.md ~/.clau
 echo ""
 printf "  ${PURPLE}say what matters. it's listening.${RESET}\n"
 echo ""
-printf "  ${DIM}Research:${RESET} https://tomacco.github.io/claude-distill/research/\n"
+printf "  ${DIM}Research:${RESET} https://tomacco.github.io/aura-distill/research/\n"
 printf "  ${DIM}@tomacco is super happy to share this research with you.${RESET}\n"
 printf "  ${DIM}Every finding is reproducible. Raw outputs published.${RESET}\n"
 echo ""

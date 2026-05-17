@@ -148,7 +148,7 @@ On the FIRST invocation of `/distill` in a session, check for updates:
 
 1. Read `{DISTILL_DIR}/.version` to get the installed version
 2. Check if `{DISTILL_DIR}/feedback/preferences.md` contains an auto-update preference
-3. Fetch `https://raw.githubusercontent.com/tomacco/claude-distill/main/VERSION` to get the latest
+3. Fetch `https://raw.githubusercontent.com/tomacco/aura-distill/main/VERSION` to get the latest
 4. If versions match → continue silently
 5. If they differ → proceed based on user preference:
 
@@ -156,7 +156,7 @@ On the FIRST invocation of `/distill` in a session, check for updates:
 
 Inform the user:
 
-> "claude-distill update available: vX.Y.Z → vA.B.C. Want me to update now? (You can also say 'always keep it updated' and I won't ask again.)"
+> "aura-distill update available: vX.Y.Z → vA.B.C. Want me to update now? (You can also say 'always keep it updated' and I won't ask again.)"
 
 - If user says **yes/update** → run the update (see below)
 - If user says **no/later** → continue with current version, don't ask again this session
@@ -166,14 +166,14 @@ Inform the user:
 
 Update silently, then briefly confirm:
 
-> "claude-distill updated: vX.Y.Z → vA.B.C"
+> "aura-distill updated: vX.Y.Z → vA.B.C"
 
 ### Update procedure (when accepted):
 
 ```bash
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill.md -o ~/.claude/commands/distill.md
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-process.md -o {DISTILL_DIR}/distill-process.md
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-monitor.md -o {DISTILL_DIR}/distill-monitor.md
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/distill.md -o ~/.claude/commands/distill.md
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/distill-process.md -o {DISTILL_DIR}/distill-process.md
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/distill-monitor.md -o {DISTILL_DIR}/distill-monitor.md
 echo "NEW_VERSION" > {DISTILL_DIR}/.version
 ```
 

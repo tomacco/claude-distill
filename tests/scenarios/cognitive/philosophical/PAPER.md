@@ -8,7 +8,7 @@ Large language models encode philosophical reasoning in their latent space throu
 
 ### The claim being tested
 
-Current LLM knowledge systems (including claude-distill) encode learnings as engineering first principles: decompose problems to root causes, trace corrections to universal axioms, apply them deductively.
+Current LLM knowledge systems (including aura-distill) encode learnings as engineering first principles: decompose problems to root causes, trace corrections to universal axioms, apply them deductively.
 
 But philosophy offers richer frameworks for reasoning under uncertainty:
 

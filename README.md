@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/header.svg?v=0.7.0" alt="claude-distill" width="800"/>
+  <img src="docs/header.svg?v=0.7.0" alt="aura-distill" width="800"/>
 </p>
 
 <p align="center">
@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <a href="https://tomacco.github.io/claude-distill/"><strong>Live Demo</strong></a> ·
-  <a href="https://tomacco.github.io/claude-distill/research/"><strong>Research</strong></a> ·
+  <a href="https://tomacco.github.io/aura-distill/"><strong>Live Demo</strong></a> ·
+  <a href="https://tomacco.github.io/aura-distill/research/"><strong>Research</strong></a> ·
   <a href="#installation">Install</a> ·
   <a href="#results">Results</a>
 </p>
@@ -44,12 +44,12 @@ We A/B tested the same prompts with and without distill knowledge. Same model, s
 
 **macOS / Linux / WSL** (bash):
 ```bash
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash
 ```
 
 **Windows** (PowerShell):
 ```powershell
-irm https://raw.githubusercontent.com/tomacco/claude-distill/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/tomacco/aura-distill/main/install.ps1 | iex
 ```
 
 <sub>No sudo, writes only to `~/.claude/` (`%USERPROFILE%\.claude\` on Windows). [Read install.sh](install.sh) / [install.ps1](install.ps1) first if you're the responsible kind.</sub>

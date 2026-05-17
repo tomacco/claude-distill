@@ -1,4 +1,4 @@
-This repo is the `claude-distill` project itself, not the notification preferences service. Are you starting a new project for the notification preferences service, or do you have an existing repo I should be working in?
+This repo is the `aura-distill` project itself, not the notification preferences service. Are you starting a new project for the notification preferences service, or do you have an existing repo I should be working in?
 
 In the meantime, here's a minimal Kafka consumer setup appropriate for your situation — keeping it simple given ~10 events/day, while following your team's established patterns:
 

@@ -160,8 +160,8 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
             '',
             '<span style="color:#fff;font-weight:bold">** don\'t use Mythos next time **</span>',
             '',
-            '<span style="color:#666">tip: try claude-distill instead.</span>',
-            '<span style="color:#666">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</span>',
+            '<span style="color:#666">tip: try aura-distill instead.</span>',
+            '<span style="color:#666">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</span>',
         ];
     }
 }

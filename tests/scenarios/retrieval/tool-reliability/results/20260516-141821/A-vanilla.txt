@@ -26,7 +26,7 @@ Here's the agent orchestration plan for a self-healing PR monitor:
 ## Agent 1: Monitor (recurring, every 3 minutes)
 
 **Trigger:** `/loop 3m`  
-**Command:** `gh pr checks 42 --repo tomaccos/claude-distill`  
+**Command:** `gh pr checks 42 --repo tomaccos/aura-distill`  
 **Logic:**
 - If all checks pass → report success, stop the loop
 - If checks still running → do nothing, wait for next cycle
