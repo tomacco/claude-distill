@@ -11,10 +11,8 @@ VERSION="0.9.12"
 
 BUILD="20260516-01"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
-CMD_DIR="$HOME/.claude/commands"
-DISTILL_DIR="$HOME/.claude/distill"
-RULES_DIR="$HOME/.claude/rules"
-CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+# Profile paths are set dynamically after profile detection (see below)
+PROFILE_DIR=""
 DISTILL_LINE='# Distill — knowledge system (github.com/tomacco/claude-distill)
 
 GATE: If ~/.claude/distill/.needs-migration exists, tell the user: "Run /distill to migrate existing memories." Do NOT proceed until addressed or declined.'
@@ -102,9 +100,99 @@ show_section() {
 }
 
 
+# ═══ PROFILE DETECTION ═══
+
+# Parse --profile argument
+PROFILE_NAME=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --profile) PROFILE_NAME="$2"; shift 2 ;;
+        --profile=*) PROFILE_NAME="${1#*=}"; shift ;;
+        *) shift ;;
+    esac
+done
+
+# Detect available profiles
+detect_profiles() {
+    local profiles=()
+    [ -d "$HOME/.claude" ] && profiles+=("default:$HOME/.claude")
+    for dir in "$HOME"/.claude-*/; do
+        [ -d "$dir" ] || continue
+        local name=$(basename "$dir" | sed 's/^\.claude-//')
+        # Skip test/internal profiles
+        [[ "$name" == *"isolation"* || "$name" == *"hidden"* || "$name" == *"backup"* ]] && continue
+        profiles+=("$name:$dir")
+    done
+    echo "${profiles[@]}"
+}
+
+resolve_profile() {
+    local profiles=($(detect_profiles))
+    local count=${#profiles[@]}
+
+    # If --profile was passed, use it
+    if [ -n "$PROFILE_NAME" ]; then
+        if [ "$PROFILE_NAME" = "default" ]; then
+            PROFILE_DIR="$HOME/.claude"
+        else
+            PROFILE_DIR="$HOME/.claude-${PROFILE_NAME}"
+        fi
+        if [ ! -d "$PROFILE_DIR" ]; then
+            fail_msg "Profile '$PROFILE_NAME' not found at $PROFILE_DIR"
+            exit 1
+        fi
+        return
+    fi
+
+    # Single profile (or only default) → use it silently
+    if [ $count -le 1 ]; then
+        PROFILE_DIR="$HOME/.claude"
+        return
+    fi
+
+    # Multiple profiles → ask user
+    echo ""
+    printf "  ${BOLD}Multiple profiles detected:${RESET}\n"
+    echo ""
+    local i=1
+    for entry in "${profiles[@]}"; do
+        local name="${entry%%:*}"
+        local path="${entry#*:}"
+        local marker=""
+        [ -f "${path}distill/.version" ] && marker=" ${DIM}(distill installed)${RESET}"
+        printf "    ${CYAN}%d)${RESET} %s %s${marker}\n" "$i" "$name" "${DIM}($path)${RESET}"
+        i=$((i + 1))
+    done
+    echo ""
+    printf "  ${BOLD}Choose profile [1-%d]:${RESET} " "$count"
+    read -r choice
+
+    if [ -z "$choice" ] || [ "$choice" -lt 1 ] || [ "$choice" -gt "$count" ] 2>/dev/null; then
+        fail_msg "Invalid choice. Run with --profile <name> to skip this prompt."
+        exit 1
+    fi
+
+    local selected="${profiles[$((choice-1))]}"
+    PROFILE_DIR="${selected#*:}"
+    # Remove trailing slash
+    PROFILE_DIR="${PROFILE_DIR%/}"
+}
+
 # ═══ MAIN INSTALLATION ═══
 
 show_header
+
+# Resolve which profile to install to
+resolve_profile
+
+# Set paths based on resolved profile
+CMD_DIR="$PROFILE_DIR/commands"
+DISTILL_DIR="$PROFILE_DIR/distill"
+RULES_DIR="$PROFILE_DIR/rules"
+CLAUDE_MD="$PROFILE_DIR/CLAUDE.md"
+
+info_msg "Installing to: ${PROFILE_DIR}"
+echo ""
 
 # Detect existing installation
 EXISTING_VERSION=""
@@ -161,7 +249,7 @@ done_msg "rules/distill.md ${DIM}(auto-loads every session)${RESET}"
 show_section "Session integration"
 
 # Disable auto-memory (distill owns knowledge management)
-SETTINGS_JSON="$HOME/.claude/settings.json"
+SETTINGS_JSON="$PROFILE_DIR/settings.json"
 if [ -f "$SETTINGS_JSON" ]; then
     if grep -q '"autoMemoryEnabled"' "$SETTINGS_JSON" 2>/dev/null; then
         skip_msg "Auto-memory already configured in settings.json"
