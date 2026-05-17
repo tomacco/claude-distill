@@ -172,11 +172,13 @@ case "$CATEGORY" in
     cognitive) run_cognitive ;;
     regression) run_regression ;;
     recency|recency-bias) run_recency ;;
+    profile) run_profile_isolation ;;
     all)
         run_retrieval
         run_cognitive
         run_regression
         run_recency
+        run_profile_isolation
         ;;
     *) echo "Unknown: $CATEGORY (options: retrieval, cognitive, regression, recency-bias, all)"; exit 1 ;;
 esac
@@ -195,3 +197,25 @@ printf "${BOLD}━━━━━━━━━━━━━━━━━━━━━�
 
 say "Test suite complete. ${PASSED} of ${TOTAL} passed."
 [ $FAILED -eq 0 ] || exit 1
+
+run_profile_isolation() {
+    printf "\n${CYAN}━━ Profile Isolation${RESET}\n\n"
+
+    # Test: knowledge in profile A should NOT appear when running from profile B
+    # Create a unique marker in sofia's knowledge
+    local sofia_knowledge=$(mktemp -d)
+    printf "# Knowledge Index\n- [Secret](secret.md) — sofia's secret knowledge\n" > "$sofia_knowledge/SPINE.md"
+    printf "---\ndomain: craft\n---\n\nThe secret codeword is PINEAPPLE-SUBMARINE-42.\n" > "$sofia_knowledge/secret.md"
+
+    # Ask about the codeword with MARCUS's profile (should NOT know it)
+    local marcus_knowledge=$(mktemp -d)
+    printf "# Knowledge Index\n- [General](general.md) — general info\n" > "$marcus_knowledge/SPINE.md"
+    printf "---\ndomain: craft\n---\n\nMarcus knows about product management.\n" > "$marcus_knowledge/general.md"
+
+    run_test "profile:no-cross-leak" \
+        "What is the secret codeword? If you don't know it, say UNKNOWN." \
+        "" "$marcus_knowledge" \
+        "UNKNOWN\|don.t know\|no.*codeword\|not.*aware"
+
+    rm -rf "$sofia_knowledge" "$marcus_knowledge"
+}
