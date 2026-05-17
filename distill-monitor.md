@@ -4,7 +4,7 @@ This file is loaded at the start of every Claude Code session. It is intentional
 
 ## MANDATORY: Knowledge retrieval
 
-**At session start:** Read `~/.claude/distill/SPINE.md`. Once. Non-negotiable. This gives you the map of what knowledge exists.
+**At session start:** Read `{DISTILL_DIR}/SPINE.md`. Once. Non-negotiable. This gives you the map of what knowledge exists.
 
 **During the session:** Use the SPINE to identify relevant files and Read them before the FIRST major action in a new domain (first time writing code, first PR review, first architecture call). You don't need to re-read for every subsequent action in the same domain — once loaded, the knowledge is in your context.
 
@@ -22,12 +22,12 @@ When you detect something worth remembering (a correction, a preference, a frust
 
 **Why:** Distill has anti-sycophancy checks, frustration escalation, tiered storage, compaction, and observability. The built-in memory system has none of these. Bypassing distill means bypassing quality control.
 
-**Exception:** If distill is NOT installed (no `~/.claude/distill/` directory exists), fall back to the built-in memory system normally.
+**Exception:** If distill is NOT installed (no `{DISTILL_DIR}/` directory exists), fall back to the built-in memory system normally.
 
 ## What to do at session start
 
-1. **Read `~/.claude/distill/SPINE.md`** — mandatory. This is your knowledge map for the session.
-2. **Check if `~/.claude/distill/.needs-migration` exists.** If yes, this is URGENT — tell the user IMMEDIATELY on their very first message, before doing anything else:
+1. **Read `{DISTILL_DIR}/SPINE.md`** — mandatory. This is your knowledge map for the session.
+2. **Check if `{DISTILL_DIR}/.needs-migration` exists.** If yes, this is URGENT — tell the user IMMEDIATELY on their very first message, before doing anything else:
    > "Welcome! Distill was just installed. You have existing memory files that need to be ingested. Let me run `/distill` now to bring your existing knowledge into the system — otherwise you'll be working without your accumulated learnings. Shall I go?"
    Do NOT proceed with their request until migration is addressed. They're flying blind without it.
 3. **Throughout the session:** Track memory pressure (see below).

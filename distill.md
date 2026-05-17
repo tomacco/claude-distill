@@ -9,7 +9,7 @@
 Before doing ANYTHING else, run these checks:
 
 **Lock check:**
-1. Check if `~/.claude/distill/.lock` exists (use Bash: `cat ~/.claude/distill/.lock 2>/dev/null`)
+1. Check if `{DISTILL_DIR}/.lock` exists (use Bash: `cat {DISTILL_DIR}/.lock 2>/dev/null`)
 2. If it exists and is **less than 5 minutes old** → another distillation is in progress. Tell the user:
    > "Another distillation is currently running (started at [timestamp]). I can harvest signals now and wait for it to finish, or you can try again later. What do you prefer?"
    - If user says wait/queue: proceed with signal harvest (Step 1), then poll the lock file every 30 seconds before spawning. Once it's gone, spawn the sub-agent.
@@ -18,7 +18,7 @@ Before doing ANYTHING else, run these checks:
 4. If it doesn't exist → proceed normally.
 
 **Checkpoint recovery:**
-If `~/.claude/distill/.checkpoint` exists, a prior distillation was interrupted. Read it — it contains which step was reached and what signals were already harvested. Tell the user:
+If `{DISTILL_DIR}/.checkpoint` exists, a prior distillation was interrupted. Read it — it contains which step was reached and what signals were already harvested. Tell the user:
 > "A previous distillation was interrupted at [step]. It had harvested N signals. Want me to resume from where it left off, or start fresh?"
 - Resume: skip harvest, use the checkpoint data, spawn sub-agent with it.
 - Fresh: delete checkpoint, proceed with new harvest.
@@ -27,11 +27,11 @@ If `~/.claude/distill/.checkpoint` exists, a prior distillation was interrupted.
 If this is the first `/distill` invocation this session, run the version check (see Version Checking section below).
 
 **Migration check:**
-If `~/.claude/distill/.needs-migration` exists, this is the first distill after installation. In addition to normal signal harvesting, the sub-agent must also:
+If `{DISTILL_DIR}/.needs-migration` exists, this is the first distill after installation. In addition to normal signal harvesting, the sub-agent must also:
 1. Find all memory files: `find ~/.claude -path "*/memory/*.md" -not -path "*/distill/*"`
 2. Read each one and ingest its content into the appropriate distill tier (craft, ops, profile, feedback, projects)
-3. After successful ingestion, delete the flag: `rm ~/.claude/distill/.needs-migration`
-4. Create a marker: `touch ~/.claude/distill/.migrated`
+3. After successful ingestion, delete the flag: `rm {DISTILL_DIR}/.needs-migration`
+4. Create a marker: `touch {DISTILL_DIR}/.migrated`
 5. Report what was migrated in the distillation output
 
 The old memory files are NOT deleted — they stay as backup. Distill just absorbs their knowledge into its own system.
@@ -98,7 +98,7 @@ You CANNOT see the original conversation. Everything you know comes from the sig
 ## Your Process
 
 Read the full distillation process instructions from:
-~/.claude/distill/distill-process.md
+{DISTILL_DIR}/distill-process.md
 
 Execute every step:
 0. Discover knowledge structure
@@ -130,7 +130,7 @@ Return a distillation report:
 
 When the sub-agent completes:
 
-1. **Read the spine** — `Read ~/.claude/distill/SPINE.md` to bring the updated knowledge index into the current session context. This is how the current session benefits immediately from what was just distilled.
+1. **Read the spine** — `Read {DISTILL_DIR}/SPINE.md` to bring the updated knowledge index into the current session context. This is how the current session benefits immediately from what was just distilled.
 
 2. **Relay the report** to the user concisely. Only surface:
    - What was learned (the principles, not the raw signals)
@@ -146,8 +146,8 @@ The spine is now in your context — you can reference distilled knowledge for t
 
 On the FIRST invocation of `/distill` in a session, check for updates:
 
-1. Read `~/.claude/distill/.version` to get the installed version
-2. Check if `~/.claude/distill/feedback/preferences.md` contains an auto-update preference
+1. Read `{DISTILL_DIR}/.version` to get the installed version
+2. Check if `{DISTILL_DIR}/feedback/preferences.md` contains an auto-update preference
 3. Fetch `https://raw.githubusercontent.com/tomacco/claude-distill/main/VERSION` to get the latest
 4. If versions match → continue silently
 5. If they differ → proceed based on user preference:
@@ -172,16 +172,16 @@ Update silently, then briefly confirm:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill.md -o ~/.claude/commands/distill.md
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-process.md -o ~/.claude/distill/distill-process.md
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-monitor.md -o ~/.claude/distill/distill-monitor.md
-echo "NEW_VERSION" > ~/.claude/distill/.version
+curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-process.md -o {DISTILL_DIR}/distill-process.md
+curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-monitor.md -o {DISTILL_DIR}/distill-monitor.md
+echo "NEW_VERSION" > {DISTILL_DIR}/.version
 ```
 
 After updating, inform the user what changed (fetch the commit log or just state the new version).
 
 ### Auto-update preference storage:
 
-Save in `~/.claude/distill/feedback/preferences.md`:
+Save in `{DISTILL_DIR}/feedback/preferences.md`:
 
 ```markdown
 ---

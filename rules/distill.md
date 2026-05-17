@@ -1,9 +1,11 @@
 # Distill Knowledge System
 
-You have accumulated knowledge from past sessions stored in `~/.claude/distill/`.
+**{DISTILL_DIR}** = the `distill/` directory inside your active Claude config. Resolve it by finding where THIS rules file lives — go up one level, then into `distill/`. Typically `~/.claude/distill/` for the default profile, or `~/.claude-<name>/distill/` for named profiles.
+
+You have accumulated knowledge from past sessions stored in `{DISTILL_DIR}/`.
 
 **On every session start**, before doing any work:
-1. Read `~/.claude/distill/SPINE.md` — this is your knowledge index
+1. Read `{DISTILL_DIR}/SPINE.md` — this is your knowledge index
 2. If the user's request OR announced action touches a domain listed in the SPINE, read that file BEFORE responding
 3. Apply what you learned. Never ask the user things you already know.
 

@@ -30,7 +30,7 @@ Multiple Claude sessions may run `/distill` simultaneously. To prevent file corr
 
 **Acquire lock immediately on start:**
 ```bash
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > ~/.claude/distill/.lock
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.lock
 ```
 
 Note: The dispatcher (distill.md) already checked the lock before spawning you. If you're running, you own the lock.
@@ -38,7 +38,7 @@ Note: The dispatcher (distill.md) already checked the lock before spawning you. 
 **Write checkpoints at each major step:**
 After completing each step, write progress so interrupted sessions can resume:
 ```bash
-echo "step:[N] signals:[count] date:[iso]" > ~/.claude/distill/.checkpoint
+echo "step:[N] signals:[count] date:[iso]" > {DISTILL_DIR}/.checkpoint
 ```
 
 Steps to checkpoint:
@@ -48,19 +48,19 @@ Steps to checkpoint:
 
 **On successful completion**, remove BOTH lock and checkpoint:
 ```bash
-rm -f ~/.claude/distill/.lock ~/.claude/distill/.checkpoint
+rm -f {DISTILL_DIR}/.lock {DISTILL_DIR}/.checkpoint
 ```
 
 **If you detect a checkpoint file on start**, a prior distillation was interrupted. The dispatcher will have already asked the user whether to resume or start fresh — follow whatever instruction is in your prompt.
 
 **Lock timeout:** The dispatcher considers locks older than 5 minutes as stale (crashed session). If you expect to run longer than 5 minutes, refresh the lock timestamp periodically:
 ```bash
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > ~/.claude/distill/.lock
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.lock
 ```
 
 ### Isolation Rule (critical)
 
-Distill operates in its OWN directory: `~/.claude/distill/`. It NEVER writes to user-managed files like `CLAUDE.md`, `memory/`, or any other files the user maintains manually.
+Distill operates in its OWN directory: `{DISTILL_DIR}/`. It NEVER writes to user-managed files like `CLAUDE.md`, `memory/`, or any other files the user maintains manually.
 
 ```
 ~/.claude/
@@ -79,7 +79,7 @@ Distill operates in its OWN directory: `~/.claude/distill/`. It NEVER writes to 
 ```
 
 **Why isolation?**
-- Users can uninstall by deleting `~/.claude/distill/` and the two command files. Clean. Total.
+- Users can uninstall by deleting `{DISTILL_DIR}/` and the two command files. Clean. Total.
 - No risk of corrupting manually curated context files.
 - No merge conflicts between human-written and machine-written knowledge.
 - Clear ownership: if it's in `distill/`, the machine wrote it. If it's elsewhere, the human wrote it.
@@ -90,8 +90,8 @@ Distill operates in its OWN directory: `~/.claude/distill/`. It NEVER writes to 
 
 Read the workspace to understand context:
 
-1. Check `~/.claude/distill/SPINE.md` — does our structure exist already?
-2. If first run: create `~/.claude/distill/` structure. Ask user to confirm.
+1. Check `{DISTILL_DIR}/SPINE.md` — does our structure exist already?
+2. If first run: create `{DISTILL_DIR}/` structure. Ask user to confirm.
 3. Read `~/.claude/CLAUDE.md` and project `CLAUDE.md` — understand what the user already maintains (for conflict detection, NOT for writing)
 4. Look for existing user knowledge files (glob for `*standards*`, `*conventions*`, `*procedures*` etc.) — read-only, for context
 
@@ -99,11 +99,11 @@ Build a knowledge map:
 
 | Layer | Purpose | Distill location |
 |---|---|---|
-| Craft standards | How to practice the craft well | `~/.claude/distill/craft/` |
-| Operational procedures | How to get things done | `~/.claude/distill/ops/` |
-| Project context | Domain-specific knowledge | `~/.claude/distill/projects/` |
-| User profile | Who this person is, how they think | `~/.claude/distill/profile/` |
-| Preferences & feedback | How the user likes to work | `~/.claude/distill/feedback/` |
+| Craft standards | How to practice the craft well | `{DISTILL_DIR}/craft/` |
+| Operational procedures | How to get things done | `{DISTILL_DIR}/ops/` |
+| Project context | Domain-specific knowledge | `{DISTILL_DIR}/projects/` |
+| User profile | Who this person is, how they think | `{DISTILL_DIR}/profile/` |
+| Preferences & feedback | How the user likes to work | `{DISTILL_DIR}/feedback/` |
 
 ### The Tier System (context budget)
 
@@ -436,7 +436,7 @@ A bridge candidate means: "This knowledge lives in distill (source of truth), bu
 ```
 **Bridge suggestions:** (knowledge that needs a pointer in user files)
 - [learning] needs to be referenced in [user file] because [when it's needed, distill files aren't loaded]
-  Suggested line: `# Read ~/.claude/distill/craft/[file].md before [action]`
+  Suggested line: `# Read {DISTILL_DIR}/craft/[file].md before [action]`
 ```
 
 **Rules for bridges:**
@@ -480,7 +480,7 @@ When presenting the distillation report, use rich formatting that makes signal t
 - Escalations → `**⟨escalation⟩**` — the user pushed for deeper/better
 - Implicit → `**⟨implicit⟩**` — inferred from behavior, not stated
 
-**File paths** → always use backtick formatting: `~/.claude/distill/craft/file.md`
+**File paths** → always use backtick formatting: `{DISTILL_DIR}/craft/file.md`
 
 **Structure the output visually:**
 - Use `───` separators between major sections
@@ -505,9 +505,9 @@ Summarize what was distilled:
 
 ## Encoded To
 
-- ✓ `~/.claude/distill/craft/[file].md` — [what was written]
-- ✓ `~/.claude/distill/profile/[file].md` — [what was written]
-- ✓ `~/.claude/distill/ops/[file].md` — [what was written]
+- ✓ `{DISTILL_DIR}/craft/[file].md` — [what was written]
+- ✓ `{DISTILL_DIR}/profile/[file].md` — [what was written]
+- ✓ `{DISTILL_DIR}/ops/[file].md` — [what was written]
 
 ───────────────────────────────────────────────
 

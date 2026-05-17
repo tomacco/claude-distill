@@ -209,17 +209,17 @@ show_section "Core files"
 mkdir -p "$CMD_DIR"
 mkdir -p "$DISTILL_DIR"/{craft,ops,profile,projects,feedback,archive}
 
-# Download core files
+# Download core files and resolve {DISTILL_DIR} to actual path
 
-curl -sL "$REPO/distill.md" -o "$CMD_DIR/distill.md"
+curl -sL "$REPO/distill.md" | sed "s|{DISTILL_DIR}|$DISTILL_DIR|g" > "$CMD_DIR/distill.md"
 done_msg "distill.md ${DIM}(command)${RESET}"
 
 
-curl -sL "$REPO/distill-process.md" -o "$DISTILL_DIR/distill-process.md"
+curl -sL "$REPO/distill-process.md" | sed "s|{DISTILL_DIR}|$DISTILL_DIR|g" > "$DISTILL_DIR/distill-process.md"
 done_msg "distill-process.md ${DIM}(process engine)${RESET}"
 
 
-curl -sL "$REPO/distill-monitor.md" -o "$DISTILL_DIR/distill-monitor.md"
+curl -sL "$REPO/distill-monitor.md" | sed "s|{DISTILL_DIR}|$DISTILL_DIR|g" > "$DISTILL_DIR/distill-monitor.md"
 done_msg "distill-monitor.md ${DIM}(session monitor)${RESET}"
 
 # Version
@@ -241,7 +241,7 @@ fi
 show_section "Knowledge retrieval"
 
 mkdir -p "$RULES_DIR"
-curl -sL "$REPO/rules/distill.md" -o "$RULES_DIR/distill.md"
+curl -sL "$REPO/rules/distill.md" | sed "s|{DISTILL_DIR}|$DISTILL_DIR|g" > "$RULES_DIR/distill.md"
 done_msg "rules/distill.md ${DIM}(auto-loads every session)${RESET}"
 
 # ═══ CLAUDE.md INTEGRATION ═══
