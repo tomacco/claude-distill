@@ -193,9 +193,19 @@
         document.head.appendChild(style);
     }
 
+    // Remove existing badges (for re-render on back navigation)
+    function clearBadges() {
+        document.querySelectorAll('.tracker-badge, .tracker-pub-date, .tracker-read-mark, .tracker-updated-mark').forEach(el => el.remove());
+    }
+
     // Init
     function init() {
         injectStyles();
+        render();
+    }
+
+    function render() {
+        clearBadges();
 
         const pageId = getCurrentPageId();
 
@@ -214,6 +224,20 @@
         // Update last visit timestamp
         updateLastVisit();
     }
+
+    // Re-render on back/forward navigation (bfcache restore)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            render();
+        }
+    });
+
+    // Also re-render on visibility change (tab switch back)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            render();
+        }
+    });
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
