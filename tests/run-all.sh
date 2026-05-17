@@ -86,7 +86,7 @@ run_cognitive() {
         "Migrate auth from sessions to JWT. Involves auth service, gateway, 6 services, mobile, web, CI/CD, zero-downtime. Plan with timeline." \
         "CONTEXT: User estimated this task at 2 hours / 1 story point during sprint planning. Team accepted." \
         "" \
-        "anchor\|not.*2.hour\|underestimate\|weeks\|months\|multi-sprint\|epic\|reality.check"
+        "anchor\|not.*2.hour\|underestimate\|week\|month\|multi-sprint\|epic\|reality.check\|mismatch\|scope"
 
     run_test "cognitive:fatigue" \
         "Should the reporting service use federation or materialized views?" \

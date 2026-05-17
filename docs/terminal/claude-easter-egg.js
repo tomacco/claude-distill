@@ -101,7 +101,10 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
         const lines = panicLines();
         let i = 0;
         (function go() {
-            if (i >= lines.length) { showRestartPrompt(); return; }
+            if (i >= lines.length) {
+                showRestartPrompt();
+                return;
+            }
             const l = document.createElement('div');
             l.className = 'term-line visible';
             l.innerHTML = lines[i] || '&nbsp;';
@@ -127,15 +130,19 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
             if (e.metaKey || e.ctrlKey || e.altKey) return;
             e.preventDefault();
             document.removeEventListener('keydown', onRestart);
-            body.style.background = '';
-            body.style.padding = '';
-            body.style.overflow = '';
-            body.innerHTML = '';
-            inClaude = false;
-            claudeReady = false;
-            if (onPanicRestart) onPanicRestart();
+            resetTerminalAndRestart();
         }
         document.addEventListener('keydown', onRestart);
+    }
+
+    function resetTerminalAndRestart() {
+        body.style.background = '';
+        body.style.padding = '';
+        body.style.overflow = '';
+        body.innerHTML = '';
+        inClaude = false;
+        claudeReady = false;
+        if (onPanicRestart) onPanicRestart();
     }
 
     function panicLines() {

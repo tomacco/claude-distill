@@ -21,10 +21,29 @@ CLAUDE_BIN="${CLAUDE_BIN:-node /opt/homebrew/opt/claude-code-npm/libexec/lib/nod
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="${RULES_SRC:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/rules/distill.md}"
 
-# Backup locations (set on first call to isolate_begin)
-_ISO_BACKUP=""
+# Backup locations — use PERSISTENT path (survives process death)
+_ISO_BACKUP="$HOME/.claude/_isolation_backup"
 _ISO_WORKSPACE=""
 _ISO_ACTIVE=false
+
+# Recovery: if isolation backup exists from a crashed run, restore first
+if [ -d "$_ISO_BACKUP" ] && [ -f "$_ISO_BACKUP/global-claude-md" ]; then
+    echo "WARNING: Recovering from crashed isolation. Restoring..." >&2
+    cp "$_ISO_BACKUP/global-claude-md" "$HOME/.claude/CLAUDE.md" 2>/dev/null || true
+    cp "$_ISO_BACKUP/personal-claude-md" "${REAL_CONFIG}/CLAUDE.md" 2>/dev/null || true
+    [ -d "$HOME/.claude/_distill_isolation_bak" ] && mv "$HOME/.claude/_distill_isolation_bak" "$HOME/.claude/distill"
+    [ -d "$HOME/.claude/_rules_isolation_bak" ] && mv "$HOME/.claude/_rules_isolation_bak" "$HOME/.claude/rules"
+    [ -d "$HOME/.claude/_plugins_isolation_bak" ] && mv "$HOME/.claude/_plugins_isolation_bak" "$HOME/.claude/plugins"
+    [ -d "${REAL_CONFIG}/_distill_isolation_bak" ] && mv "${REAL_CONFIG}/_distill_isolation_bak" "${REAL_CONFIG}/distill"
+    [ -d "${REAL_CONFIG}/_rules_isolation_bak" ] && mv "${REAL_CONFIG}/_rules_isolation_bak" "${REAL_CONFIG}/rules"
+    [ -d "${REAL_CONFIG}/_plugins_isolation_bak" ] && mv "${REAL_CONFIG}/_plugins_isolation_bak" "${REAL_CONFIG}/plugins"
+    for settings_path in "$HOME/.claude/settings.json" "${REAL_CONFIG}/settings.json"; do
+        local bak_name=$(echo "$settings_path" | tr '/' '_')
+        [ -f "$_ISO_BACKUP/$bak_name" ] && cp "$_ISO_BACKUP/$bak_name" "$settings_path"
+    done 2>/dev/null
+    rm -rf "$_ISO_BACKUP"
+    echo "Recovery complete." >&2
+fi
 
 isolate_begin() {
     if [ "$_ISO_ACTIVE" = true ]; then
@@ -32,7 +51,7 @@ isolate_begin() {
         return 1
     fi
 
-    _ISO_BACKUP=$(mktemp -d)
+    mkdir -p "$_ISO_BACKUP"
     _ISO_WORKSPACE=$(mktemp -d "/tmp/distill-test-workspace-XXXX")
     _ISO_ACTIVE=true
 
