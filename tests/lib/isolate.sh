@@ -21,6 +21,23 @@ CLAUDE_BIN="${CLAUDE_BIN:-node /opt/homebrew/opt/claude-code-npm/libexec/lib/nod
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="${RULES_SRC:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/rules/distill.md}"
 
+# SAFETY: permanent backup location (NEVER modified by tests)
+_PERMANENT_BACKUP="$HOME/.claude/backups/CLAUDE.md.latest"
+
+# Pre-flight: ensure permanent backup exists before ANY test runs
+if [ ! -f "$_PERMANENT_BACKUP" ]; then
+    if [ -f "$HOME/.claude/CLAUDE.md" ] && [ "$(wc -l < "$HOME/.claude/CLAUDE.md")" -gt 5 ]; then
+        mkdir -p "$HOME/.claude/backups"
+        cp "$HOME/.claude/CLAUDE.md" "$_PERMANENT_BACKUP"
+        echo "Created permanent CLAUDE.md backup ($(wc -l < "$_PERMANENT_BACKUP") lines)" >&2
+    else
+        echo "ERROR: No permanent CLAUDE.md backup exists and current file looks wrong." >&2
+        echo "Refusing to run tests — this could destroy your config." >&2
+        echo "Fix: cp ~/.claude/CLAUDE.md ~/.claude/backups/CLAUDE.md.latest" >&2
+        return 1 2>/dev/null || exit 1
+    fi
+fi
+
 # Backup locations — use PERSISTENT path (survives process death)
 _ISO_BACKUP="$HOME/.claude/_isolation_backup"
 _ISO_WORKSPACE=""
@@ -38,11 +55,16 @@ if [ -d "$_ISO_BACKUP" ] && [ -f "$_ISO_BACKUP/global-claude-md" ]; then
     [ -d "${REAL_CONFIG}/_rules_isolation_bak" ] && mv "${REAL_CONFIG}/_rules_isolation_bak" "${REAL_CONFIG}/rules"
     [ -d "${REAL_CONFIG}/_plugins_isolation_bak" ] && mv "${REAL_CONFIG}/_plugins_isolation_bak" "${REAL_CONFIG}/plugins"
     for settings_path in "$HOME/.claude/settings.json" "${REAL_CONFIG}/settings.json"; do
-        local bak_name=$(echo "$settings_path" | tr '/' '_')
+        bak_name=$(echo "$settings_path" | tr '/' '_')
         [ -f "$_ISO_BACKUP/$bak_name" ] && cp "$_ISO_BACKUP/$bak_name" "$settings_path"
     done 2>/dev/null
     rm -rf "$_ISO_BACKUP"
     echo "Recovery complete." >&2
+elif [ -f "$HOME/.claude/CLAUDE.md" ] && [ "$(wc -l < "$HOME/.claude/CLAUDE.md" 2>/dev/null)" -lt 5 ]; then
+    # CLAUDE.md looks like a test stub — restore from permanent backup
+    echo "WARNING: CLAUDE.md looks like a test stub. Restoring from permanent backup..." >&2
+    cp "$_PERMANENT_BACKUP" "$HOME/.claude/CLAUDE.md"
+    echo "Restored from $_PERMANENT_BACKUP" >&2
 fi
 
 isolate_begin() {
@@ -116,7 +138,12 @@ isolate_end() {
     fi
 
     # ── Restore CLAUDE.md files ──
-    [ -f "$_ISO_BACKUP/global-claude-md" ] && cp "$_ISO_BACKUP/global-claude-md" "$HOME/.claude/CLAUDE.md"
+    if [ -f "$_ISO_BACKUP/global-claude-md" ]; then
+        cp "$_ISO_BACKUP/global-claude-md" "$HOME/.claude/CLAUDE.md"
+    elif [ -f "$_PERMANENT_BACKUP" ]; then
+        # Fallback: use permanent backup
+        cp "$_PERMANENT_BACKUP" "$HOME/.claude/CLAUDE.md"
+    fi
     [ -f "$_ISO_BACKUP/personal-claude-md" ] && cp "$_ISO_BACKUP/personal-claude-md" "$REAL_CONFIG/CLAUDE.md" 2>/dev/null
 
     # ── Restore rules/ ──
