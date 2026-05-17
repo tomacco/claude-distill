@@ -175,6 +175,54 @@
             text-align: center;
         }
 
+        .install-tabs {
+            display: flex;
+            gap: 0;
+            max-width: 700px;
+            width: 100%;
+            margin-bottom: -1px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .install-tab {
+            padding: 0.4rem 1.2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--dim);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+
+        .install-tab:hover {
+            color: var(--text);
+        }
+
+        .install-tab.active {
+            color: var(--synapse);
+            background: var(--surface);
+            border-color: var(--border);
+            border-bottom-color: var(--surface);
+        }
+
+        .install-panel {
+            display: none;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .install-panel.active {
+            display: block;
+        }
+
+        .install-panel .install-cmd {
+            border-radius: 0 4px 4px 4px;
+        }
+
         .install-mid {
             text-align: center;
             padding: 2rem 0;
@@ -1638,13 +1686,28 @@
 <div class="hero">
     <pre class="neural-canvas" id="neural-canvas" aria-hidden="true"></pre>
     <div class="title-group">
-        <h1 class="title">claude-<span>distill</span></h1>
+        <h1 class="title">aura-<span>distill</span></h1>
         <p class="tagline">not what it remembers &mdash; how it learns</p>
         <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">Claude Code remembers facts. This teaches it principles.</p>
     </div>
     <p class="hero-pitch">You correct Claude once. It should never make that mistake again &mdash; in any project, any session, forever.<br>That&rsquo;s what this does. One slash command: <code style="color:var(--synapse)">/distill</code></p>
-    <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
-    <p class="install-note">yes it&rsquo;s a curl|bash. <a href="https://github.com/tomacco/aura-distill/blob/main/install.sh" target="_blank" style="color:var(--synapse)">read it first</a> if you&rsquo;re the responsible kind. it&rsquo;s 100 lines, no sudo, writes only to ~/.claude/.</p>
+    <div class="install-tabs">
+        <button class="install-tab active" onclick="switchTab('mac')">macOS</button>
+        <button class="install-tab" onclick="switchTab('linux')">Linux</button>
+        <button class="install-tab" onclick="switchTab('windows')">Windows</button>
+    </div>
+    <div class="install-panel active" id="panel-mac">
+        <div class="install-cmd" id="install-cmd" onclick="copyCmd(event, 'brew install tomacco/aura-distill/aura-distill && aura-distill install')">brew install tomacco/aura-distill/aura-distill && aura-distill install</div>
+        <p class="install-note">or: <span style="color:var(--synapse);cursor:pointer" onclick="copyCmd(event, 'curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash')">curl -sL &hellip;/install.sh | bash</span> &mdash; <a href="https://github.com/tomacco/aura-distill/blob/main/install.sh" target="_blank" style="color:var(--synapse)">read it first</a> if you&rsquo;re the responsible kind.</p>
+    </div>
+    <div class="install-panel" id="panel-linux">
+        <div class="install-cmd" onclick="copyCmd(event, 'curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash')">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
+        <p class="install-note">also works via <span style="color:var(--synapse);cursor:pointer" onclick="copyCmd(event, 'brew install tomacco/aura-distill/aura-distill && aura-distill install')">Homebrew on Linux</span>. no sudo, writes only to ~/.claude/.</p>
+    </div>
+    <div class="install-panel" id="panel-windows">
+        <div class="install-cmd" onclick="copyCmd(event, 'irm https://raw.githubusercontent.com/tomacco/aura-distill/main/install.ps1 | iex')">irm https://raw.githubusercontent.com/tomacco/aura-distill/main/install.ps1 | iex</div>
+        <p class="install-note">PowerShell. no admin required, writes only to %USERPROFILE%\.claude\.</p>
+    </div>
     <div class="star-row">
         <a class="github-button" href="https://github.com/tomacco/aura-distill" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star tomacco/aura-distill on GitHub">Star</a>
     </div>
@@ -1786,12 +1849,12 @@
             <span class="score-label">Average improvement</span>
             <span class="score-value">+6.0<span class="score-unit">/12</span></span>
         </div>
-        <p class="results-note">5 scenarios tested. Full methodology, raw outputs, and persona details in <a href="https://github.com/tomacco/aura-distill/blob/main/docs/research.md" style="color:var(--synapse)">docs/research.md</a></p>
+        <p class="results-note">5 scenarios tested. Full methodology, raw outputs, and persona details in the <a href="https://tomacco.github.io/aura-distill/research/" style="color:var(--synapse)">research site</a></p>
     </div>
 </div>
 
 <div class="install-mid reveal">
-    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
+    <div class="install-cmd" onclick="copyCmd(event, currentCmd())"><span class="mid-cmd-text"></span></div>
     <p class="install-mid-note">convinced yet? no? keep scrolling, we have graphs.</p>
 </div>
 
@@ -1869,7 +1932,7 @@
 </div>
 
 <div class="install-mid reveal">
-    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
+    <div class="install-cmd" onclick="copyCmd(event, currentCmd())"><span class="mid-cmd-text"></span></div>
     <p class="install-mid-note">still reading? you&rsquo;re thorough. we respect that. the install script is too.</p>
 </div>
 
@@ -1915,15 +1978,15 @@
         </details>
         <details class="faq-item reveal">
             <summary>How do I uninstall?</summary>
-            <p><code>rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md</code><br>That's it. Your knowledge files are yours &mdash; back them up first if you want to keep them.</p>
+            <p><code>rm -f ~/.claude/commands/distill.md ~/.claude/rules/distill.md ~/.claude/distill/distill-process.md ~/.claude/distill/distill-monitor.md ~/.claude/distill/.version</code><br>Or <code>aura-distill uninstall</code> if installed via Homebrew. Your knowledge files in ~/.claude/distill/ are preserved.</p>
         </details>
     </div>
 </div>
 
 
 <div class="cta">
-    <div class="install-cmd" onclick="copyInstall(event)" style="max-width:600px;margin:0 auto 1.5rem;">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
-    <a href="https://github.com/tomacco/aura-distill" class="cta-link">View source on GitHub</a>
+    <div class="install-cmd" onclick="copyCmd(event, currentCmd())" style="max-width:600px;margin:0 auto 1.5rem;"><span class="mid-cmd-text"></span></div>
+    <a href="https://github.com/tomacco/aura-distill" class="cta-link">View source on GitHub</a> &middot; <a href="https://tomacco.github.io/aura-distill/research/" class="cta-link">Research &amp; methodology</a>
     <p style="margin-top:1rem;font-size:0.72rem;color:var(--dim);">you made it to the bottom. that&rsquo;s commitment. reward yourself with an install.</p>
 </div>
 
@@ -2054,9 +2117,38 @@ function animateBurst() {
     }
 }
 
+// ═══ OS TAB SWITCHING ═══
+let activeOS = 'mac';
+const cmds = {
+    mac: 'brew install tomacco/aura-distill/aura-distill && aura-distill install',
+    linux: 'curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash',
+    windows: 'irm https://raw.githubusercontent.com/tomacco/aura-distill/main/install.ps1 | iex'
+};
+
+// Auto-detect OS
+(function detectOS() {
+    const ua = navigator.userAgent || navigator.platform || '';
+    if (/Win/.test(ua)) activeOS = 'windows';
+    else if (/Linux/.test(ua) && !/Android/.test(ua)) activeOS = 'linux';
+    else activeOS = 'mac';
+    switchTab(activeOS);
+})();
+
+function switchTab(os) {
+    activeOS = os;
+    document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.install-tab[onclick*="${os}"]`).classList.add('active');
+    const panel = document.getElementById('panel-' + os);
+    if (panel) panel.classList.add('active');
+    // Update mid-page install commands
+    document.querySelectorAll('.mid-cmd-text').forEach(el => { el.textContent = cmds[os]; });
+}
+
+function currentCmd() { return cmds[activeOS]; }
+
 // ═══ COPY WITH EFFECTS ═══
-function copyInstall(e) {
-    const cmd = 'curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash';
+function copyCmd(e, cmd) {
     navigator.clipboard.writeText(cmd);
 
     // Get click position for burst origin
@@ -2076,7 +2168,7 @@ function copyInstall(e) {
     flash.classList.add('fire');
 
     // Cmd element pulse
-    const cmdEl = document.getElementById('install-cmd');
+    const cmdEl = e.currentTarget.closest('.install-cmd') || e.currentTarget;
     cmdEl.classList.add('copied');
     setTimeout(() => cmdEl.classList.remove('copied'), 1500);
 

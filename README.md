@@ -42,6 +42,12 @@ We A/B tested the same prompts with and without distill knowledge. Same model, s
 
 ## Installation
 
+**macOS** (Homebrew):
+```bash
+brew install tomacco/aura-distill/aura-distill
+aura-distill install
+```
+
 **macOS / Linux / WSL** (bash):
 ```bash
 curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash
@@ -141,17 +147,25 @@ Claude with distill **pushes back** when you're about to make a mistake it alrea
 
 ## Uninstall
 
+If installed via Homebrew:
+```bash
+aura-distill uninstall
+brew uninstall aura-distill
+```
+
 **macOS / Linux / WSL:**
 ```bash
-rm -rf ~/.claude/distill/ ~/.claude/commands/distill.md ~/.claude/rules/distill.md
+rm -f ~/.claude/commands/distill.md ~/.claude/rules/distill.md
+rm -f ~/.claude/distill/distill-process.md ~/.claude/distill/distill-monitor.md ~/.claude/distill/.version
 ```
 
 **Windows** (PowerShell):
 ```powershell
-Remove-Item -Recurse -Force $HOME\.claude\distill, $HOME\.claude\commands\distill.md, $HOME\.claude\rules\distill.md
+Remove-Item -Force $HOME\.claude\commands\distill.md, $HOME\.claude\rules\distill.md
+Remove-Item -Force $HOME\.claude\distill\distill-process.md, $HOME\.claude\distill\distill-monitor.md, $HOME\.claude\distill\.version
 ```
 
-Your knowledge files are yours. Back them up if you want to keep them.
+Your knowledge files in `~/.claude/distill/` are preserved. They're yours.
 
 ---
 
