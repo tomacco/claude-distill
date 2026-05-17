@@ -4,7 +4,7 @@
 export function createShell({ body, addLine, killCursors, startClaude }) {
     let buf = '';
 
-    // ── Data (before headline to avoid TDZ — const is not hoisted) ──
+    // ── Data (must be before headline — avoids TDZ) ──
 
     const cmds = {
         ls: (a) => {
@@ -68,7 +68,7 @@ export function createShell({ body, addLine, killCursors, startClaude }) {
         cur = prompt();
     }
 
-    // ── Private ──
+    // ── Private: Output rendering ──
 
     function appendOutput(html) {
         const el = document.createElement('div');

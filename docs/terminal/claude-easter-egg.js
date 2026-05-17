@@ -114,19 +114,19 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
     }
 
     function showRestartPrompt() {
-        const el = document.createElement('div');
-        el.className = 'term-line visible';
-        el.style.fontSize = '0.68rem';
-        el.style.lineHeight = '1.6';
-        el.style.marginTop = '1rem';
-        el.innerHTML = '<span style="color:#565f89">Press any key to restart...</span><span class="term-cursor"></span>';
-        body.appendChild(el);
+        const prompt = document.createElement('div');
+        prompt.className = 'term-line visible';
+        prompt.style.fontSize = '0.68rem';
+        prompt.style.lineHeight = '1.6';
+        prompt.style.marginTop = '1rem';
+        prompt.innerHTML = '<span style="color:#565f89">Press any key to restart...</span><span class="term-cursor"></span>';
+        body.appendChild(prompt);
         body.scrollTop = body.scrollHeight;
 
-        function onKey(e) {
+        function onRestart(e) {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
             e.preventDefault();
-            document.removeEventListener('keydown', onKey);
+            document.removeEventListener('keydown', onRestart);
             body.style.background = '';
             body.style.padding = '';
             body.style.overflow = '';
@@ -135,7 +135,7 @@ export function createClaudeEasterEgg({ body, addLine, showFooter, killCursors, 
             claudeReady = false;
             if (onPanicRestart) onPanicRestart();
         }
-        document.addEventListener('keydown', onKey);
+        document.addEventListener('keydown', onRestart);
     }
 
     function panicLines() {
