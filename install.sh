@@ -7,7 +7,7 @@ set -e
 
 
 
-VERSION="0.9.12"
+VERSION="0.9.13"
 
 BUILD="20260516-01"
 REPO="https://raw.githubusercontent.com/tomacco/claude-distill/main"
