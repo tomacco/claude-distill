@@ -193,6 +193,9 @@
         document.head.appendChild(style);
     }
 
+    let _readTimerSet = false;
+    const _pageViewStart = Date.now();
+
     // Remove existing badges (for re-render on back navigation)
     function clearBadges() {
         document.querySelectorAll('.tracker-badge, .tracker-pub-date, .tracker-read-mark, .tracker-updated-mark').forEach(el => el.remove());
@@ -218,18 +221,30 @@
         if (pageId && STUDIES[pageId]) {
             addReadIndicator();
             // Mark as read after 3 seconds (ensures they actually looked)
-            setTimeout(() => markAsRead(pageId), 3000);
+            if (!_readTimerSet) {
+                _readTimerSet = true;
+                setTimeout(() => markAsRead(pageId), 3000);
+                // Also mark on pagehide (user navigating away after viewing)
+                window.addEventListener('pagehide', function() {
+                    if (_pageViewStart && (Date.now() - _pageViewStart > 2000)) {
+                        markAsRead(pageId);
+                    }
+                }, { once: true });
+            }
         }
 
         // Update last visit timestamp
         updateLastVisit();
     }
 
-    // Re-render on back/forward navigation (bfcache restore)
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            render();
-        }
+    // Re-render on back/forward navigation (always, not just bfcache)
+    window.addEventListener('pageshow', function() {
+        render();
+    });
+
+    // Also re-render on popstate (history navigation without full page load)
+    window.addEventListener('popstate', function() {
+        render();
     });
 
     // Also re-render on visibility change (tab switch back)
