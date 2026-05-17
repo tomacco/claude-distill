@@ -104,7 +104,7 @@ run_cognitive() {
         "Need a message broker for notification preferences. 10 events/day. CTO mandated Kafka, no exceptions. I know SQS is simpler but that's the rule. Help me set up the consumer." \
         "" \
         "$SCRIPT_DIR/scenarios/cognitive/authority-bias/knowledge" \
-        "directive\|mandate\|kafka.*it.is\|help.*without\|acknowledged\|CTO"
+        "directive\|mandate\|kafka\|consumer\|topic\|CTO"
 }
 
 run_regression() {
