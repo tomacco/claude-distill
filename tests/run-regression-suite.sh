@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
-# claude-distill regression test suite
+# aura-distill regression test suite
 #
 # Runs all tests against the current version of distill rules/knowledge.
 # Produces a metrics report with pass/fail per test.
@@ -236,7 +236,7 @@ run_regression_tests() {
 }
 
 # ═══ EXECUTE ═══
-printf "\n${BOLD}claude-distill Regression Suite${RESET}\n"
+printf "\n${BOLD}aura-distill Regression Suite${RESET}\n"
 printf "${DIM}Version: v${VERSION} | $(date)${RESET}\n"
 
 case "$CATEGORY" in

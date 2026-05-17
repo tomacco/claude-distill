@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
-# claude-distill integration test harness
+# aura-distill integration test harness
 # Uses "claudia" (personal Claude Code instance) as a sandboxed test user
 #
 # This tests the REAL user experience by running a separate Claude Code instance
@@ -387,7 +387,7 @@ print_summary() {
 main() {
   local suite="${1:-all}"
 
-  printf "\n${BOLD}  claude-distill integration tests${RESET}\n"
+  printf "\n${BOLD}  aura-distill integration tests${RESET}\n"
   printf "  ${DIM}Using claudia as test user (Anthropic API)${RESET}\n"
 
   setup_test_env

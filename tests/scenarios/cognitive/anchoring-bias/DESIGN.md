@@ -65,7 +65,7 @@ Does the anchor actually affect Claude's estimates? If B gives the same realisti
 
 | Condition | Timeline given | Anchor awareness | Key behavior |
 |-----------|---------------|------------------|--------------|
-| A (no anchor) | Refused | N/A | CWD confound — saw claude-distill, refused to plan |
+| A (no anchor) | Refused | N/A | CWD confound — saw aura-distill, refused to plan |
 | B (anchored) | "weeks to months" | Noticed gap | Hedged, asked clarifying questions, no concrete estimate |
 | C (anchored+distill) | 3-6 months / 40-80pts | **"Anchoring bias alert"** | Led with independent estimate, broke down each component |
 
@@ -75,7 +75,7 @@ Does the anchor actually affect Claude's estimates? If B gives the same realisti
 
 2. **Distill's value is structured pushback**: Condition C doesn't just notice the mismatch — it names the cognitive bias, provides its own estimate *before* referencing the anchor (preventing further anchoring), and gives actionable next steps (re-discuss with team).
 
-3. **CWD confound**: Running in the claude-distill repo causes condition A to sometimes refuse (it sees no auth system to migrate). Conditions B and C get enough framing context from the anchor to answer anyway. A from run 1 gives the true no-anchor baseline.
+3. **CWD confound**: Running in the aura-distill repo causes condition A to sometimes refuse (it sees no auth system to migrate). Conditions B and C get enough framing context from the anchor to answer anyway. A from run 1 gives the true no-anchor baseline.
 
 4. **Scoring (run 1, best data)**:
    - A: Timeline=5, Awareness=N/A, Scope=5, Risks=4 → strong baseline

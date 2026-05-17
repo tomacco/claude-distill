@@ -1,4 +1,4 @@
-// claude-distill research — theme + navigation
+// aura-distill research — theme + navigation
 (function() {
     // Apply saved or system theme immediately (before paint)
     const saved = localStorage.getItem('distill-mode');

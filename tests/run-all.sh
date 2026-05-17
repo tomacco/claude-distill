@@ -163,7 +163,7 @@ KNOWLEDGE
 }
 
 # ═══ EXECUTE ═══
-printf "\n${BOLD}claude-distill Full Test Suite${RESET}\n"
+printf "\n${BOLD}aura-distill Full Test Suite${RESET}\n"
 printf "${DIM}Isolation: validated protocol (lib/isolate.sh)${RESET}\n"
 printf "${DIM}Started: $(date)${RESET}\n"
 

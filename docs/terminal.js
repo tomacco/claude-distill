@@ -1,4 +1,4 @@
-// ═══ TERMINAL ENGINE — claude-distill landing page ═══
+// ═══ TERMINAL ENGINE — aura-distill landing page ═══
 // Data-driven animation + interactive shell + easter eggs
 gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
@@ -424,7 +424,7 @@ function initShell() {
                 gsap.to(terminalEl,{backgroundColor:'#fff',duration:0.05,yoyo:true,repeat:3,onComplete:()=>gsap.set(terminalEl,{backgroundColor:''})});
                 setTimeout(()=>{
                     body.style.background='#000';body.style.padding='2rem';body.style.overflow='hidden';body.innerHTML='';
-                    const p=['<span style="color:#fff;font-weight:bold">*** KERNEL PANIC ***</span>','','<span style="color:#aaa">panic(cpu 4): "Mythos context overflow"</span>','<span style="color:#aaa">Memory ID: 0xdeadbeef</span>','','<span style="color:#888">  claude_mythos_init + 0x420</span>','<span style="color:#888">  context_window_overflow + 0x69</span>','<span style="color:#888">  infinite_recursion_handler + 0x1337</span>','<span style="color:#888">  reality_check_failed + 0xdead</span>','<span style="color:#888">  hal9000_compat_layer + 0x2001</span>','','<span style="color:#fff;font-weight:bold">** don\'t use Mythos next time **</span>','','<span style="color:#666">tip: try claude-distill instead.</span>','<span style="color:#666">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</span>'];
+                    const p=['<span style="color:#fff;font-weight:bold">*** KERNEL PANIC ***</span>','','<span style="color:#aaa">panic(cpu 4): "Mythos context overflow"</span>','<span style="color:#aaa">Memory ID: 0xdeadbeef</span>','','<span style="color:#888">  claude_mythos_init + 0x420</span>','<span style="color:#888">  context_window_overflow + 0x69</span>','<span style="color:#888">  infinite_recursion_handler + 0x1337</span>','<span style="color:#888">  reality_check_failed + 0xdead</span>','<span style="color:#888">  hal9000_compat_layer + 0x2001</span>','','<span style="color:#fff;font-weight:bold">** don\'t use Mythos next time **</span>','','<span style="color:#666">tip: try aura-distill instead.</span>','<span style="color:#666">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</span>'];
                     let i=0;(function go(){if(i>=p.length)return;const l=document.createElement('div');l.className='term-line visible';l.innerHTML=p[i]||'&nbsp;';l.style.fontSize='0.68rem';l.style.lineHeight='1.6';body.appendChild(l);i++;setTimeout(go,i<3?100:40);})();
                 },300);
             },1500);
@@ -543,7 +543,7 @@ function initShell() {
                     <div class="classic-menu-dropdown">
                         <div class="classic-menu-dropdown-item disabled">About This Computer</div>
                         <div class="classic-menu-sep"></div>
-                        <div class="classic-menu-dropdown-item disabled">claude-distill v0.7</div>
+                        <div class="classic-menu-dropdown-item disabled">aura-distill v0.7</div>
                         <div class="classic-menu-dropdown-item disabled">\u201cI distilled knowledge</div>
                         <div class="classic-menu-dropdown-item disabled">&nbsp;before it was cool.\u201d</div>
                         <div class="classic-menu-dropdown-item disabled">&nbsp;\u2014 HyperCard, 1987</div>
@@ -568,7 +568,7 @@ function initShell() {
                     <div class="classic-titlebar">
                         <div class="classic-close-box" id="classic-close-box"></div>
                         <div class="classic-titlebar-stripes"></div>
-                        <div class="classic-window-title">claude-distill</div>
+                        <div class="classic-window-title">aura-distill</div>
                     </div>
                     <div class="classic-infobar">
                         <span>${totalItems} items</span>
@@ -592,7 +592,7 @@ function initShell() {
 
                 <div class="classic-file-icon classic-app-icon classic-desktop-icon" id="classic-distill-app">
                     <div class="classic-neural-icon"><canvas id="classic-neural-canvas" width="32" height="32"></canvas></div>
-                    <div class="classic-file-name">claude-distill</div>
+                    <div class="classic-file-name">aura-distill</div>
                 </div>
             </div>
 

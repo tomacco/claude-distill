@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>claude-distill</title>
+    <title>aura-distill</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1643,12 +1643,12 @@
         <p class="tagline" style="margin-top: 0.5rem; opacity: 0.7; font-size: clamp(0.6rem, 1.2vw, 0.8rem);">Claude Code remembers facts. This teaches it principles.</p>
     </div>
     <p class="hero-pitch">You correct Claude once. It should never make that mistake again &mdash; in any project, any session, forever.<br>That&rsquo;s what this does. One slash command: <code style="color:var(--synapse)">/distill</code></p>
-    <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
-    <p class="install-note">yes it&rsquo;s a curl|bash. <a href="https://github.com/tomacco/claude-distill/blob/main/install.sh" target="_blank" style="color:var(--synapse)">read it first</a> if you&rsquo;re the responsible kind. it&rsquo;s 100 lines, no sudo, writes only to ~/.claude/.</p>
+    <div class="install-cmd" id="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
+    <p class="install-note">yes it&rsquo;s a curl|bash. <a href="https://github.com/tomacco/aura-distill/blob/main/install.sh" target="_blank" style="color:var(--synapse)">read it first</a> if you&rsquo;re the responsible kind. it&rsquo;s 100 lines, no sudo, writes only to ~/.claude/.</p>
     <div class="star-row">
-        <a class="github-button" href="https://github.com/tomacco/claude-distill" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star tomacco/claude-distill on GitHub">Star</a>
+        <a class="github-button" href="https://github.com/tomacco/aura-distill" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star tomacco/aura-distill on GitHub">Star</a>
     </div>
-    <a href="https://github.com/tomacco/claude-distill" class="star-beg" target="_blank">if this saves you from explaining something twice, mash that star button. my self-worth depends on a number going up. <span style="opacity:0.5">una estrellita shurmano.</span></a>
+    <a href="https://github.com/tomacco/aura-distill" class="star-beg" target="_blank">if this saves you from explaining something twice, mash that star button. my self-worth depends on a number going up. <span style="opacity:0.5">una estrellita shurmano.</span></a>
     <div class="scroll-hint" id="scroll-hint">
         <span class="scroll-text">scroll</span>
         <div class="scroll-arrow">
@@ -1786,12 +1786,12 @@
             <span class="score-label">Average improvement</span>
             <span class="score-value">+6.0<span class="score-unit">/12</span></span>
         </div>
-        <p class="results-note">5 scenarios tested. Full methodology, raw outputs, and persona details in <a href="https://github.com/tomacco/claude-distill/blob/main/docs/research.md" style="color:var(--synapse)">docs/research.md</a></p>
+        <p class="results-note">5 scenarios tested. Full methodology, raw outputs, and persona details in <a href="https://github.com/tomacco/aura-distill/blob/main/docs/research.md" style="color:var(--synapse)">docs/research.md</a></p>
     </div>
 </div>
 
 <div class="install-mid reveal">
-    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
     <p class="install-mid-note">convinced yet? no? keep scrolling, we have graphs.</p>
 </div>
 
@@ -1869,7 +1869,7 @@
 </div>
 
 <div class="install-mid reveal">
-    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
+    <div class="install-cmd" onclick="copyInstall(event)">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
     <p class="install-mid-note">still reading? you&rsquo;re thorough. we respect that. the install script is too.</p>
 </div>
 
@@ -1922,8 +1922,8 @@
 
 
 <div class="cta">
-    <div class="install-cmd" onclick="copyInstall(event)" style="max-width:600px;margin:0 auto 1.5rem;">curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash</div>
-    <a href="https://github.com/tomacco/claude-distill" class="cta-link">View source on GitHub</a>
+    <div class="install-cmd" onclick="copyInstall(event)" style="max-width:600px;margin:0 auto 1.5rem;">curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash</div>
+    <a href="https://github.com/tomacco/aura-distill" class="cta-link">View source on GitHub</a>
     <p style="margin-top:1rem;font-size:0.72rem;color:var(--dim);">you made it to the bottom. that&rsquo;s commitment. reward yourself with an install.</p>
 </div>
 
@@ -2056,7 +2056,7 @@ function animateBurst() {
 
 // ═══ COPY WITH EFFECTS ═══
 function copyInstall(e) {
-    const cmd = 'curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash';
+    const cmd = 'curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash';
     navigator.clipboard.writeText(cmd);
 
     // Get click position for burst origin

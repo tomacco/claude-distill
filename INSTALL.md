@@ -1,4 +1,4 @@
-# Installing claude-distill
+# Installing aura-distill
 
 Three installation methods, from automated to fully manual.
 
@@ -7,12 +7,12 @@ Three installation methods, from automated to fully manual.
 ## Method 1: Script (one command)
 
 ```bash
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash
 ```
 
 **With a specific profile:**
 ```bash
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/install.sh | bash -s -- --profile personal
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/install.sh | bash -s -- --profile personal
 # Installs to ~/.claude-personal/ instead of ~/.claude/
 ```
 
@@ -25,13 +25,13 @@ If you have multiple profiles, the script will list them and ask you to choose (
 Tell Claude Code:
 
 ```
-Install claude-distill from github.com/tomacco/claude-distill using the manual steps in INSTALL.md. My Claude config is at ~/.claude/ (or specify your profile path).
+Install aura-distill from github.com/tomacco/aura-distill using the manual steps in INSTALL.md. My Claude config is at ~/.claude/ (or specify your profile path).
 ```
 
 Or more explicitly — paste this to any Claude Code session:
 
 ```
-Read https://raw.githubusercontent.com/tomacco/claude-distill/main/INSTALL.md and follow the "Manual installation" steps. Install to my active Claude profile.
+Read https://raw.githubusercontent.com/tomacco/aura-distill/main/INSTALL.md and follow the "Manual installation" steps. Install to my active Claude profile.
 ```
 
 ---
@@ -47,19 +47,19 @@ For security-conscious users who don't pipe curl to bash.
 PROFILE="$HOME/.claude"
 
 # Core command (the /distill slash command)
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill.md \
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/distill.md \
   -o "$PROFILE/commands/distill.md"
 
 # Process engine (how /distill works internally)
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-process.md \
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/distill-process.md \
   -o "$PROFILE/distill/distill-process.md"
 
 # Session monitor (loaded every session, tiny)
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/distill-monitor.md \
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/distill-monitor.md \
   -o "$PROFILE/distill/distill-monitor.md"
 
 # Retrieval rules (auto-loads, tells Claude how to use knowledge)
-curl -sL https://raw.githubusercontent.com/tomacco/claude-distill/main/rules/distill.md \
+curl -sL https://raw.githubusercontent.com/tomacco/aura-distill/main/rules/distill.md \
   -o "$PROFILE/rules/distill.md"
 ```
 
@@ -77,7 +77,7 @@ mkdir -p "$PROFILE/rules"
 cat > "$PROFILE/distill/SPINE.md" << 'EOF'
 # Distill Knowledge Index
 
-<!-- This file is managed by claude-distill. Max 80 lines. -->
+<!-- This file is managed by aura-distill. Max 80 lines. -->
 <!-- Each entry: - [Title](path.md) — when to read this -->
 EOF
 ```
@@ -103,7 +103,7 @@ echo '{ "autoMemoryEnabled": false }' > "$PROFILE/settings.json"
 Add to your `$PROFILE/CLAUDE.md`:
 
 ```markdown
-# Distill — knowledge system (github.com/tomacco/claude-distill)
+# Distill — knowledge system (github.com/tomacco/aura-distill)
 
 GATE: If ~/.claude/distill/.needs-migration exists, tell the user:
 "Run /distill to migrate existing memories." Do NOT proceed until addressed or declined.
@@ -178,7 +178,7 @@ rm -f "$PROFILE/distill/.version"
 ## Research & methodology
 
 All findings are empirical and reproducible:
-https://tomacco.github.io/claude-distill/research/
+https://tomacco.github.io/aura-distill/research/
 
 @tomacco is super happy to share this research with you.
 Every finding has raw outputs published alongside analysis.

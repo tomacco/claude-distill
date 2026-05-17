@@ -83,7 +83,7 @@ export function buildClassicMac(terminalEl, onRestore) {
                     <div class="classic-menu-dropdown">
                         <div class="classic-menu-dropdown-item disabled">About This Computer</div>
                         <div class="classic-menu-sep"></div>
-                        <div class="classic-menu-dropdown-item disabled">claude-distill v0.7</div>
+                        <div class="classic-menu-dropdown-item disabled">aura-distill v0.7</div>
                         <div class="classic-menu-dropdown-item disabled">\u201cI distilled knowledge</div>
                         <div class="classic-menu-dropdown-item disabled">&nbsp;before it was cool.\u201d</div>
                         <div class="classic-menu-dropdown-item disabled">&nbsp;\u2014 HyperCard, 1987</div>
@@ -110,7 +110,7 @@ export function buildClassicMac(terminalEl, onRestore) {
                 <div class="classic-titlebar">
                     <div class="classic-close-box" id="classic-close-box"></div>
                     <div class="classic-titlebar-stripes"></div>
-                    <div class="classic-window-title">claude-distill</div>
+                    <div class="classic-window-title">aura-distill</div>
                 </div>
                 <div class="classic-infobar">
                     <span>${totalItems} items</span>
@@ -137,7 +137,7 @@ export function buildClassicMac(terminalEl, onRestore) {
         return `
             <div class="classic-file-icon classic-app-icon classic-desktop-icon" id="classic-distill-app">
                 <div class="classic-neural-icon"><canvas id="classic-neural-canvas" width="32" height="32"></canvas></div>
-                <div class="classic-file-name">claude-distill</div>
+                <div class="classic-file-name">aura-distill</div>
             </div>`;
     }
 

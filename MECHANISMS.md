@@ -1,6 +1,6 @@
 # Mechanisms Tracker
 
-Living document of the mechanisms in claude-distill, their current state, and improvement ideas.
+Living document of the mechanisms in aura-distill, their current state, and improvement ideas.
 
 ## Concurrency & Reliability
 
