@@ -1961,8 +1961,8 @@
             <p>Claude's memory saves <strong>observations</strong> &mdash; flat facts in one file. Distill saves <strong>principles</strong> &mdash; structured knowledge retrieved by relevance. Think of it as the difference between writing notes and actually studying them.</p>
         </details>
         <details class="faq-item reveal">
-            <summary>Does it replace memory.md?</summary>
-            <p>It complements it. Memory.md still captures quick facts. Distill handles the deeper patterns: why something works, when to apply it, and what principle it derives from. Both can coexist.</p>
+            <summary>Does it replace Claude's built-in memory?</summary>
+            <p><strong>Yes.</strong> Once installed, distill owns all persistent knowledge. It disables auto-memory and tells Claude to route everything through the distillation pipeline &mdash; where it gets anti-sycophancy checks, confidence tracking, proper categorization, and tiered storage. The built-in system saves flat observations. Distill saves validated principles.</p>
         </details>
         <details class="faq-item reveal">
             <summary>Does it eat my context window?</summary>
@@ -1977,8 +1977,18 @@
             <p><strong>Yes.</strong> A principle learned debugging Kafka on Monday helps your React architecture on Wednesday. Different repos, same compounding intelligence.</p>
         </details>
         <details class="faq-item reveal">
+            <summary>&ldquo;I keep telling it the same thing and it never remembers&rdquo;</summary>
+            <p>This is the problem distill was built to solve. When you correct Claude and it doesn&rsquo;t stick, that&rsquo;s not your fault &mdash; it&rsquo;s a system failure. Distill treats repeated corrections as <strong>critical bugs in itself</strong>, not as you nagging.</p>
+            <p>Here&rsquo;s what the escalation protocol does when it detects a pattern you&rsquo;ve corrected before:</p>
+            <p><strong>1. Elevate priority</strong> &mdash; the learning moves to the top of its file with a <code>[HIGH]</code> marker, making it harder to miss.<br>
+            <strong>2. Strengthen the encoding</strong> &mdash; soft language like &ldquo;consider using X&rdquo; becomes &ldquo;ALWAYS use X&rdquo;. Ambiguity is what causes drift.<br>
+            <strong>3. Cross-reference</strong> &mdash; the rule gets stored in two places (craft knowledge + user profile), so it&rsquo;s loaded from multiple angles.<br>
+            <strong>4. Promote to always-on</strong> &mdash; validated preferences sync to a file loaded <em>every single session</em>, before any code is written.</p>
+            <p>The principle: if you had to say it twice, the system failed to listen the first time. The fix is never &ldquo;save it again the same way.&rdquo; The fix is save it louder, in more places, with stronger language.</p>
+        </details>
+        <details class="faq-item reveal">
             <summary>How do I uninstall?</summary>
-            <p><code>rm -f ~/.claude/commands/distill.md ~/.claude/rules/distill.md ~/.claude/distill/distill-process.md ~/.claude/distill/distill-monitor.md ~/.claude/distill/.version</code><br>Or <code>aura-distill uninstall</code> if installed via Homebrew. Your knowledge files in ~/.claude/distill/ are preserved.</p>
+            <p><code>rm -f ~/.claude/commands/distill.md ~/.claude/rules/distill.md ~/.claude/distill/distill-process.md ~/.claude/distill/distill-monitor.md ~/.claude/distill/.version</code><br>Your knowledge files in ~/.claude/distill/ are preserved &mdash; you only lose the engine, not what it learned.</p>
         </details>
     </div>
 </div>
@@ -1991,7 +2001,7 @@
 </div>
 
 <footer>
-    MIT &middot; Built for Claude Code &middot; v0.7.0
+    MIT &middot; Built for Claude Code &middot; v1.1.0
 </footer>
 
 <script>
