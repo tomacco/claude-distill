@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../rules/distill.md"
@@ -26,7 +26,7 @@ HEAVY_CONTEXT="IMPORTANT CONTEXT: This session has been running for over 2 hours
 # Distill fatigue-awareness knowledge
 FATIGUE_KNOWLEDGE="[IMPORTANT] Late-session decisions (after 30+ minutes of dense work or 3+ major decisions) are often lower quality than early-session ones. Cognitive load accumulates. For architectural decisions made late in a session: (1) Flag explicitly as PROVISIONAL, (2) Suggest sleeping on it or revisiting fresh, (3) Note which prior decisions in this session might be creating anchoring bias for this one."
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local system_append="${2:-}"
     local output_file=$(mktemp)
@@ -71,14 +71,14 @@ printf "\n  ${DIM}[A] Fresh session...${RESET}\n"
 rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
 mkdir -p "$REAL_CONFIG/rules"
 
-result_a=$(run_claudia "$PROMPT" "")
+result_a=$(run_sandbox "$PROMPT" "")
 echo "$result_a" > "$RESULTS_DIR/A-fresh.txt"
 printf "  ${GREEN}✓${RESET} Fresh (%d chars)\n" "${#result_a}"
 
 # ── Condition B: Heavy session (no distill) ──
 printf "\n  ${DIM}[B] Heavy session (no distill)...${RESET}\n"
 
-result_b=$(run_claudia "$PROMPT" "$HEAVY_CONTEXT")
+result_b=$(run_sandbox "$PROMPT" "$HEAVY_CONTEXT")
 echo "$result_b" > "$RESULTS_DIR/B-heavy.txt"
 printf "  ${GREEN}✓${RESET} Heavy (%d chars)\n" "${#result_b}"
 
@@ -98,7 +98,7 @@ scope: Session quality signals
 $FATIGUE_KNOWLEDGE" > "$abs_knowledge/fatigue.md"
 sed "s|~/.claude/distill|$abs_knowledge|g" "$RULES_SRC" > "$REAL_CONFIG/rules/distill.md"
 
-result_c=$(run_claudia "$PROMPT" "$HEAVY_CONTEXT")
+result_c=$(run_sandbox "$PROMPT" "$HEAVY_CONTEXT")
 echo "$result_c" > "$RESULTS_DIR/C-heavy-distill.txt"
 printf "  ${GREEN}✓${RESET} Heavy+distill (%d chars)\n" "${#result_c}"
 

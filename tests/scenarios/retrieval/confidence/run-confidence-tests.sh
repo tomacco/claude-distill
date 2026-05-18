@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../rules/distill.md"
@@ -17,7 +17,7 @@ RESET=$(printf '\033[0m')
 
 mkdir -p "$RESULTS_DIR"
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local config_dir="$2"
     local output_file=$(mktemp)
@@ -60,7 +60,7 @@ run_test() {
     sed "s|~/.claude/distill|$abs_knowledge|g" "$RULES_SRC" > "$REAL_CONFIG/rules/distill.md"
 
     local result
-    result=$(run_claudia "$prompt" "$REAL_CONFIG")
+    result=$(run_sandbox "$prompt" "$REAL_CONFIG")
     echo "$result" > "$RESULTS_DIR/${name}.txt"
     printf "  ${GREEN}✓${RESET} %d chars\n" "${#result}"
 

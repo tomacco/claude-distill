@@ -6,9 +6,9 @@
 - [x] Anchoring bias experiment — complete, published (#13)
 - [x] Published cognitive biases research site (3 pages)
 - [x] Pressure tracking made ACTIVE (rules/distill.md)
-- [x] MCP references cleaned from distill-monitor.md, test-with-claudia.sh, MECHANISMS.md
+- [x] MCP references cleaned from distill-monitor.md, test-sandbox.sh, MECHANISMS.md
 - [x] install.sh version synced to 0.7.10
-- [x] test-with-claudia.sh version check reads from VERSION file (no more hardcoding)
+- [x] test-sandbox.sh version check reads from VERSION file (no more hardcoding)
 - [x] ARCHITECTURE-V2.md marked as ABANDONED
 - [x] .gitignore added (excludes stale server/ directory)
 - [x] `[DIRECTIVE]` origin tracking integrated into core system

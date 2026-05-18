@@ -16,7 +16,7 @@
 #   isolate_end
 # ═══════════════════════════════════════════════════════════════════════════════
 
-REAL_CONFIG="${REAL_CONFIG:-$HOME/.claude-personal}"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-${REAL_CONFIG:-$HOME/.claude}}"
 CLAUDE_BIN="${CLAUDE_BIN:-node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js}"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="${RULES_SRC:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/rules/distill.md}"

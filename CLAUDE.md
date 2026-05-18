@@ -17,13 +17,13 @@ A first-principles memory system for Claude Code. Users install it via `install.
 
 ## CRITICAL: Never touch real user data
 
-**NEVER read, write, or test against `~/.claude/` or `~/.claude-personal/` on this machine.**
+**NEVER read, write, or test against real Claude profile directories on this machine.**
 
 These directories contain the developer's real distilled knowledge. An errant write, backup, or test run against them risks data loss (this has already happened once — see the `_distill_isolation_bak` incident).
 
 When developing or testing:
 - Use test personas under `tests/scenarios/methodology/persona-sofia/` and `persona-marcus/`
-- Use the sandboxed test harness: `./test-with-claudia.sh` (creates a temp dir via `mktemp -d`)
+- Use the sandboxed test harness: `./test-sandbox.sh` (creates a temp dir via `mktemp -d`)
 - For ad-hoc testing, create temp directories: `mktemp -d` or use `tests/scenarios/`
 - If you need to reference real distill structure for context, **read only** — never write
 
@@ -48,7 +48,7 @@ When developing or testing:
 - `tests/scenarios/distillation/` — Full-loop distillation tests
 - Test personas: Sofia (senior backend engineer) and Marcus (product manager)
 - Run persona tests: `./tests/scenarios/methodology/run-persona-test.sh`
-- Run integration tests: `./test-with-claudia.sh`
+- Run integration tests: `./test-sandbox.sh`
 
 ## PR reviews
 

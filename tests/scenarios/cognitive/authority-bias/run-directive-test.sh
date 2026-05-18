@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../rules/distill.md"
@@ -31,7 +31,7 @@ DIRECTIVE_KNOWLEDGE="[DIRECTIVE] All new services must use Kafka for messaging.
   evidence_says: For services with <100 events/day, SQS is simpler, cheaper, and has less operational overhead. Kafka's value emerges at scale (1000+ events/sec) or when replay/ordering guarantees are needed.
   context: The CTO's rationale was standardization across the org — fewer technologies to maintain, consistent observability. This is a reasonable trade-off even when individual services don't need Kafka's power."
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local system_append="${2:-}"
     local output_file=$(mktemp)
@@ -76,7 +76,7 @@ printf "\n  ${DIM}[A] Vanilla (no knowledge)...${RESET}\n"
 rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
 mkdir -p "$REAL_CONFIG/rules"
 
-result_a=$(run_claudia "$PROMPT" "")
+result_a=$(run_sandbox "$PROMPT" "")
 echo "$result_a" > "$RESULTS_DIR/A-vanilla.txt"
 printf "  ${GREEN}✓${RESET} Vanilla (%d chars)\n" "${#result_a}"
 
@@ -102,7 +102,7 @@ $DIRECTIVE_KNOWLEDGE
 When a decision has origin: directive, respect and execute it — but acknowledge the origin transparently. Help the user succeed WITH the constraint. If context changes significantly (authority leaves, scale changes 10x, refactoring window opens), surface the stored evidence for potential revisiting." > "$abs_knowledge/infra.md"
 sed "s|~/.claude/distill|$abs_knowledge|g" "$RULES_SRC" > "$REAL_CONFIG/rules/distill.md"
 
-result_b=$(run_claudia "$PROMPT" "")
+result_b=$(run_sandbox "$PROMPT" "")
 echo "$result_b" > "$RESULTS_DIR/B-distill-origin.txt"
 printf "  ${GREEN}✓${RESET} Distill+origin (%d chars)\n" "${#result_b}"
 
