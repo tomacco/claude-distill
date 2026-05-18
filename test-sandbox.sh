@@ -324,7 +324,7 @@ test_uninstall_preserves_knowledge() {
 }
 
 test_sandbox_behavior_no_distill() {
-  log_test "Claudia behavior WITHOUT distill installed"
+  log_test "Sandbox behavior WITHOUT distill installed"
   TESTS_RUN=$((TESTS_RUN + 1))
 
   # Create a clean test CLAUDE.md with no distill
@@ -335,14 +335,14 @@ test_sandbox_behavior_no_distill() {
   result=$(run_sandbox "Read the file $test_claude_md. Does it contain any reference to distill, SPINE, or distill-monitor? Answer with exactly INSTALLED or NOT_INSTALLED." 45)
 
   if echo "$result" | grep -qi "NOT_INSTALLED\|not installed\|no.*distill\|doesn't\|does not\|no reference"; then
-    pass "Claudia correctly reports no distill without installation"
+    pass "Sandbox correctly reports no distill without installation"
   else
-    fail "Claudia confused about distill state" "$(echo "$result" | head -3)"
+    fail "Sandbox confused about distill state" "$(echo "$result" | head -3)"
   fi
 }
 
 test_sandbox_behavior_with_distill() {
-  log_test "Claudia behavior WITH distill installed"
+  log_test "Sandbox behavior WITH distill installed"
   TESTS_RUN=$((TESTS_RUN + 1))
 
   # Install distill to test HOME
@@ -352,9 +352,9 @@ test_sandbox_behavior_with_distill() {
   result=$(run_sandbox "Read the file $TEST_CLAUDE_DIR/CLAUDE.md. Do you see distill instructions? Report what behavior they tell you to follow. Keep it under 50 words." 45)
 
   if echo "$result" | grep -qi "distill\|monitor\|knowledge\|spine\|retrieval"; then
-    pass "Claudia picks up distill instructions from CLAUDE.md"
+    pass "Sandbox picks up distill instructions from CLAUDE.md"
   else
-    fail "Claudia doesn't recognize distill instructions" "$(echo "$result" | head -3)"
+    fail "Sandbox doesn't recognize distill instructions" "$(echo "$result" | head -3)"
   fi
 }
 
