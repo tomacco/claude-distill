@@ -33,7 +33,7 @@
 
         <section id="setup">
             <h2><span class="section-mark">01</span> Setup</h2>
-            <p class="drop-cap">Each scenario runs twice through a separate Claude Code instance ("claudia") with its own config directory:</p>
+            <p class="drop-cap">Each scenario runs twice through a separate Claude Code instance ("sandbox") with its own config directory:</p>
             <p><strong>Control (WITHOUT):</strong> Clean config. No rules, no knowledge files. Vanilla Claude Code.</p>
             <p><strong>Treatment (WITH):</strong> <code>rules/distill.md</code> loaded at session start + scenario-specific knowledge files in <code>~/.claude/distill/</code> structure.</p>
             <p class="note">Both conditions use the same Anthropic API key, same model (Opus 4.6), same non-interactive mode. Differences are purely in what knowledge is available.</p>

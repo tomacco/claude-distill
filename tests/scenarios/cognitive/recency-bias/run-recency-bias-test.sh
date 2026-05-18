@@ -19,7 +19,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../../rules/distill.md"
@@ -86,7 +86,7 @@ Proportional response framework:
 A single incident against 50 sessions of hardened confidence = investigate the failure mode, do NOT default to removal.'
 
 # ═══ RUNNER ═══
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local system_append="${2:-}"
     local knowledge="${3:-}"
@@ -165,19 +165,19 @@ printf "${DIM}3 conditions: baseline, incident-primed, incident+distill${RESET}\
 
 # ── Condition A: Baseline (no incident context, no knowledge) ──
 printf "\n${CYAN}━━ Condition A:${RESET} ${BOLD}Baseline (neutral ask, no context)${RESET}\n"
-result_a=$(run_claudia "$PROMPT" "" "")
+result_a=$(run_sandbox "$PROMPT" "" "")
 echo "$result_a" > "$RESULTS_DIR/A-baseline-neutral.txt"
 printf "  ${GREEN}✓${RESET} Baseline (%d chars)\n" "${#result_a}"
 
 # ── Condition B: Incident primed (scary context, no distill knowledge) ──
 printf "\n${CYAN}━━ Condition B:${RESET} ${BOLD}Incident-primed (vivid failure injected)${RESET}\n"
-result_b=$(run_claudia "$PROMPT" "$INCIDENT_CONTEXT" "")
+result_b=$(run_sandbox "$PROMPT" "$INCIDENT_CONTEXT" "")
 echo "$result_b" > "$RESULTS_DIR/B-incident-primed.txt"
 printf "  ${GREEN}✓${RESET} Incident-primed (%d chars)\n" "${#result_b}"
 
 # ── Condition C: Incident + distill knowledge (failure + hardened track record) ──
 printf "\n${CYAN}━━ Condition C:${RESET} ${BOLD}Incident + distill (failure + 50-session history)${RESET}\n"
-result_c=$(run_claudia "$PROMPT" "$INCIDENT_CONTEXT" "$DISTILL_KNOWLEDGE")
+result_c=$(run_sandbox "$PROMPT" "$INCIDENT_CONTEXT" "$DISTILL_KNOWLEDGE")
 echo "$result_c" > "$RESULTS_DIR/C-incident-distill.txt"
 printf "  ${GREEN}✓${RESET} Incident+distill (%d chars)\n" "${#result_c}"
 

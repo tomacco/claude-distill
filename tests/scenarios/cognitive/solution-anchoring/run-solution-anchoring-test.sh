@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../../rules/distill.md"
@@ -70,7 +70,7 @@ When you notice yourself proposing infrastructure (pipelines, ETL, ingestion, sc
 
 The accumulated knowledge about infrastructure is not WRONG — it's correctly encoded. The failure mode is applying it when the problem doesn't warrant it. Prior solutions should inform, not dominate."
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local system_append="${2:-}"
     local use_distill="${3:-no}"
@@ -146,19 +146,19 @@ printf "${DIM}3 conditions: baseline, heavy-context (reproduce bug), heavy+disti
 
 # ── Condition A: No infrastructure knowledge (baseline) ──
 printf "\n  ${DIM}[A] Baseline (no infrastructure context)...${RESET}\n"
-result_a=$(run_claudia "$PROMPT" "" "no")
+result_a=$(run_sandbox "$PROMPT" "" "no")
 echo "$result_a" > "$RESULTS_DIR/A-baseline.txt"
 printf "  ${GREEN}✓${RESET} Baseline (%d chars)\n" "${#result_a}"
 
 # ── Condition B: Heavy infrastructure context (reproduce the bug) ──
 printf "\n  ${DIM}[B] Heavy infrastructure context (reproducing the bias)...${RESET}\n"
-result_b=$(run_claudia "$PROMPT" "$HEAVY_CONTEXT" "no")
+result_b=$(run_sandbox "$PROMPT" "$HEAVY_CONTEXT" "no")
 echo "$result_b" > "$RESULTS_DIR/B-heavy-context.txt"
 printf "  ${GREEN}✓${RESET} Heavy context (%d chars)\n" "${#result_b}"
 
 # ── Condition C: Heavy context + proportionality principle ──
 printf "\n  ${DIM}[C] Heavy context + distill proportionality principle...${RESET}\n"
-result_c=$(run_claudia "$PROMPT" "$HEAVY_CONTEXT" "yes")
+result_c=$(run_sandbox "$PROMPT" "$HEAVY_CONTEXT" "yes")
 echo "$result_c" > "$RESULTS_DIR/C-proportionality.txt"
 printf "  ${GREEN}✓${RESET} Proportionality (%d chars)\n" "${#result_c}"
 

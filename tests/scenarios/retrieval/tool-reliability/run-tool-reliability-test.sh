@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../rules/distill.md"
@@ -20,7 +20,7 @@ mkdir -p "$RESULTS_DIR"
 
 PROMPT="I want you to set up a PR monitor that: (1) Checks the CI status of PR #42 every 3 minutes, (2) If CI fails, spawns a coding agent to fix the issue, (3) Once the fix is pushed, verifies CI passes. Give me the agent orchestration plan — what gets spawned, in what order, with what instructions."
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local use_distill="${2:-no}"
     local output_file=$(mktemp)
@@ -90,13 +90,13 @@ printf "${DIM}2 conditions: vanilla, distill with operational knowledge${RESET}\
 
 # Condition A: No knowledge
 printf "\n  ${DIM}[A] Vanilla (no operational knowledge)...${RESET}\n"
-result_a=$(run_claudia "$PROMPT" "no")
+result_a=$(run_sandbox "$PROMPT" "no")
 echo "$result_a" > "$RESULTS_DIR/A-vanilla.txt"
 printf "  ${GREEN}✓${RESET} Vanilla (%d chars)\n" "${#result_a}"
 
 # Condition B: Distill with operational knowledge
 printf "\n  ${DIM}[B] Distill (operational knowledge from past failures)...${RESET}\n"
-result_b=$(run_claudia "$PROMPT" "yes")
+result_b=$(run_sandbox "$PROMPT" "yes")
 echo "$result_b" > "$RESULTS_DIR/B-distill.txt"
 printf "  ${GREEN}✓${RESET} Distill (%d chars)\n" "${#result_b}"
 

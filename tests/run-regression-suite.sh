@@ -12,7 +12,7 @@
 #   ./run-regression-suite.sh regression   # Inverse/regression guards only
 #
 # Prerequisites:
-#   - ~/.claude-personal/ must have valid API auth
+#   - a secondary profile dir must have valid API auth
 #   - rules/distill.md must exist in repo root
 #
 # Output:
@@ -26,7 +26,7 @@ REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 VERSION=$(cat "$REPO_DIR/VERSION" | tr -d '[:space:]')
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 METRICS_DIR="$SCRIPT_DIR/metrics/v${VERSION}"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$REPO_DIR/rules/distill.md"

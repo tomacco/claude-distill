@@ -21,7 +21,7 @@ All notable changes to aura-distill.
 - **`rules/distill.md`** — native retrieval via Claude Code's rules/ directory. Replaces MCP server entirely.
 - **Animated terminal demo** on landing page (GSAP) — simulates full Claude Code session with /distill.
 - **Interactive shell** in terminal — fake commands, claude easter egg (kernel panic).
-- **`test-with-claudia.sh`** — integration tests using a second Claude Code instance.
+- **`test-sandbox.sh`** — integration tests using a second Claude Code instance.
 
 ### Removed
 - **MCP server** (Node.js, TypeScript, SQLite) — the entire server directory. Zero dependencies now.

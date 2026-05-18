@@ -32,7 +32,7 @@ scenarios/
 ## Running tests
 
 ```bash
-# Persona-based (uses ~/.claude-personal for auth)
+# Persona-based (uses the configured test profile for auth)
 ./methodology/run-persona-test.sh sofia loss-aversion
 ./methodology/run-persona-test.sh marcus anchoring-bias
 

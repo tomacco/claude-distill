@@ -41,7 +41,7 @@ This is intentionally ambiguous — both are valid. Quality here = depth of anal
 
 ## Implementation
 
-Uses `--append-system-prompt` with claudia to inject the heavy context.
+Uses `--append-system-prompt` with sandbox to inject the heavy context.
 No actual multi-hour sessions needed — the model treats the prompt
 as context regardless of when it was generated.
 

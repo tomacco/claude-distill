@@ -12,7 +12,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../../rules/distill.md"
@@ -98,7 +98,7 @@ correction_count: 1
 last_correction: 2026-05-16"
 
 # ═══ RUNNER ═══
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local system_append="${2:-}"
     local use_knowledge="${3:-}"
@@ -177,7 +177,7 @@ printf "${DIM}Can distill learn from a correction and prevent recurrence?${RESET
 # Phase 1: Reproduce bias
 printf "\n${CYAN}━━ Phase 1:${RESET} ${BOLD}Reproduce the bias${RESET}\n"
 printf "  ${DIM}Heavy infrastructure context + simple analytics question...${RESET}\n"
-result_1=$(run_claudia "$PROMPT_PHASE1" "$HEAVY_CONTEXT" "")
+result_1=$(run_sandbox "$PROMPT_PHASE1" "$HEAVY_CONTEXT" "")
 echo "$result_1" > "$RESULTS_DIR/phase1-biased.txt"
 printf "  ${GREEN}✓${RESET} Phase 1 (%d chars)\n" "${#result_1}"
 
@@ -191,7 +191,7 @@ printf "  ${GREEN}✓${RESET} Correction knowledge written\n"
 # Phase 3: Fresh session — same context, different problem, correction loaded
 printf "\n${CYAN}━━ Phase 3:${RESET} ${BOLD}Fresh session (same bias pressure + correction)${RESET}\n"
 printf "  ${DIM}Different analytics question, same infrastructure context, correction loaded...${RESET}\n"
-result_3=$(run_claudia "$PROMPT_PHASE3" "$HEAVY_CONTEXT" "$CORRECTION_KNOWLEDGE")
+result_3=$(run_sandbox "$PROMPT_PHASE3" "$HEAVY_CONTEXT" "$CORRECTION_KNOWLEDGE")
 echo "$result_3" > "$RESULTS_DIR/phase3-corrected.txt"
 printf "  ${GREEN}✓${RESET} Phase 3 (%d chars)\n" "${#result_3}"
 

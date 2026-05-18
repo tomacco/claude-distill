@@ -14,7 +14,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../../rules/distill.md"
@@ -104,7 +104,7 @@ origin: evidence (direct correction mid-session)
 correction_count: 1"
 
 # ═══ RUNNER ═══
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local knowledge="${2:-}"
     local output_file=$(mktemp)
@@ -173,19 +173,19 @@ printf "${DIM}Does correction-aware distillation prevent it?${RESET}\n"
 
 # Baseline: no knowledge
 printf "\n${CYAN}━━ Baseline:${RESET} ${BOLD}No knowledge (clean session)${RESET}\n"
-result_baseline=$(run_claudia "$NEW_PROMPT" "")
+result_baseline=$(run_sandbox "$NEW_PROMPT" "")
 echo "$result_baseline" > "$RESULTS_DIR/baseline-clean.txt"
 printf "  ${GREEN}✓${RESET} Baseline (%d chars)\n" "${#result_baseline}"
 
 # Poisoned: naive distill output loaded
 printf "\n${CYAN}━━ Poisoned:${RESET} ${BOLD}Naive distill output (wrong framing encoded)${RESET}\n"
-result_poisoned=$(run_claudia "$NEW_PROMPT" "$POISONED_KNOWLEDGE")
+result_poisoned=$(run_sandbox "$NEW_PROMPT" "$POISONED_KNOWLEDGE")
 echo "$result_poisoned" > "$RESULTS_DIR/poisoned-naive.txt"
 printf "  ${GREEN}✓${RESET} Poisoned (%d chars)\n" "${#result_poisoned}"
 
 # Corrected: correction-aware distill output loaded
 printf "\n${CYAN}━━ Corrected:${RESET} ${BOLD}Correction-aware distill output${RESET}\n"
-result_corrected=$(run_claudia "$NEW_PROMPT" "$CORRECTED_KNOWLEDGE")
+result_corrected=$(run_sandbox "$NEW_PROMPT" "$CORRECTED_KNOWLEDGE")
 echo "$result_corrected" > "$RESULTS_DIR/corrected-aware.txt"
 printf "  ${GREEN}✓${RESET} Corrected (%d chars)\n" "${#result_corrected}"
 

@@ -1,17 +1,18 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
 # aura-distill integration test harness
-# Uses "claudia" (personal Claude Code instance) as a sandboxed test user
+# Spawns a sandboxed Claude Code instance with a disposable config dir.
 #
 # This tests the REAL user experience by running a separate Claude Code instance
 # with its own config dir, hitting Anthropic's API directly (not Bedrock).
+# Auth config is read from DISTILL_TEST_CONFIG (default: ~/.claude).
 #
 # Usage:
-#   ./test-with-claudia.sh              # Run all tests
-#   ./test-with-claudia.sh install      # Run only install tests
-#   ./test-with-claudia.sh uninstall    # Run only uninstall tests
-#   ./test-with-claudia.sh directive     # Run only directive/origin tests
-#   ./test-with-claudia.sh behavior     # Run only behavior tests
+#   ./test-sandbox.sh              # Run all tests
+#   ./test-sandbox.sh install      # Run only install tests
+#   ./test-sandbox.sh uninstall    # Run only uninstall tests
+#   ./test-sandbox.sh directive    # Run only directive/origin tests
+#   ./test-sandbox.sh behavior    # Run only behavior tests
 # ═══════════════════════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -19,8 +20,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TEST_HOME=$(mktemp -d)
 TEST_CLAUDE_DIR="$TEST_HOME/.claude"
-# Use the real personal config (has auth token) for API tests
-REAL_CONFIG_DIR="$HOME/.claude-personal"
+# Auth config dir (must have valid API token). Override with DISTILL_TEST_CONFIG.
+REAL_CONFIG_DIR="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 
@@ -64,8 +65,8 @@ skip() {
   printf "  ${YELLOW}SKIP${RESET} %s\n" "$1"
 }
 
-run_claudia() {
-  # Run claudia in print mode with full permissions
+run_sandbox() {
+  # Run sandbox in print mode with full permissions
   # Uses real HOME + real config dir (for auth), prompts reference TEST paths
   local prompt="$1"
   local max_seconds="${2:-60}"
@@ -285,7 +286,7 @@ last_updated: 2026-05-16
 KNOWLEDGE
 
   local result
-  result=$(run_claudia "I'm setting up a new service that handles 5 events per day. What message broker should I use? I know SQS would be simpler but we have team standards." 60)
+  result=$(run_sandbox "I'm setting up a new service that handles 5 events per day. What message broker should I use? I know SQS would be simpler but we have team standards." 60)
 
   if echo "$result" | grep -qi "kafka\|directive\|mandate\|standard\|team"; then
     pass "Distill respects directive and helps with Kafka"
@@ -322,8 +323,8 @@ test_uninstall_preserves_knowledge() {
   fi
 }
 
-test_claudia_behavior_no_distill() {
-  log_test "Claudia behavior WITHOUT distill installed"
+test_sandbox_behavior_no_distill() {
+  log_test "Sandbox behavior WITHOUT distill installed"
   TESTS_RUN=$((TESTS_RUN + 1))
 
   # Create a clean test CLAUDE.md with no distill
@@ -331,29 +332,29 @@ test_claudia_behavior_no_distill() {
   echo "# Test instructions - no distill here" > "$test_claude_md"
 
   local result
-  result=$(run_claudia "Read the file $test_claude_md. Does it contain any reference to distill, SPINE, or distill-monitor? Answer with exactly INSTALLED or NOT_INSTALLED." 45)
+  result=$(run_sandbox "Read the file $test_claude_md. Does it contain any reference to distill, SPINE, or distill-monitor? Answer with exactly INSTALLED or NOT_INSTALLED." 45)
 
   if echo "$result" | grep -qi "NOT_INSTALLED\|not installed\|no.*distill\|doesn't\|does not\|no reference"; then
-    pass "Claudia correctly reports no distill without installation"
+    pass "Sandbox correctly reports no distill without installation"
   else
-    fail "Claudia confused about distill state" "$(echo "$result" | head -3)"
+    fail "Sandbox confused about distill state" "$(echo "$result" | head -3)"
   fi
 }
 
-test_claudia_behavior_with_distill() {
-  log_test "Claudia behavior WITH distill installed"
+test_sandbox_behavior_with_distill() {
+  log_test "Sandbox behavior WITH distill installed"
   TESTS_RUN=$((TESTS_RUN + 1))
 
   # Install distill to test HOME
   HOME="$TEST_HOME" bash "$SCRIPT_DIR/install.sh" < /dev/null 2>&1 || true
 
   local result
-  result=$(run_claudia "Read the file $TEST_CLAUDE_DIR/CLAUDE.md. Do you see distill instructions? Report what behavior they tell you to follow. Keep it under 50 words." 45)
+  result=$(run_sandbox "Read the file $TEST_CLAUDE_DIR/CLAUDE.md. Do you see distill instructions? Report what behavior they tell you to follow. Keep it under 50 words." 45)
 
   if echo "$result" | grep -qi "distill\|monitor\|knowledge\|spine\|retrieval"; then
-    pass "Claudia picks up distill instructions from CLAUDE.md"
+    pass "Sandbox picks up distill instructions from CLAUDE.md"
   else
-    fail "Claudia doesn't recognize distill instructions" "$(echo "$result" | head -3)"
+    fail "Sandbox doesn't recognize distill instructions" "$(echo "$result" | head -3)"
   fi
 }
 
@@ -388,7 +389,7 @@ main() {
   local suite="${1:-all}"
 
   printf "\n${BOLD}  aura-distill integration tests${RESET}\n"
-  printf "  ${DIM}Using claudia as test user (Anthropic API)${RESET}\n"
+  printf "  ${DIM}Using sandbox as test user (Anthropic API)${RESET}\n"
 
   setup_test_env
 
@@ -407,16 +408,16 @@ main() {
       test_uninstall_preserves_knowledge
       ;;
     behavior)
-      test_claudia_behavior_no_distill
-      test_claudia_behavior_with_distill
+      test_sandbox_behavior_no_distill
+      test_sandbox_behavior_with_distill
       ;;
     all)
       test_install_fresh
       test_install_upgrade
       test_install_with_existing_memories
       test_uninstall_preserves_knowledge
-      test_claudia_behavior_no_distill
-      test_claudia_behavior_with_distill
+      test_sandbox_behavior_no_distill
+      test_sandbox_behavior_with_distill
       test_directive_origin_tracking
       ;;
     *)

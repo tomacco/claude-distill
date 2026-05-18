@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 RULES_SRC="$SCRIPT_DIR/../../../rules/distill.md"
@@ -26,7 +26,7 @@ ANCHOR_CONTEXT="CONTEXT FROM SPRINT PLANNING: The user estimated this task would
 # Distill anchoring-awareness knowledge
 ANCHORING_KNOWLEDGE="[IMPORTANT] Anchoring bias: when a number is introduced early (time estimate, cost, effort), all subsequent reasoning tends to cluster around that anchor regardless of evidence. When you notice a user-provided estimate that seems mismatched with task complexity: (1) Explicitly name the anchor ('you mentioned 2 hours'), (2) Provide your independent estimate FIRST before addressing the anchor, (3) Quantify the gap and explain what drives it, (4) Suggest the estimate may need re-discussion with the team."
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local system_append="${2:-}"
     local output_file=$(mktemp)
@@ -71,14 +71,14 @@ printf "\n  ${DIM}[A] No anchor (baseline)...${RESET}\n"
 rm -rf "$REAL_CONFIG/rules" 2>/dev/null || true
 mkdir -p "$REAL_CONFIG/rules"
 
-result_a=$(run_claudia "$PROMPT" "")
+result_a=$(run_sandbox "$PROMPT" "")
 echo "$result_a" > "$RESULTS_DIR/A-no-anchor.txt"
 printf "  ${GREEN}✓${RESET} No anchor (%d chars)\n" "${#result_a}"
 
 # ── Condition B: Anchored (user estimate injected) ──
 printf "\n  ${DIM}[B] Anchored (2hr estimate)...${RESET}\n"
 
-result_b=$(run_claudia "$PROMPT" "$ANCHOR_CONTEXT")
+result_b=$(run_sandbox "$PROMPT" "$ANCHOR_CONTEXT")
 echo "$result_b" > "$RESULTS_DIR/B-anchored.txt"
 printf "  ${GREEN}✓${RESET} Anchored (%d chars)\n" "${#result_b}"
 
@@ -98,7 +98,7 @@ scope: Estimation and planning biases
 $ANCHORING_KNOWLEDGE" > "$abs_knowledge/anchoring.md"
 sed "s|~/.claude/distill|$abs_knowledge|g" "$RULES_SRC" > "$REAL_CONFIG/rules/distill.md"
 
-result_c=$(run_claudia "$PROMPT" "$ANCHOR_CONTEXT")
+result_c=$(run_sandbox "$PROMPT" "$ANCHOR_CONTEXT")
 echo "$result_c" > "$RESULTS_DIR/C-anchored-distill.txt"
 printf "  ${GREEN}✓${RESET} Anchored+distill (%d chars)\n" "${#result_c}"
 

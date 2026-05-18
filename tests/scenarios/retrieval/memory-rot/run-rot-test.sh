@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/results/$(date +%Y%m%d-%H%M%S)"
-REAL_CONFIG="$HOME/.claude-personal"
+REAL_CONFIG="${DISTILL_TEST_CONFIG:-$HOME/.claude}"
 CLAUDE_BIN="node /opt/homebrew/opt/claude-code-npm/libexec/lib/node_modules/@anthropic-ai/claude-code/cli.js"
 SANDBOX_PROFILE='(version 1)(allow default)(deny file-read* (literal "/Library/Application Support/ClaudeCode/managed-settings.json"))'
 
@@ -16,7 +16,7 @@ RESET=$(printf '\033[0m')
 
 mkdir -p "$RESULTS_DIR"
 
-run_claudia() {
+run_sandbox() {
     local prompt="$1"
     local config_dir="$2"
     local output_file=$(mktemp)
@@ -62,7 +62,7 @@ Read and apply the following project memory:
 $(cat "$SCRIPT_DIR/month6/MEMORY.md" | head -200)" > "$REAL_CONFIG/rules/memory-sim.md"
 
     local result_memory
-    result_memory=$(run_claudia "$prompt" "$REAL_CONFIG")
+    result_memory=$(run_sandbox "$prompt" "$REAL_CONFIG")
     echo "$result_memory" > "$RESULTS_DIR/${prompt_name}_MEMORY-MONTH6.txt"
     printf "  ${GREEN}✓${RESET} Memory month-6 (%d chars)\n" "${#result_memory}"
 
@@ -77,7 +77,7 @@ $(cat "$SCRIPT_DIR/month6/MEMORY.md" | head -200)" > "$REAL_CONFIG/rules/memory-
         "$rules_src" > "$REAL_CONFIG/rules/distill.md"
 
     local result_distill
-    result_distill=$(run_claudia "$prompt" "$REAL_CONFIG")
+    result_distill=$(run_sandbox "$prompt" "$REAL_CONFIG")
     echo "$result_distill" > "$RESULTS_DIR/${prompt_name}_DISTILL.txt"
     printf "  ${GREEN}✓${RESET} Distill (%d chars)\n" "${#result_distill}"
 
