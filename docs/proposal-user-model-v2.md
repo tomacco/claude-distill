@@ -87,11 +87,13 @@ The section is capped at 15 lines to stay within the 60-line budget (rules file 
 - Don't ask what you can infer. If the codebase answers the question, read the codebase.
 - When corrected, apply immediately. Don't explain why you were wrong unless asked.
 
-**Identity context** (for calibration):
-- Shell: fish | Editor: neovim | Stack: Go, TypeScript, Kotlin
-- Expertise: deep in backend systems, working in frontend, learning ML
-- Decision style: intuition-first, validates with data after
+~~**Identity context** (for calibration):~~
+~~- Shell: fish | Editor: neovim | Stack: Go, TypeScript, Kotlin~~
+~~- Expertise: deep in backend systems, working in frontend, learning ML~~
+~~- Decision style: intuition-first, validates with data after~~
 ```
+
+> **BENCHMARK UPDATE (May 18, 2026):** Identity context was removed from always-on after benchmarking showed it caused a -1.75 proportionality regression and -0.86 retrieval regression. Stack/shell/expertise in always-on causes over-assertion on simple problems (class rename gets architecture context). These stay in profile files, loaded via SPINE on demand. Output rules + interaction rules alone improved user model +0.33 with zero regression in bias or correction.
 
 ### Key design decisions
 

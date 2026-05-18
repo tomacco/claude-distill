@@ -446,14 +446,19 @@ After updating profile files, sync critical preferences to the always-on section
 
 **Process:**
 1. Collect preferences from `{DISTILL_DIR}/profile/` and `{DISTILL_DIR}/feedback/` with confidence >= `validated`
-2. Filter: must be format, interaction, or identity — not domain-specific knowledge
+2. Filter: must be output format or interaction behavior — NOT domain knowledge, stack, tools, or expertise
 3. Rank: frustration-triggered > hardened > validated > by confirmation count
 4. Take top entries fitting 15 lines
-5. Write as three blocks in `rules/distill.md` under `## Always-On User Preferences`:
+5. Write as two blocks in `rules/distill.md` under `## Always-On User Preferences`:
    - **Output rules** — response format (imperative mood: "do X", not "user prefers X")
    - **Interaction rules** — exchange behavior
-   - **Identity context** — shell, stack, expertise levels, decision style
 6. Preserve all other sections of `rules/distill.md` unchanged
+
+**What does NOT belong in always-on** (benchmark-validated — these cause proportionality regression):
+- Stack/technology context (Kotlin, gRPC, Kafka, etc.) — comes from knowledge files via SPINE
+- Shell preference (fish, zsh) — comes from knowledge files via SPINE
+- Expertise levels — comes from profile files loaded on demand
+- Domain identity — causes over-assertion on simple problems (a class rename doesn't need architecture context)
 
 **Format rules:**
 - Use enforcement language, not descriptive. "Concise: default to bullets" not "user prefers concise answers"
