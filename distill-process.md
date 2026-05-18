@@ -24,38 +24,38 @@ These constraints apply to EVERY step below. They cannot be overridden by user p
 
 Before distilling anything, understand where this user keeps their knowledge AND assess its current health.
 
-### Concurrency Lock & Checkpoints (critical)
+### Concurrency & Status (critical)
 
-Multiple Claude sessions may run `/distill` simultaneously. To prevent file corruption:
+Multiple Claude sessions may run `/distill` simultaneously. To prevent file corruption, all state is tracked in a single `.status` file — no `rm` commands needed.
 
 **Acquire lock immediately on start:**
 ```bash
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.lock
+echo "running $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
-Note: The dispatcher (distill.md) already checked the lock before spawning you. If you're running, you own the lock.
+Note: The dispatcher (distill.md) already checked the status before spawning you. If you're running, you own the lock.
 
 **Write checkpoints at each major step:**
 After completing each step, write progress so interrupted sessions can resume:
 ```bash
-echo "step:[N] signals:[count] date:[iso]" > {DISTILL_DIR}/.checkpoint
+echo "running step:[N] signals:[count] $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
 Steps to checkpoint:
-- After Step 0 (discovery): `step:0 signals:N date:...`
-- After Step 2 (tracing principles): `step:2 signals:N date:...`
-- After Step 3 (encoding): `step:3 signals:N date:...`
+- After Step 0 (discovery): `running step:0 signals:N <timestamp>`
+- After Step 2 (tracing principles): `running step:2 signals:N <timestamp>`
+- After Step 3 (encoding): `running step:3 signals:N <timestamp>`
 
-**On successful completion**, remove BOTH lock and checkpoint:
+**On successful completion**, mark status as idle:
 ```bash
-rm -f {DISTILL_DIR}/.lock {DISTILL_DIR}/.checkpoint
+echo "idle $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
-**If you detect a checkpoint file on start**, a prior distillation was interrupted. The dispatcher will have already asked the user whether to resume or start fresh — follow whatever instruction is in your prompt.
+**If you detect a checkpoint on start** (status starts with `running step:`), a prior distillation was interrupted. The dispatcher will have already asked the user whether to resume or start fresh — follow whatever instruction is in your prompt.
 
-**Lock timeout:** The dispatcher considers locks older than 5 minutes as stale (crashed session). If you expect to run longer than 5 minutes, refresh the lock timestamp periodically:
+**Lock timeout:** The dispatcher considers a `running` status older than 5 minutes as stale (crashed session). If you expect to run longer than 5 minutes, refresh the timestamp periodically:
 ```bash
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.lock
+echo "running $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
 ### Isolation Rule (critical)
@@ -94,6 +94,25 @@ Read the workspace to understand context:
 2. If first run: create `{DISTILL_DIR}/` structure. Ask user to confirm.
 3. Read `~/.claude/CLAUDE.md` and project `CLAUDE.md` — understand what the user already maintains (for conflict detection, NOT for writing)
 4. Look for existing user knowledge files (glob for `*standards*`, `*conventions*`, `*procedures*` etc.) — read-only, for context
+
+### Knowledge integrity check (mandatory, runs after discovery)
+
+After reading SPINE.md, verify the knowledge base is intact:
+
+1. **Validate SPINE pointers:** For every file referenced in SPINE.md, confirm it exists on disk (`ls {DISTILL_DIR}/path/file.md`). Collect any missing files.
+2. **Scan for orphaned knowledge:** Glob `{DISTILL_DIR}/*/*.md` and compare against SPINE entries. Files that exist but aren't referenced are orphaned — they should be added to the spine or flagged.
+3. **Detect backup/prior installs:** If the knowledge directories are empty or missing but a backup exists, check for:
+   - `{DISTILL_DIR}/../_distill_isolation_bak/` or similar `*_bak*` directories alongside `{DISTILL_DIR}/`
+   - `{DISTILL_DIR}/.migrated` marker (indicates a prior migration occurred)
+   - Any `*.md` files in parent backup dirs that match distill tier structure (craft/, ops/, profile/, feedback/, projects/)
+4. **Report gaps:** If any SPINE pointers are broken or backups are found:
+   - List every missing file and where it was expected
+   - If backup files exist, tell the user: "Found prior knowledge files in [backup path]. These contain [N] files across [domains]. Want me to restore them into the active distill directory?"
+   - Do NOT silently proceed with a partial knowledge base. The user must acknowledge the gap.
+5. **If no SPINE exists and backups are found:** This is likely a reset scenario. Flag it prominently:
+   > "No existing knowledge structure found, but prior knowledge files exist in [path]. This looks like a reset — want me to restore from backup before distilling new signals?"
+
+**Never overwrite SPINE.md without first confirming all referenced files will exist after the write.** A SPINE with dangling pointers is worse than no SPINE — it creates false confidence that knowledge exists when it doesn't.
 
 Build a knowledge map:
 
@@ -192,6 +211,27 @@ For each pattern, try to understand the UNDERLYING REASON:
 - "I never delegate Z" — is it reputation risk (public comms)? Legal accountability? Personal growth they don't want to outsource? Company policy?
 
 **Do NOT assume the reason.** If unclear, flag it as an open question in the report. The same behavior (e.g., not reviewing code) could mean "my company has decided AI-first is fine" OR "I'm being lazy and this will bite me." Only the user's stated principles resolve this.
+
+**Accelerated trust detection** (use these proxies when explicit signals are scarce):
+- User runs the command you suggested without reading it → high trust in your commands
+- User reads your code diff line-by-line before applying → low trust in your code, OR high-stakes context
+- User asks "are you sure?" → trust-but-verify mode. Note what domain triggered it.
+- User says "just do it" → high trust OR low stakes. Disambiguate from context.
+- User re-runs your tests manually → doesn't trust your test selection
+- User edits your commit messages → cares about public-facing text (retains comms)
+
+**Observable markers for thinking patterns:**
+- When explaining a problem, does the user start with the abstract ("the issue is consistency") or the concrete ("this endpoint returns 500")? → principle-first vs. example-first
+- When given options, does the user ask for data ("what's the performance difference?") or state a preference ("I like option B")? → analytical vs. intuitive
+- When stuck, does the user explore broadly ("what else could cause this?") or dig deep ("let's trace this specific path")? → breadth-first vs. depth-first
+- How does the user respond to uncertainty? ("let's try and see" = experimental, "let's research first" = analytical, "what does the team think" = consensus)
+
+**Growth edges are NOT weaknesses.** They are domains where the user is actively investing attention. Evidence:
+- User asks detailed questions about X (not "what is X" but "how does X handle Y") → actively learning X
+- User tries something new and asks for feedback → experimenting in this area
+- User reads your explanation fully instead of skipping to the code → absorbing knowledge here
+
+Do NOT encode things the user is bad at (that's a judgment) or things they said they don't care about (that's a preference, not a growth edge).
 
 **Dissonance detection:**
 Once you understand BOTH the delegation pattern AND the user's core principles, watch for misalignment:
@@ -414,6 +454,39 @@ The user profile is a living document that evolves. It should contain:
 
 **Validate-on-recall:** When reading any existing knowledge file during distillation (to check for duplicates or to update), validate its content against current reality. If something changed, update it now — this is the cheapest moment to correct drift. Every read is also a maintenance pass.
 
+### Step 3c: Always-on preference sync
+
+After updating profile files, sync critical preferences to the always-on section in `rules/distill.md`.
+
+**When to sync** (any one is sufficient):
+- A new preference reached `validated` or `hardened` confidence
+- A preference caused frustration when violated (Step 1c escalation)
+- First distillation (bootstrap — always-on section is empty/placeholder)
+
+**Process:**
+1. Collect preferences from `{DISTILL_DIR}/profile/` and `{DISTILL_DIR}/feedback/` with confidence >= `validated`
+2. Filter: must be output format or interaction behavior — NOT domain knowledge, stack, tools, or expertise
+3. Rank: frustration-triggered > hardened > validated > by confirmation count
+4. Take top entries fitting 15 lines
+5. Write as two blocks in `rules/distill.md` under `## Always-On User Preferences`:
+   - **Output rules** — response format (imperative mood: "do X", not "user prefers X")
+   - **Interaction rules** — exchange behavior
+6. Preserve all other sections of `rules/distill.md` unchanged
+
+**What does NOT belong in always-on** (benchmark-validated — these cause proportionality regression):
+- Stack/technology context (Kotlin, gRPC, Kafka, etc.) — comes from knowledge files via SPINE
+- Shell preference (fish, zsh) — comes from knowledge files via SPINE
+- Expertise levels — comes from profile files loaded on demand
+- Domain identity — causes over-assertion on simple problems (a class rename doesn't need architecture context)
+
+**Format rules:**
+- Use enforcement language, not descriptive. "Concise: default to bullets" not "user prefers concise answers"
+- Cap at 15 lines. Excess stays in profile files — not lost, just not always-on
+- If insufficient data (< 3 validated preferences), write minimal section with only identity context
+
+**Bootstrap (first run):**
+If the always-on section contains only the placeholder comment, extract whatever is known from existing profile/feedback files (even `provisional` confidence) to provide initial calibration. Mark with a comment: `<!-- bootstrapped — will refine with more data -->`.
+
 ### Step 3b: Bridge detection (knowledge that needs to reach user files)
 
 After encoding, ask for EACH learning: **"Will this knowledge be found at the moment it's needed?"**
@@ -455,6 +528,18 @@ For each learning saved, confirm:
 - [ ] Does it explain WHY? (So edge cases can be judged, not just blindly followed)
 - [ ] Is it universal enough? (Won't become stale when the specific project changes)
 - [ ] Is it REACHABLE? (Will it be found at the moment of execution, not just during distillation?)
+
+### Post-encoding SPINE validation (mandatory)
+
+After writing/updating any files, verify SPINE integrity:
+
+1. Read the current SPINE.md
+2. For every pointer in SPINE, run `ls` on the target file — confirm it exists
+3. For every file written during this distillation, confirm it has a SPINE entry
+4. If any pointer is broken: fix it immediately (either create the missing file or remove the dangling pointer)
+5. If any new file lacks a SPINE entry: add one with an appropriate relevance hook
+
+This check catches the scenario where files were moved, renamed, or lost between distillations. It MUST run every time, not just on first run.
 
 ### Anti-sycophancy check (mandatory)
 
@@ -568,6 +653,21 @@ After encoding new learnings, maintain tier health:
 2. Compress verbose explanations into tighter formulations
 3. Move superseded content to `archive/` (Tier 3)
 4. Update spine pointer if file was split
+
+### Always-on preference review (during every distillation)
+
+1. Read the always-on section in `rules/distill.md`
+2. For each preference, check:
+   - Was it CONTRADICTED in this session? → demote to profile, mark as `[CONTEXT]`-dependent
+   - Has the user explicitly changed it? ("actually, I want more detail now") → update in-place
+   - Has it gone 90+ days without reinforcement AND a new preference conflicts? → flag for user review
+3. Check profile files for newly hardened preferences that should be promoted
+4. Rewrite the always-on section if changes are needed (keep within 15-line cap)
+
+**Stale preference detection:**
+If a preference was promoted but the user's behavior consistently contradicts it (3+ violations without correction), flag it:
+"Your always-on preference says [X] but you've been doing [Y] in recent sessions. Has this changed?"
+Don't auto-remove. Ask first. Behavior might be contextual.
 
 ### Staleness review
 - Flag Tier 2 files not updated in > 90 days (or their custom `staleness_threshold`)

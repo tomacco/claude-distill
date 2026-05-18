@@ -27,7 +27,7 @@ When you detect something worth remembering (a correction, a preference, a frust
 ## What to do at session start
 
 1. **Read `{DISTILL_DIR}/SPINE.md`** — mandatory. This is your knowledge map for the session.
-2. **Check if `{DISTILL_DIR}/.needs-migration` exists.** If yes, this is URGENT — tell the user IMMEDIATELY on their very first message, before doing anything else:
+2. **Check if `{DISTILL_DIR}/.needs-migration` exists and does NOT start with "migrated".** If it exists and is not yet migrated, this is URGENT — tell the user IMMEDIATELY on their very first message, before doing anything else:
    > "Welcome! Distill was just installed. You have existing memory files that need to be ingested. Let me run `/distill` now to bring your existing knowledge into the system — otherwise you'll be working without your accumulated learnings. Shall I go?"
    Do NOT proceed with their request until migration is addressed. They're flying blind without it.
 3. **Throughout the session:** Track memory pressure (see below).

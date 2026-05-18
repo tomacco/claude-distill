@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Model — aura-distill Research</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600;1,7..72,300;1,7..72,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research-style.css">
+</head>
+<body>
+    <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle dark mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+    </button>
+    <nav class="toc">
+        <a href="#problem">The problem</a>
+        <a href="#benchmark">Benchmark</a>
+        <a href="#analysis">Root cause</a>
+        <a href="#literature">Literature</a>
+        <a href="#fix">The fix</a>
+        <a href="#mechanism">How it works</a>
+        <a href="#references">References</a>
+    </nav>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back">&larr; Research hub</a>
+            <h1>User Model: Always-On Preference Enforcement</h1>
+            <div class="meta">May 2026 &middot; 7-system benchmark &middot; Claude Opus 4.6</div>
+            <p class="abstract">Competitive benchmarks revealed user model as aura-distill's weakest category (3.17/5, 5th of 7). Analysis of the winning system showed the fix wasn't architectural &mdash; it was about where preferences live. This study led to the "Always-On User Preferences" mechanism.</p>
+        </header>
+
+        <section id="problem">
+            <h2>The problem</h2>
+            <p>In the distill-benchmark competitive analysis, aura-distill scored <strong>3.17/5</strong> on user model &mdash; placing 5th out of 7 systems. This was the lowest-performing category, dragging down overall results despite strong showings in knowledge retrieval and bias resistance.</p>
+            <p>Four scenarios exposed specific failure modes:</p>
+            <table>
+                <thead><tr><th>Scenario</th><th>Description</th><th>Score</th><th>Issue</th></tr></thead>
+                <tbody>
+                    <tr><td>U1</td><td>Senior calibration</td><td class="score-negative">3.00</td><td>Tutorial-level explanation to a senior engineer</td></tr>
+                    <tr><td>U2</td><td>Commit message style</td><td class="score-positive">4.33</td><td>Clean &mdash; matched user convention</td></tr>
+                    <tr><td>U3</td><td>Concise answer</td><td class="score-negative">2.67</td><td>Dead last &mdash; produced the longest response of all 7 systems</td></tr>
+                    <tr><td>U4</td><td>Fish shell</td><td class="score-negative">2.67</td><td>Labeled code as bash despite fish shell preference</td></tr>
+                    <tr><td colspan="2"><strong>Average</strong></td><td><strong>3.17</strong></td><td></td></tr>
+                </tbody>
+            </table>
+            <div class="insight">
+                <div class="insight-label">Pattern</div>
+                <p>U2 (commit messages) succeeded because commit conventions are structural &mdash; they live in the rules file. U1, U3, and U4 failed because they depend on knowing <em>who the user is</em>, not just <em>what the project does</em>.</p>
+            </div>
+        </section>
+
+        <section id="benchmark">
+            <h2>Benchmark results</h2>
+            <p>Full 7-system comparison on the user model category:</p>
+            <table>
+                <thead><tr><th>Rank</th><th>System</th><th>User Model Score</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td><strong>knowledge-graph</strong></td><td class="score-positive">4.33</td></tr>
+                    <tr><td>2</td><td>semantic-memory</td><td class="score-positive">4.00</td></tr>
+                    <tr><td>3</td><td>structured-notes</td><td>3.67</td></tr>
+                    <tr><td>4</td><td>context-window</td><td>3.33</td></tr>
+                    <tr><td>5</td><td>aura-distill</td><td class="score-negative">3.17</td></tr>
+                    <tr><td>6</td><td>flat-file</td><td class="score-negative">3.00</td></tr>
+                    <tr><td>7</td><td>vanilla-baseline</td><td class="score-negative">2.50</td></tr>
+                </tbody>
+            </table>
+            <p>The 1.16-point gap between knowledge-graph (1st) and aura-distill (5th) was the largest category deficit in the benchmark. On overall scores, aura-distill placed competitively &mdash; but user model was the clear drag.</p>
+            <div class="insight">
+                <div class="insight-label">Key finding</div>
+                <p>The top two systems (knowledge-graph, semantic-memory) both inline user preferences directly into the system prompt. The bottom three require retrieval steps before preferences become visible to the model.</p>
+            </div>
+        </section>
+
+        <section id="analysis">
+            <h2>Root cause analysis</h2>
+            <p>The failure decomposed into three layers:</p>
+
+            <h3>1. Load-time gap</h3>
+            <p>User preferences in aura-distill were stored in profile files behind a lazy-load gate. The SPINE had to match a domain keyword, trigger a file read, and then the model had to attend to the preference. For U3 (concise answers) and U4 (fish shell), there was no domain keyword to trigger loading &mdash; these are cross-cutting preferences, not domain-specific knowledge.</p>
+
+            <h3>2. Application gap</h3>
+            <p>Even when preferences loaded, they were stated as descriptive facts: <code>user prefers concise answers</code>. This phrasing invites the model to weigh it against its own tendencies. The winning system used enforcement language: <code>give concise answers, no preamble</code>.</p>
+
+            <h3>3. Coverage gap</h3>
+            <p>The user profile was thin on output-format preferences. Shell preference, verbosity calibration, and expertise level were either missing or buried in domain-specific files where cross-cutting scenarios couldn't find them.</p>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <span class="comparison-scenario">knowledge-graph vs. aura-distill: preference delivery</span>
+                    <span class="comparison-score">architecture diff</span>
+                </div>
+                <div class="comparison-sides">
+                    <div class="side side-with">
+                        <div class="side-label">knowledge-graph (winner)</div>
+                        <div class="side-content">
+                            Inlines preferences directly in the rules file:<br><br>
+                            <code>**User prefs**: fish shell, concise answers, senior-level (15yr), no tutorials, imperative commit messages</code><br><br>
+                            Loaded <strong>every session</strong>. Zero retrieval cost. Model sees preferences before any user message arrives.
+                        </div>
+                    </div>
+                    <div class="side side-without">
+                        <div class="side-label">aura-distill (5th place)</div>
+                        <div class="side-content">
+                            Preferences stored in <code>profiles/user.md</code>:<br><br>
+                            SPINE trigger &rarr; file load &rarr; model attention<br><br>
+                            Requires a <strong>domain match</strong> to trigger. Cross-cutting preferences (shell, verbosity) have no trigger path. Even when loaded, descriptive language reduces enforcement.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="literature">
+            <h2>Academic context</h2>
+            <p>The user model problem is well-studied in recent LLM personalization research. Seven papers provide direct context for the always-on preference mechanism:</p>
+
+            <p><strong>AlpsBench</strong> (Li et al., 2025) benchmarks models on latent user traits &mdash; preferences that must be inferred from behavior rather than stated explicitly. Models struggle most when traits conflict with default behavior, exactly the failure mode in U3 and U4.</p>
+
+            <p><strong>PersistBench</strong> (Kovac et al., 2025) finds a 97% failure rate on memory-induced sycophancy: when a memory says "user prefers X" but X is wrong for the current context, models comply with the memory rather than pushing back. This informed the contradiction-checking mechanism in always-on preferences.</p>
+
+            <p><strong>PLUS</strong> (Chen et al., 2025) demonstrates that text summaries outperform embedding-based retrieval for user preference matching. This validates the always-on approach: a concise text block in the system prompt beats a vector-search pipeline for preference recall.</p>
+
+            <p><strong>Memory as Metabolism</strong> (Xu et al., 2025) distinguishes two types of personalization: mirroring style (match how the user communicates) and compensating substance (fill gaps in what they know). Always-on preferences handle style; domain knowledge handles substance.</p>
+
+            <p><strong>ProfiLLM</strong> (Gupta et al., 2025) shows a 55-65% gap reduction in personalization after a single profile-enriched prompt. The effect is immediate and does not require multi-turn interaction. This confirms that always-on inlining is sufficient &mdash; no iterative refinement needed.</p>
+
+            <p><strong>STALE</strong> (Jang et al., 2025) achieves only 55.2% accuracy on detecting stale memories &mdash; nearly a coin flip. This motivated the confidence lifecycle in always-on preferences: only validated or hardened preferences get promoted to always-on, reducing the risk of stale enforcement.</p>
+
+            <p><strong>SteeM</strong> (Hu et al., 2025) introduces user-controlled memory reliance, letting users decide how much the model should depend on stored preferences vs. in-context signals. The always-on compliance checklist draws on this principle: users can override any always-on preference in-session.</p>
+        </section>
+
+        <section id="fix">
+            <h2>The fix</h2>
+            <p>Always-On User Preferences &mdash; a max 15-line section added to <code>rules/distill.md</code> that loads every session with zero retrieval cost.</p>
+
+            <p>Design principles:</p>
+            <ol>
+                <li><strong>Inlined, not retrieved.</strong> Preferences live in the rules file, not behind a SPINE trigger. They are visible to the model before any user message.</li>
+                <li><strong>Enforcement language.</strong> "Give concise answers" not "user prefers concise answers." Imperative phrasing reduces model hedging.</li>
+                <li><strong>Auto-synced.</strong> The <code>/distill</code> command evaluates profile data and writes the always-on section automatically. No manual curation required.</li>
+            </ol>
+
+            <p>Example always-on section:</p>
+            <div class="code-block">
+                <pre># Always-On User Preferences (auto-synced by /distill)
+# Do not edit manually — will be overwritten on next distillation.
+
+- Use fish shell syntax in all shell examples. Never label as bash.
+- Give concise answers. No preamble, no "Great question!", no restating.
+- Calibrate to senior engineer (15yr). Skip tutorials, explain trade-offs.
+- Commit messages: imperative mood, no period, max 72 chars.
+- TypeScript strict mode. No `any` unless explicitly allowed.
+- Prefer composition over inheritance.
+- Test names: describe behavior, not implementation.
+
+## Compliance checklist
+1. Before responding: re-read the preferences above.
+2. If a preference conflicts with the user's current request, follow the request.
+3. If uncertain whether a preference applies, apply it — the user will correct.</pre>
+            </div>
+        </section>
+
+        <section id="mechanism">
+            <h2>How it works</h2>
+
+            <h3>Preference lifecycle</h3>
+            <p>Not every preference reaches always-on. The confidence ladder filters noise:</p>
+            <table>
+                <thead><tr><th>Stage</th><th>Criteria</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr><td>Experimental</td><td>Observed once, no confirmation</td><td>Stored in profile only</td></tr>
+                    <tr><td>Provisional</td><td>Observed 2-3 times or explicitly stated</td><td>Stored in profile, applied when loaded</td></tr>
+                    <tr><td>Validated</td><td>Confirmed by user behavior across sessions</td><td>Candidate for always-on</td></tr>
+                    <tr><td>Hardened</td><td>Confirmed 5+ times, never contradicted</td><td class="score-positive">Promoted to always-on</td></tr>
+                </tbody>
+            </table>
+            <p>Only <strong>validated</strong> and <strong>hardened</strong> preferences are promoted to the always-on section. This prevents one-off corrections from becoming permanent enforcement rules.</p>
+
+            <h3>Sync process</h3>
+            <p>When <code>/distill</code> runs, it:</p>
+            <ol>
+                <li>Reads the current user profile and all session signals</li>
+                <li>Evaluates each preference against the confidence ladder</li>
+                <li>Ranks validated/hardened preferences by impact (cross-cutting preferences score higher)</li>
+                <li>Formats the top preferences into imperative rules</li>
+                <li>Writes the always-on section to <code>rules/distill.md</code>, replacing the previous version</li>
+            </ol>
+            <p>The 15-line limit forces prioritization. If a user has 30 hardened preferences, only the 15 most cross-cutting survive. Domain-specific preferences stay in their domain files.</p>
+
+            <h3>Contradiction detection</h3>
+            <p>Every distillation checks for contradictions between:</p>
+            <ul>
+                <li>New session signals and existing always-on preferences</li>
+                <li>Always-on preferences and domain-specific knowledge</li>
+                <li>User behavior and stated preferences (say-do gap)</li>
+            </ul>
+            <p>When a contradiction is detected on a hardened preference, it triggers a paradigm alarm rather than a silent update &mdash; because something the user confirmed 5+ times is now being contradicted.</p>
+        </section>
+
+        <section id="references">
+            <h2>References</h2>
+            <ol>
+                <li>Li, Z. et al. (2025). <em>AlpsBench: Benchmarking LLM Alignment with Latent Personality and Social Traits.</em> arXiv: <a href="https://arxiv.org/abs/2603.26680">2603.26680</a></li>
+                <li>Kovac, G. et al. (2025). <em>PersistBench: Evaluating Memory-Induced Sycophancy in Conversational AI.</em> arXiv: <a href="https://arxiv.org/abs/2602.01146">2602.01146</a></li>
+                <li>Chen, Y. et al. (2025). <em>PLUS: Personalized LLM User Profiling via Text Summaries.</em> arXiv: <a href="https://arxiv.org/abs/2507.13579">2507.13579</a></li>
+                <li>Xu, H. et al. (2025). <em>Memory as Metabolism: Mirroring Style, Compensating Substance.</em> arXiv: <a href="https://arxiv.org/abs/2604.12034">2604.12034</a></li>
+                <li>Gupta, A. et al. (2025). <em>ProfiLLM: Single-Prompt Personalization via User Profiles.</em> arXiv: <a href="https://arxiv.org/abs/2506.13980">2506.13980</a></li>
+                <li>Jang, J. et al. (2025). <em>STALE: Detecting Stale Memories in Long-Term LLM Interactions.</em> arXiv: <a href="https://arxiv.org/abs/2605.06527">2605.06527</a></li>
+                <li>Hu, S. et al. (2025). <em>SteeM: Steerable Memory Reliance in Conversational Agents.</em> arXiv: <a href="https://arxiv.org/abs/2601.05107">2601.05107</a></li>
+            </ol>
+        </section>
+
+        <div class="shipped">
+            <span class="shipped-icon">&#9670;</span>
+            <div class="shipped-body">
+                <div class="shipped-version">Shipped in v1.1.0 &mdash; feature/user-model-v2 branch</div>
+                <div class="shipped-desc">Benchmark re-run pending. The Always-On User Preferences mechanism is live and auto-synced by <code>/distill</code>. Expected improvement: U1, U3, U4 scores should converge toward U2 levels (4.0+).</div>
+            </div>
+        </div>
+
+        <footer>
+            <a href="index.html">Research hub</a> &middot; <a href="https://github.com/tomacco/aura-distill">aura-distill on GitHub</a>
+        </footer>
+    </div>
+
+    <script src="research-theme.js"></script>
+    <script src="research-tracker.js"></script>
+</body>
+</html>

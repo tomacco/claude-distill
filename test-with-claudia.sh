@@ -199,8 +199,8 @@ test_install_fresh() {
 
   # Verify CLAUDE.md has distill reference
   if [ -f "$TEST_CLAUDE_DIR/CLAUDE.md" ]; then
-    if grep -q "distill-monitor.md" "$TEST_CLAUDE_DIR/CLAUDE.md"; then
-      pass "CLAUDE.md contains distill monitor reference"
+    if grep -q "aura-distill" "$TEST_CLAUDE_DIR/CLAUDE.md"; then
+      pass "CLAUDE.md contains distill reference"
     else
       fail "CLAUDE.md missing distill reference"
     fi
@@ -231,7 +231,7 @@ test_install_upgrade() {
 
   # CLAUDE.md should not have duplicate entries
   local count
-  count=$(grep -c "distill-monitor.md" "$TEST_CLAUDE_DIR/CLAUDE.md" 2>/dev/null || echo "0")
+  count=$(grep -c "aura-distill" "$TEST_CLAUDE_DIR/CLAUDE.md" 2>/dev/null || echo "0")
   if [ "$count" -eq 1 ]; then
     pass "No duplicate CLAUDE.md entries on upgrade"
   else
