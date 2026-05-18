@@ -7,9 +7,9 @@ set -e
 
 
 
-VERSION="1.0.3"
+VERSION="1.1.0"
 
-BUILD="20260516-01"
+BUILD="20260518-01"
 REPO="https://raw.githubusercontent.com/tomacco/aura-distill/main"
 # Profile paths are set dynamically after profile detection (see below)
 PROFILE_DIR=""
@@ -195,7 +195,7 @@ info_msg "Installing to: ${PROFILE_DIR}"
 echo ""
 
 # Detect existing installation
-EXISTING_VERSION="1.0.3"
+EXISTING_VERSION=""
 if [ -f "$DISTILL_DIR/.version" ]; then
     EXISTING_VERSION=$(cat "$DISTILL_DIR/.version")
     info_msg "Existing installation: v${EXISTING_VERSION} → v${VERSION}"
@@ -303,7 +303,7 @@ if [ "$MEMORY_FILES" -gt 0 ] && [ ! -f "$DISTILL_DIR/.migrated" ]; then
     printf "    • Your old files stay untouched (as backup)\n"
     echo ""
     # Flag so we only show this once
-    touch "$DISTILL_DIR/.needs-migration"
+    echo "pending $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$DISTILL_DIR/.needs-migration"
 fi
 
 # ═══ COMPLETE ═══

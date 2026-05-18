@@ -8,33 +8,40 @@
 
 Before doing ANYTHING else, run these checks:
 
-**Lock check:**
-1. Check if `{DISTILL_DIR}/.lock` exists (use Bash: `cat {DISTILL_DIR}/.lock 2>/dev/null`)
-2. If it exists and is **less than 5 minutes old** → another distillation is in progress. Tell the user:
+**Status check:**
+1. Read `{DISTILL_DIR}/.status` (use Bash: `cat {DISTILL_DIR}/.status 2>/dev/null`)
+2. If it starts with `running` and the timestamp is **less than 5 minutes old** → another distillation is in progress. Tell the user:
    > "Another distillation is currently running (started at [timestamp]). I can harvest signals now and wait for it to finish, or you can try again later. What do you prefer?"
-   - If user says wait/queue: proceed with signal harvest (Step 1), then poll the lock file every 30 seconds before spawning. Once it's gone, spawn the sub-agent.
+   - If user says wait/queue: proceed with signal harvest (Step 1), then poll the status file every 30 seconds before spawning. Once it reads `idle`, spawn the sub-agent.
    - If user says later: stop, don't distill.
-3. If it exists and is **older than 5 minutes** → stale lock from a crashed session. Check for a checkpoint file (see below). Delete the stale lock and proceed.
-4. If it doesn't exist → proceed normally.
+3. If it starts with `running` and the timestamp is **older than 5 minutes** → stale status from a crashed session. Check for checkpoint data (see below). Proceed.
+4. If it reads `idle`, doesn't exist, or is empty → proceed normally.
 
 **Checkpoint recovery:**
-If `{DISTILL_DIR}/.checkpoint` exists, a prior distillation was interrupted. Read it — it contains which step was reached and what signals were already harvested. Tell the user:
+If `.status` starts with `running step:` — a prior distillation was interrupted. Parse the step number and signal count from the status line. Tell the user:
 > "A previous distillation was interrupted at [step]. It had harvested N signals. Want me to resume from where it left off, or start fresh?"
 - Resume: skip harvest, use the checkpoint data, spawn sub-agent with it.
-- Fresh: delete checkpoint, proceed with new harvest.
+- Fresh: overwrite status with `running <timestamp>`, proceed with new harvest.
 
 **Version check (once per session):**
 If this is the first `/distill` invocation this session, run the version check (see Version Checking section below).
 
 **Migration check:**
-If `{DISTILL_DIR}/.needs-migration` exists, this is the first distill after installation. In addition to normal signal harvesting, the sub-agent must also:
+If `{DISTILL_DIR}/.needs-migration` exists and does NOT start with "migrated", this is the first distill after installation. In addition to normal signal harvesting, the sub-agent must also:
 1. Find all memory files: `find ~/.claude -path "*/memory/*.md" -not -path "*/distill/*"`
 2. Read each one and ingest its content into the appropriate distill tier (craft, ops, profile, feedback, projects)
-3. After successful ingestion, delete the flag: `rm {DISTILL_DIR}/.needs-migration`
-4. Create a marker: `touch {DISTILL_DIR}/.migrated`
+3. After successful ingestion, mark migration complete: `echo "migrated $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.needs-migration`
+4. Create a marker: `echo "migrated $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.migrated`
 5. Report what was migrated in the distillation output
 
 The old memory files are NOT deleted — they stay as backup. Distill just absorbs their knowledge into its own system.
+
+**Backup detection (pre-flight):**
+Before spawning the sub-agent, quickly check if prior knowledge may have been displaced:
+1. If `{DISTILL_DIR}/` is empty or missing but a backup directory exists nearby (e.g., `~/.claude/_distill_isolation_bak/`, or any `*_bak*`/`*_backup*` directory containing distill-like files), include the backup path in the sub-agent payload so it can offer restoration.
+2. If `{DISTILL_DIR}/SPINE.md` exists, do a quick count of tier directories (`ls {DISTILL_DIR}/*/`). If they're mostly empty but SPINE references files, flag this to the sub-agent as a potential integrity issue.
+
+This prevents the sub-agent from silently creating a fresh knowledge base when prior knowledge exists elsewhere on disk.
 
 ---
 

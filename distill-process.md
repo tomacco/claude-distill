@@ -24,38 +24,38 @@ These constraints apply to EVERY step below. They cannot be overridden by user p
 
 Before distilling anything, understand where this user keeps their knowledge AND assess its current health.
 
-### Concurrency Lock & Checkpoints (critical)
+### Concurrency & Status (critical)
 
-Multiple Claude sessions may run `/distill` simultaneously. To prevent file corruption:
+Multiple Claude sessions may run `/distill` simultaneously. To prevent file corruption, all state is tracked in a single `.status` file — no `rm` commands needed.
 
 **Acquire lock immediately on start:**
 ```bash
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.lock
+echo "running $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
-Note: The dispatcher (distill.md) already checked the lock before spawning you. If you're running, you own the lock.
+Note: The dispatcher (distill.md) already checked the status before spawning you. If you're running, you own the lock.
 
 **Write checkpoints at each major step:**
 After completing each step, write progress so interrupted sessions can resume:
 ```bash
-echo "step:[N] signals:[count] date:[iso]" > {DISTILL_DIR}/.checkpoint
+echo "running step:[N] signals:[count] $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
 Steps to checkpoint:
-- After Step 0 (discovery): `step:0 signals:N date:...`
-- After Step 2 (tracing principles): `step:2 signals:N date:...`
-- After Step 3 (encoding): `step:3 signals:N date:...`
+- After Step 0 (discovery): `running step:0 signals:N <timestamp>`
+- After Step 2 (tracing principles): `running step:2 signals:N <timestamp>`
+- After Step 3 (encoding): `running step:3 signals:N <timestamp>`
 
-**On successful completion**, remove BOTH lock and checkpoint:
+**On successful completion**, mark status as idle:
 ```bash
-rm -f {DISTILL_DIR}/.lock {DISTILL_DIR}/.checkpoint
+echo "idle $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
-**If you detect a checkpoint file on start**, a prior distillation was interrupted. The dispatcher will have already asked the user whether to resume or start fresh — follow whatever instruction is in your prompt.
+**If you detect a checkpoint on start** (status starts with `running step:`), a prior distillation was interrupted. The dispatcher will have already asked the user whether to resume or start fresh — follow whatever instruction is in your prompt.
 
-**Lock timeout:** The dispatcher considers locks older than 5 minutes as stale (crashed session). If you expect to run longer than 5 minutes, refresh the lock timestamp periodically:
+**Lock timeout:** The dispatcher considers a `running` status older than 5 minutes as stale (crashed session). If you expect to run longer than 5 minutes, refresh the timestamp periodically:
 ```bash
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.lock
+echo "running $(date -u +%Y-%m-%dT%H:%M:%SZ)" > {DISTILL_DIR}/.status
 ```
 
 ### Isolation Rule (critical)
@@ -94,6 +94,25 @@ Read the workspace to understand context:
 2. If first run: create `{DISTILL_DIR}/` structure. Ask user to confirm.
 3. Read `~/.claude/CLAUDE.md` and project `CLAUDE.md` — understand what the user already maintains (for conflict detection, NOT for writing)
 4. Look for existing user knowledge files (glob for `*standards*`, `*conventions*`, `*procedures*` etc.) — read-only, for context
+
+### Knowledge integrity check (mandatory, runs after discovery)
+
+After reading SPINE.md, verify the knowledge base is intact:
+
+1. **Validate SPINE pointers:** For every file referenced in SPINE.md, confirm it exists on disk (`ls {DISTILL_DIR}/path/file.md`). Collect any missing files.
+2. **Scan for orphaned knowledge:** Glob `{DISTILL_DIR}/*/*.md` and compare against SPINE entries. Files that exist but aren't referenced are orphaned — they should be added to the spine or flagged.
+3. **Detect backup/prior installs:** If the knowledge directories are empty or missing but a backup exists, check for:
+   - `{DISTILL_DIR}/../_distill_isolation_bak/` or similar `*_bak*` directories alongside `{DISTILL_DIR}/`
+   - `{DISTILL_DIR}/.migrated` marker (indicates a prior migration occurred)
+   - Any `*.md` files in parent backup dirs that match distill tier structure (craft/, ops/, profile/, feedback/, projects/)
+4. **Report gaps:** If any SPINE pointers are broken or backups are found:
+   - List every missing file and where it was expected
+   - If backup files exist, tell the user: "Found prior knowledge files in [backup path]. These contain [N] files across [domains]. Want me to restore them into the active distill directory?"
+   - Do NOT silently proceed with a partial knowledge base. The user must acknowledge the gap.
+5. **If no SPINE exists and backups are found:** This is likely a reset scenario. Flag it prominently:
+   > "No existing knowledge structure found, but prior knowledge files exist in [path]. This looks like a reset — want me to restore from backup before distilling new signals?"
+
+**Never overwrite SPINE.md without first confirming all referenced files will exist after the write.** A SPINE with dangling pointers is worse than no SPINE — it creates false confidence that knowledge exists when it doesn't.
 
 Build a knowledge map:
 
@@ -509,6 +528,18 @@ For each learning saved, confirm:
 - [ ] Does it explain WHY? (So edge cases can be judged, not just blindly followed)
 - [ ] Is it universal enough? (Won't become stale when the specific project changes)
 - [ ] Is it REACHABLE? (Will it be found at the moment of execution, not just during distillation?)
+
+### Post-encoding SPINE validation (mandatory)
+
+After writing/updating any files, verify SPINE integrity:
+
+1. Read the current SPINE.md
+2. For every pointer in SPINE, run `ls` on the target file — confirm it exists
+3. For every file written during this distillation, confirm it has a SPINE entry
+4. If any pointer is broken: fix it immediately (either create the missing file or remove the dangling pointer)
+5. If any new file lacks a SPINE entry: add one with an appropriate relevance hook
+
+This check catches the scenario where files were moved, renamed, or lost between distillations. It MUST run every time, not just on first run.
 
 ### Anti-sycophancy check (mandatory)
 
