@@ -61,7 +61,7 @@ Review this PR thoroughly. You are the only quality gate before this ships to us
 
 ### Step 0: Understand the project
 
-Read CLAUDE.md, README.md, and the key architecture files to understand the codebase. Do NOT skip this — you need project context to evaluate whether changes are correct and coherent.
+Read CLAUDE.md, README.md, and the architecture files listed in CLAUDE.md's Architecture section (distill.md, distill-process.md, distill-monitor.md, knowledge-architecture.md, install.sh). Do NOT skip this — you need project context to evaluate whether changes are correct and coherent.
 
 ### Step 1: Understand the PR
 
@@ -126,7 +126,7 @@ APPROVE, REQUEST CHANGES, or NEEDS DISCUSSION. With a one-line justification.
 1. **Never self-review in the same context.** If you wrote it, you cannot review it. Period.
 2. **The reviewer's verdict is respected.** If it says BLOCK, you fix the issue before merging. Don't argue with the reviewer in a different context window — fix the code.
 3. **Don't coach the reviewer.** The whole point is an unbiased perspective. If you tell it "pay special attention to the lock file migration," you've already biased it toward approving the migration and looking for small issues instead of questioning whether the approach is right.
-4. **Run tests in the worktree.** The reviewer should execute `./test-with-claudia.sh` or equivalent in its isolated copy. A review without running tests is incomplete.
+4. **Run tests in the worktree.** The reviewer should execute `./test-with-claudia.sh` or equivalent in its isolated copy. If the test harness is unavailable (e.g., missing auth config), note this in the review and evaluate test coverage from code inspection instead.
 5. **One reviewer per PR.** Don't spawn multiple reviewers hoping one will approve. If the first reviewer blocks, fix the issues and request a new review.
 
 ## What good looks like
