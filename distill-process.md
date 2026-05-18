@@ -193,6 +193,27 @@ For each pattern, try to understand the UNDERLYING REASON:
 
 **Do NOT assume the reason.** If unclear, flag it as an open question in the report. The same behavior (e.g., not reviewing code) could mean "my company has decided AI-first is fine" OR "I'm being lazy and this will bite me." Only the user's stated principles resolve this.
 
+**Accelerated trust detection** (use these proxies when explicit signals are scarce):
+- User runs the command you suggested without reading it → high trust in your commands
+- User reads your code diff line-by-line before applying → low trust in your code, OR high-stakes context
+- User asks "are you sure?" → trust-but-verify mode. Note what domain triggered it.
+- User says "just do it" → high trust OR low stakes. Disambiguate from context.
+- User re-runs your tests manually → doesn't trust your test selection
+- User edits your commit messages → cares about public-facing text (retains comms)
+
+**Observable markers for thinking patterns:**
+- When explaining a problem, does the user start with the abstract ("the issue is consistency") or the concrete ("this endpoint returns 500")? → principle-first vs. example-first
+- When given options, does the user ask for data ("what's the performance difference?") or state a preference ("I like option B")? → analytical vs. intuitive
+- When stuck, does the user explore broadly ("what else could cause this?") or dig deep ("let's trace this specific path")? → breadth-first vs. depth-first
+- How does the user respond to uncertainty? ("let's try and see" = experimental, "let's research first" = analytical, "what does the team think" = consensus)
+
+**Growth edges are NOT weaknesses.** They are domains where the user is actively investing attention. Evidence:
+- User asks detailed questions about X (not "what is X" but "how does X handle Y") → actively learning X
+- User tries something new and asks for feedback → experimenting in this area
+- User reads your explanation fully instead of skipping to the code → absorbing knowledge here
+
+Do NOT encode things the user is bad at (that's a judgment) or things they said they don't care about (that's a preference, not a growth edge).
+
 **Dissonance detection:**
 Once you understand BOTH the delegation pattern AND the user's core principles, watch for misalignment:
 - User says "I must deeply understand all code I ship" but delegates without reading → flag gently
@@ -414,6 +435,34 @@ The user profile is a living document that evolves. It should contain:
 
 **Validate-on-recall:** When reading any existing knowledge file during distillation (to check for duplicates or to update), validate its content against current reality. If something changed, update it now — this is the cheapest moment to correct drift. Every read is also a maintenance pass.
 
+### Step 3c: Always-on preference sync
+
+After updating profile files, sync critical preferences to the always-on section in `rules/distill.md`.
+
+**When to sync** (any one is sufficient):
+- A new preference reached `validated` or `hardened` confidence
+- A preference caused frustration when violated (Step 1c escalation)
+- First distillation (bootstrap — always-on section is empty/placeholder)
+
+**Process:**
+1. Collect preferences from `{DISTILL_DIR}/profile/` and `{DISTILL_DIR}/feedback/` with confidence >= `validated`
+2. Filter: must be format, interaction, or identity — not domain-specific knowledge
+3. Rank: frustration-triggered > hardened > validated > by confirmation count
+4. Take top entries fitting 15 lines
+5. Write as three blocks in `rules/distill.md` under `## Always-On User Preferences`:
+   - **Output rules** — response format (imperative mood: "do X", not "user prefers X")
+   - **Interaction rules** — exchange behavior
+   - **Identity context** — shell, stack, expertise levels, decision style
+6. Preserve all other sections of `rules/distill.md` unchanged
+
+**Format rules:**
+- Use enforcement language, not descriptive. "Concise: default to bullets" not "user prefers concise answers"
+- Cap at 15 lines. Excess stays in profile files — not lost, just not always-on
+- If insufficient data (< 3 validated preferences), write minimal section with only identity context
+
+**Bootstrap (first run):**
+If the always-on section contains only the placeholder comment, extract whatever is known from existing profile/feedback files (even `provisional` confidence) to provide initial calibration. Mark with a comment: `<!-- bootstrapped — will refine with more data -->`.
+
 ### Step 3b: Bridge detection (knowledge that needs to reach user files)
 
 After encoding, ask for EACH learning: **"Will this knowledge be found at the moment it's needed?"**
@@ -568,6 +617,21 @@ After encoding new learnings, maintain tier health:
 2. Compress verbose explanations into tighter formulations
 3. Move superseded content to `archive/` (Tier 3)
 4. Update spine pointer if file was split
+
+### Always-on preference review (during every distillation)
+
+1. Read the always-on section in `rules/distill.md`
+2. For each preference, check:
+   - Was it CONTRADICTED in this session? → demote to profile, mark as `[CONTEXT]`-dependent
+   - Has the user explicitly changed it? ("actually, I want more detail now") → update in-place
+   - Has it gone 90+ days without reinforcement AND a new preference conflicts? → flag for user review
+3. Check profile files for newly hardened preferences that should be promoted
+4. Rewrite the always-on section if changes are needed (keep within 15-line cap)
+
+**Stale preference detection:**
+If a preference was promoted but the user's behavior consistently contradicts it (3+ violations without correction), flag it:
+"Your always-on preference says [X] but you've been doing [Y] in recent sessions. Has this changed?"
+Don't auto-remove. Ask first. Behavior might be contextual.
 
 ### Staleness review
 - Flag Tier 2 files not updated in > 90 days (or their custom `staleness_threshold`)
