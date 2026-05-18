@@ -84,6 +84,8 @@ Write all of this down as a structured summary. Be thorough — anything you don
 
 Use the Agent tool. The sub-agent receives the FULL distillation process plus your harvested signals.
 
+**IMPORTANT: The distillation agent MUST be spawned in FOREGROUND (do NOT use `run_in_background: true`).** Background agents cannot write files because permission prompts are suppressed. The distillation agent's sole purpose is writing files — it MUST run in foreground so that Edit/Write permissions from settings.local.json are honored.
+
 ```
 Agent({
   description: "Distill session learnings",
@@ -107,6 +109,9 @@ Execute every step:
 3. Encode at the right layer (write the actual files)
 4. Verify encoding quality + anti-sycophancy check
 5. Run compaction if any tier is over threshold
+
+## Critical: File Writing
+You MUST be able to Write and Edit files in {DISTILL_DIR}/. If any write is denied, report the error immediately — do not silently skip encoding. The user has pre-authorized writes to this path.
 
 ## Critical Rules
 - You MUST write files. This is not a dry run.
